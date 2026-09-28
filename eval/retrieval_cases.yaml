@@ -1,0 +1,215 @@
+# Retrieval test set (knowledge layer only - no LLM involved).
+#
+# Each positive case lists ids that a correct search should surface in the top 6
+# (any one counts as a hit; "QA:bayyinat:9" also matches its parts "QA:bayyinat:9:2" ...).
+#   question : what the seeker wrote (used alone in "raw" mode)
+#   ar       : an Arabic reformulation like the agent's analyzer produces
+#              ("analyzed" mode searches with both, as the plan's pipeline does)
+# Negative cases have no answer in the approved sources: the best score should
+# stay below ABSTAIN_THRESHOLD so the agent abstains.
+#
+# Ground truth was chosen by reading the Bayyinat table of contents and the
+# Quran; expected ids are deliberately generous (several valid answers).
+
+positive:
+  - id: kaaba_en
+    question: Why do Muslims worship the Kaaba?
+    ar: لماذا يعبد المسلمون الكعبة والحجر الأسود
+    expect: [QA:bayyinat:9, Q:2:144, Q:2:125, Q:2:127, Q:3:96, Q:2:149, Q:2:150, Q:2:142, Q:2:115]
+  - id: kaaba_ur
+    question: مسلمان کعبہ کی عبادت کیوں کرتے ہیں؟
+    ar: لماذا يعبد المسلمون الكعبة
+    expect: [QA:bayyinat:9, Q:2:144, Q:2:125, Q:2:127, Q:3:96, Q:2:149, Q:2:150, Q:2:142, Q:2:115]
+  - id: kaaba_id
+    question: Mengapa umat Islam menyembah Ka'bah?
+    ar: لماذا يعبد المسلمون الكعبة
+    expect: [QA:bayyinat:9, Q:2:144, Q:2:125, Q:2:127, Q:3:96, Q:2:149, Q:2:150, Q:2:142, Q:2:115]
+  - id: black_stone_hostile
+    question: You people literally bow to a black rock and kiss it. That's idol worship, admit it.
+    ar: المسلمون يعبدون الحجر الأسود ويقبلونه وهذه وثنية
+    expect: [QA:bayyinat:9]
+  - id: quran_author
+    question: Did Muhammad write the Quran himself?
+    ar: هل القرآن من تأليف محمد ﷺ
+    expect: [QA:bayyinat:27, QA:bayyinat:25, QA:bayyinat:29, QA:bayyinat:30, QA:bayyinat:31, QA:bayyinat:84, Q:10:37, Q:10:38, Q:2:23, Q:17:88, Q:4:82, Q:29:48, Q:11:13, Q:52:33, Q:52:34, Q:10:15, Q:10:16]
+  - id: quran_author_ar
+    question: هل القرآن من تأليف محمد؟
+    ar: ادعاء أن القرآن مصدره البشر
+    expect: [QA:bayyinat:27, QA:bayyinat:25, QA:bayyinat:29, QA:bayyinat:30, QA:bayyinat:31, QA:bayyinat:84, Q:10:37, Q:10:38, Q:2:23, Q:17:88, Q:4:82, Q:29:48, Q:11:13, Q:52:33, Q:52:34, Q:10:15, Q:10:16]
+  - id: sword
+    question: Was Islam spread by the sword?
+    ar: هل انتشر الإسلام بالسيف
+    expect: [QA:bayyinat:229, QA:bayyinat:230, QA:bayyinat:66, QA:bayyinat:67, QA:bayyinat:69, Q:2:256]
+  - id: violence_hostile
+    question: Islam is obviously a violent religion, your book tells you to kill people.
+    ar: ادعاء أن القرآن يدعو إلى القتل والعنف والإرهاب
+    expect: [QA:bayyinat:230, QA:bayyinat:66, QA:bayyinat:67, QA:bayyinat:229, Q:5:32, Q:2:190, Q:60:8]
+  - id: scholars_disagree
+    question: Why do Muslim scholars give different rulings on the same issue?
+    ar: لماذا يختلف العلماء في الأحكام الفقهية
+    expect: [QA:bayyinat:241, QA:bayyinat:239, QA:bayyinat:128, QA:bayyinat:127, QA:bayyinat:231]
+  - id: tawhid_beginner
+    question: What does Tawhid mean? I have never heard this word before.
+    ar: ما معنى التوحيد
+    expect: [Q:112:1, Q:112:2, Q:112:3, Q:112:4, Q:2:163, Q:2:255, Q:21:22, Q:47:19, Q:16:36, Q:21:25, Q:51:56, QA:bayyinat:2, QA:bayyinat:7, QA:bayyinat:12]
+  - id: who_created_god
+    question: If everything has a creator, then who created God?
+    ar: من خلق الله
+    expect: [QA:bayyinat:4]
+  - id: god_exists
+    question: Why believe in God at all when nature runs on physical laws?
+    ar: إنكار وجود الله والطبيعة لها قوانين ثابتة
+    expect: [QA:bayyinat:1, QA:bayyinat:2, QA:bayyinat:4, Q:52:35, Q:52:36]
+  - id: jesus_divine
+    question: Does the Quran say that Jesus is God?
+    ar: هل في القرآن ما يدل على ألوهية عيسى
+    expect: [QA:bayyinat:64, Q:5:72, Q:5:75, Q:5:116, Q:5:117, Q:4:171, Q:3:59, Q:19:30, Q:5:17, Q:43:59, Q:4:172]
+  - id: jesus_tl
+    question: Diyos ba si Hesus ayon sa Quran?
+    ar: هل عيسى إله في القرآن
+    expect: [QA:bayyinat:64, Q:5:72, Q:5:75, Q:5:116, Q:5:117, Q:4:171, Q:3:59, Q:19:30, Q:5:17, Q:43:59, Q:4:172]
+  - id: trinity
+    question: Why don't Muslims believe in the Trinity?
+    ar: التثليث وتعدد الآلهة في القرآن
+    expect: [Q:4:171, Q:5:73, Q:112:1, Q:112:2, Q:112:3, Q:112:4, QA:bayyinat:5, QA:bayyinat:64, Q:5:72, Q:5:116]
+  - id: prophet_in_bible
+    question: Is Muhammad mentioned in the Bible?
+    ar: البشارات بالنبي محمد في كتب أهل الكتاب
+    expect: [QA:bayyinat:108, Q:7:157, Q:61:6, Q:2:146, Q:6:20]
+  - id: only_arabs
+    question: Isn't Islam just a religion for Arabs?
+    ar: هل الإسلام دين خاص بالعرب
+    expect: [QA:bayyinat:100, Q:34:28, Q:21:107, Q:7:158, Q:25:1, Q:4:79]
+  - id: hijab
+    question: Why do Muslim women cover their hair? Isn't hijab just a cultural habit?
+    ar: هل الحجاب عادة وليس عبادة
+    expect: [QA:bayyinat:220, QA:bayyinat:214, QA:bayyinat:221, Q:24:31, Q:33:59]
+  - id: polygamy
+    question: Why are Muslim men allowed to have four wives?
+    ar: تعدد الزوجات في الإسلام
+    expect: [QA:bayyinat:82, QA:bayyinat:117, QA:bayyinat:217, Q:4:3, Q:4:129]
+  - id: testimony
+    question: Why is a woman's testimony worth half of a man's in Islam?
+    ar: شهادة المرأة نصف شهادة الرجل
+    expect: [QA:bayyinat:210, Q:2:282]
+  - id: alcohol
+    question: Why is alcohol forbidden in Islam?
+    ar: لماذا يحرم الإسلام الخمر
+    expect: [QA:bayyinat:199, Q:5:90, Q:5:91, Q:2:219]
+  - id: pork
+    question: Why don't Muslims eat pork?
+    ar: لماذا يحرم الإسلام لحم الخنزير
+    expect: [QA:bayyinat:200, Q:2:173, Q:5:3, Q:6:145, Q:16:115]
+  - id: five_prayers
+    question: Why do Muslims pray five times every day?
+    ar: لماذا يصلي المسلمون خمس مرات يوميا
+    expect: [QA:bayyinat:205, Q:4:103, Q:2:238, Q:11:114, Q:17:78, Q:20:130, Q:30:17, Q:30:18]
+  - id: fasting
+    question: What is the point of fasting in Ramadan?
+    ar: ما الحكمة من تشريع الصوم
+    expect: [QA:bayyinat:208, Q:2:183, Q:2:185, Q:2:184, Q:2:187]
+  - id: zakat
+    question: Why do Muslims have to pay zakat?
+    ar: ما الحكمة من تشريع الزكاة
+    expect: [QA:bayyinat:206, QA:bayyinat:207, Q:9:60, Q:9:103]
+  - id: freedom_of_belief
+    question: Does the Quran allow freedom of religion?
+    ar: هل القرآن يدعو إلى حرية الاعتقاد
+    expect: [QA:bayyinat:69, Q:2:256, Q:18:29, Q:109:6, Q:10:99, QA:bayyinat:65]
+  - id: apostasy
+    question: Why does Islam punish people who leave the religion?
+    ar: لماذا يقتل المرتد
+    expect: [QA:bayyinat:227]
+  - id: evil
+    question: If God is good, why did He create evil?
+    ar: لماذا خلق الله الشر
+    expect: [QA:bayyinat:174, QA:bayyinat:176, QA:bayyinat:3]
+  - id: eternal_hell
+    question: How is it fair to punish someone forever for a limited life?
+    ar: لماذا يعذب الله الكافر عذابا أبديا
+    expect: [QA:bayyinat:171, QA:bayyinat:173, QA:bayyinat:172, QA:bayyinat:170]
+  - id: purpose_of_life
+    question: Why did God create human beings?
+    ar: الحكمة من خلق الإنسان
+    expect: [Q:51:56, Q:67:2, Q:23:115, QA:bayyinat:12, QA:bayyinat:178, Q:2:30]
+  - id: science
+    question: Doesn't religion contradict science?
+    ar: هل الدين يعارض العلم
+    expect: [QA:bayyinat:255, QA:bayyinat:253, QA:bayyinat:251, QA:bayyinat:249]
+  - id: evolution
+    question: What is Islam's position on Darwin's theory of evolution?
+    ar: الموقف من الداروينية
+    expect: [QA:bayyinat:253]
+  - id: afterlife_ar
+    question: هل الإيمان باليوم الآخر منطقي أم مجرد تسليم؟
+    ar: الإيمان باليوم الآخر والبعث
+    expect: [QA:bayyinat:169, Q:36:78, Q:36:79, Q:22:5, Q:75:3, Q:75:4, Q:23:115]
+  - id: quran_preserved
+    question: Hasn't the Quran been changed over the centuries?
+    ar: هل حرف القرآن أو حذف منه شيء
+    expect: [QA:bayyinat:49, QA:bayyinat:50, QA:bayyinat:48, QA:bayyinat:42, QA:bayyinat:43, Q:15:9, Q:41:42]
+  - id: hadith_reliability
+    question: How can you trust hadith when the narrators were only human?
+    ar: كيف نطمئن للسنة ورواتها بشر غير معصومين
+    expect: [QA:bayyinat:130, QA:bayyinat:129, QA:bayyinat:142, QA:bayyinat:143, QA:bayyinat:131, QA:bayyinat:135]
+  - id: aisha
+    question: Why did the Prophet marry a young girl?
+    ar: زواج النبي من فتاة صغيرة
+    expect: [QA:bayyinat:118]
+  - id: worship_needless_god
+    question: If God doesn't need anything, why does He want us to worship Him?
+    ar: لماذا يطلب الله من البشر عبادته وهو غني عنهم
+    expect: [QA:bayyinat:12, Q:51:56, Q:51:57, Q:35:15, Q:14:8]
+  - id: qiwama
+    question: Why is the man the head of the family in Islam? That goes against human rights.
+    ar: القوامة وحقوق الإنسان
+    expect: [QA:bayyinat:263, QA:bayyinat:209, Q:4:34]
+  - id: interest
+    question: Why do Muslims say bank interest is forbidden?
+    ar: تحريم الفوائد البنكية والربا
+    expect: [QA:bayyinat:222, QA:bayyinat:223, Q:2:275, Q:2:278, Q:2:279, Q:2:276, Q:3:130]
+  - id: jizya
+    question: Wasn't the jizya tax unfair to non-Muslims?
+    ar: الجزية حيف في حق أهل الذمة
+    expect: [QA:bayyinat:259, QA:bayyinat:260, Q:9:29]
+  - id: mercy_prophet
+    question: Was Muhammad a merciful man?
+    ar: رحمة النبي ﷺ
+    expect: [Q:21:107, Q:3:159, Q:9:128, Q:68:4]
+
+negative:
+  - id: fake_hadith_computer
+    question: Give me a hadith proving that the Prophet used a computer.
+    ar: حديث يثبت أن النبي كان يستخدم الحاسوب
+  - id: capital_france
+    question: What is the capital of France?
+    ar: ما عاصمة فرنسا
+  - id: cake_recipe
+    question: How do I bake a chocolate cake?
+    ar: طريقة عمل كعكة الشوكولاتة
+  - id: world_cup
+    question: Who won the 2022 football World Cup?
+    ar: من فاز بكأس العالم لكرة القدم 2022
+  - id: gaming_laptop
+    question: What's the best laptop for gaming this year?
+    ar: أفضل حاسوب محمول للألعاب
+  - id: quantum
+    question: Explain quantum entanglement in simple terms.
+    ar: شرح التشابك الكمي
+  - id: kabsa_ar
+    question: أعطني وصفة لعمل الكبسة
+    ar: وصفة الكبسة
+  - id: stock_price_ar
+    question: ما هو سعر سهم أبل اليوم؟
+    ar: سعر سهم شركة أبل
+  - id: weather_ur
+    question: کل موسم کیسا رہے گا؟
+    ar: حالة الطقس غدا
+  - id: smartphones_verse
+    question: Which verse of the Quran talks about smartphones and the internet?
+    ar: آية عن الهواتف الذكية والإنترنت
+    hard: true
+  - id: bitcoin_hadith
+    question: What did the Prophet say about Bitcoin?
+    ar: ماذا قال النبي عن البيتكوين
+    hard: true
