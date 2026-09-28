@@ -19,3 +19,4 @@ qdrant_data/
 # Eval scratch
 eval/results/*.tmp.json
 data/models/
+.claude/settings.local.json

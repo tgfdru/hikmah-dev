@@ -14,6 +14,7 @@ there is enough evidence to answer at all.
 """
 from __future__ import annotations
 
+import atexit
 import json
 import pickle
 import threading
@@ -48,7 +49,9 @@ def qdrant_client():
     if config.QDRANT_URL:
         return QdrantClient(url=config.QDRANT_URL, api_key=config.QDRANT_API_KEY or None, timeout=30)
     config.QDRANT_PATH.mkdir(parents=True, exist_ok=True)
-    return QdrantClient(path=str(config.QDRANT_PATH))
+    client = QdrantClient(path=str(config.QDRANT_PATH))
+    atexit.register(client.close)  # release the embedded-mode lock before interpreter teardown
+    return client
 
 
 def rrf(rank_lists: list[list[str]], k: int = RRF_K) -> list[tuple[str, float]]:
@@ -214,8 +217,11 @@ class HybridRetriever:
         if not texts:
             return []
         if self.reranker in ("bge", "minilm"):
+            best = [0.0] * len(texts)
             with self._lock:
-                return rerank_scores(self.reranker, queries[0], texts)
+                for q in queries[: max(1, config.RERANK_QUERIES)]:
+                    best = [max(b, x) for b, x in zip(best, rerank_scores(self.reranker, q, texts))]
+            return best
         qv = embed(queries[:MAX_QUERIES])
         tv = embed(texts)
         return [float(x) for x in (tv @ qv.T).max(axis=1)]

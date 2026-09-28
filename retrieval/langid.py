@@ -16,7 +16,7 @@ from functools import lru_cache
 
 from retrieval import config
 
-MODEL_PATH = config.DATA_DIR / "models" / "lid.176.ftz"
+MODEL_PATH = config.MODELS_DIR / "lid.176.ftz"
 MODEL_URL = "https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.ftz"
 _FOLD = {"arz": "ar", "ary": "ar", "acm": "ar", "apc": "ar", "ajp": "ar", "pnb": "ur", "ms": "ms"}
 _EN_WORDS = frozenset(

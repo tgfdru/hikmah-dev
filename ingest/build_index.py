@@ -174,6 +174,10 @@ def build(embed_only: bool = False) -> None:
         return
     write_qdrant(records, vectors)
     write_bm25_and_docs(records)
+    from retrieval.hybrid import qdrant_client
+
+    qdrant_client().close()  # release the embedded-mode lock cleanly
+    qdrant_client.cache_clear()
 
 
 if __name__ == "__main__":

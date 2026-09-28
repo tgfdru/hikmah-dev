@@ -1,0 +1,39 @@
+# Knowledge layer services.
+#
+#   docker compose up -d qdrant                 # vector database
+#   docker compose run --rm kb-build            # download sources + build store & index (once)
+#
+# The agent/API service (Nader) should mount the same `mueen_kb` volume at
+# /var/lib/mueen, set QDRANT_URL=http://qdrant:6333, and import `retrieval`.
+# Example:
+#   api:
+#     build: .                       # an image that also contains agent/ and api/
+#     command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+#     environment: {QDRANT_URL: "http://qdrant:6333", WORK_DIR: /var/lib/mueen,
+#                   HF_HOME: /var/lib/mueen/models/hf, AI_API_KEY: "${AI_API_KEY}"}
+#     volumes: [mueen_kb:/var/lib/mueen]
+#     depends_on: [qdrant]
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.19.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6333:6333"   # localhost only; the API reaches it on the compose network
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  kb-build:
+    build: .
+    profiles: ["build"]
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      DEVICE: ${DEVICE:-cpu}
+    volumes:
+      - mueen_kb:/var/lib/mueen
+    depends_on:
+      - qdrant
+
+volumes:
+  qdrant_storage:
+  mueen_kb:

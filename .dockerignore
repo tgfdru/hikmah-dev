@@ -1,0 +1,14 @@
+.venv/
+.git/
+__pycache__/
+*.pyc
+.env
+data/raw/
+data/processed/
+data/store/
+data/index/
+data/cache/
+data/models/
+eval/results/
+docs/
+tests/

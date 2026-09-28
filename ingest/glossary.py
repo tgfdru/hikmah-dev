@@ -28,7 +28,10 @@ from retrieval import config
 from retrieval.normalize_ar import norm
 
 BASE = "https://islamic-content.com/dictionary"
-CATEGORIES = [1, 1063, 1792, 266, 428, 543, 670, 707]  # the 8 subject dictionaries
+# The 8 subject dictionaries, in the order we trust them for da'wah terms: creed,
+# da'wah, Quran, seerah, conduct, fiqh, usul, hadith. The same Arabic word often
+# has several senses (e.g. "الأمة" is also a head wound in fiqh), so order matters.
+CATEGORIES = [1792, 670, 1, 707, 543, 1063, 428, 266]
 USER_AGENT = "Mozilla/5.0 (compatible; MueenKnowledgeBuilder/1.0; +https://sheykak.com)"
 DELAY = 2.0
 CACHE = config.RAW_DIR / "jamhara"
@@ -70,6 +73,23 @@ ALTERNATES = {
 }
 
 
+# Terms whose first published English entry in Jamhara has a different sense than
+# the da'wah one (checked by hand on 2026-09-28). Left out rather than risk a wrong
+# equivalent; add them manually after the content team reviews them.
+EXCLUDE = {
+    "الولاء والبراء": "matched 'wala' of manumission (slave freeing)",
+    "النار": "matched physical fire, not Hellfire",
+    "البعث": "matched a military expedition, not resurrection",
+    "التفسير": "matched a general 'understanding' sense, not Quran exegesis",
+    "السيرة": "matched 'lifestyle', not the Prophet's biography",
+    "الردة": "matched a phonetic term (repetition), not apostasy",
+    "المحرم": "matched 'prohibited'; mahram / Muharram senses ambiguous",
+    "المؤمن": "matched the divine name al-Mu'min only",
+    "الحكمة": "matched the legal 'rationale' sense, not da'wah wisdom",
+    "الطواف": "matched only 'tawaf of arrival'",
+}
+
+
 def _targets() -> list[str]:
     words: list[str] = []
     for line in TARGETS:
@@ -101,16 +121,18 @@ def _get(url: str, cache_name: str) -> str | None:
     return text or None
 
 
-def _word_index() -> dict[str, tuple[str, str]]:
-    """{normalized term: (word id, displayed term)} from the category pages."""
-    index: dict[str, tuple[str, str]] = {}
+def _word_index() -> dict[str, list[tuple[str, str]]]:
+    """{normalized term: [(word id, displayed term), ...]} from the category pages."""
+    index: dict[str, list[tuple[str, str]]] = {}
     for cat in CATEGORIES:
         page = _get(f"{BASE}/term/{cat}", f"cat_{cat}.html") or ""
         for wid, name in re.findall(r'href="https://islamic-content.com/dictionary/word/(\d+)"[^>]*>\s*(.*?)\s*</a>',
                                     page, re.S):
             name = re.sub(r"<[^>]+>", "", html.unescape(name)).strip()
             if name and not name.startswith("تعريف"):
-                index.setdefault(_key(name), (wid, name))
+                entries = index.setdefault(_key(name), [])
+                if all(wid != e[0] for e in entries):
+                    entries.append((wid, name))
     return index
 
 
@@ -139,15 +161,8 @@ def build() -> None:
     terms = []
     seen = set()
 
-    def lookup(ar: str) -> dict:
-        keys = [ar, *ALTERNATES.get(ar, [])]
-        keys += [k[2:] for k in keys if k.startswith("ال")] + [f"ال{k}" for k in keys if not k.startswith("ال")]
-        hit = next((index[_key(k)] for k in keys if _key(k) in index), None)
-        if not hit:
-            return {}
-        wid, shown = hit
-        entry = {"jamhara_id": int(wid), "jamhara_term": shown,
-                 "source_url": f"{BASE}/word/{wid}"}
+    def entry_for(wid: str, shown: str) -> dict:
+        entry = {"jamhara_id": int(wid), "jamhara_term": shown, "source_url": f"{BASE}/word/{wid}"}
         ar_page = _get(f"{BASE}/word/{wid}", f"word_{wid}_ar.html") or ""
         if ar_page:
             entry["definition_ar"] = _arabic_definition(ar_page)
@@ -162,6 +177,19 @@ def build() -> None:
                     entry[f"definition_{lang}"] = parsed[1]
         return entry
 
+    def lookup(ar: str) -> dict:
+        """First dictionary entry for the term (or an alternate) that has an English page."""
+        keys = [ar, *ALTERNATES.get(ar, [])]
+        keys += [k[2:] for k in keys if k.startswith("ال")] + [f"ال{k}" for k in keys if not k.startswith("ال")]
+        candidates = [e for k in dict.fromkeys(_key(k) for k in keys) for e in index.get(k, [])][:4]
+        first: dict = {}
+        for wid, shown in candidates:
+            entry = entry_for(wid, shown)
+            if entry.get("en"):
+                return entry
+            first = first or entry
+        return first
+
     for ar, en, rule in OFFICIAL:
         j = lookup(ar)
         terms.append({"ar": ar, "en": en, "usage_rule_ar": rule, "status": "official_challenge",
@@ -170,7 +198,7 @@ def build() -> None:
         seen.add(_key(ar))
 
     for ar in _targets():
-        if _key(ar) in seen:
+        if _key(ar) in seen or ar in EXCLUDE:
             continue
         seen.add(_key(ar))
         j = lookup(ar)

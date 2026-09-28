@@ -27,12 +27,17 @@ def _flag(name: str, default: bool) -> bool:
 
 
 ROOT = Path(__file__).resolve().parent.parent
+# Committed data (glossary.json, embeddings/ cache) lives in DATA_DIR.
 DATA_DIR = Path(_env("DATA_DIR", str(ROOT / "data")))
-RAW_DIR = DATA_DIR / "raw"
-PROCESSED_DIR = DATA_DIR / "processed"
-STORE_DIR = DATA_DIR / "store"
-INDEX_DIR = DATA_DIR / "index"
-CACHE_DIR = DATA_DIR / "cache"
+# Generated data (downloads, store, index, models) lives in WORK_DIR; point it at a
+# persistent volume in Docker so the API container can share what the build made.
+WORK_DIR = Path(_env("WORK_DIR", str(DATA_DIR)))
+RAW_DIR = WORK_DIR / "raw"
+PROCESSED_DIR = WORK_DIR / "processed"
+STORE_DIR = WORK_DIR / "store"
+INDEX_DIR = WORK_DIR / "index"
+CACHE_DIR = WORK_DIR / "cache"
+MODELS_DIR = WORK_DIR / "models"
 
 # SQLite file holding the exact Quran text + approved translations.
 VERBATIM_DB = Path(_env("VERBATIM_DB", str(STORE_DIR / "verbatim.sqlite")))
@@ -53,16 +58,16 @@ DEVICE = _env("DEVICE", "cpu")  # "cuda" if the server has a GPU
 
 # Confidence scoring of the fused candidates:
 #   "bge"    - BAAI/bge-reranker-v2-m3 cross-encoder: best quality; needs a GPU for live use
-#   "minilm" - multilingual MiniLM cross-encoder: fast on CPU, weaker
+#   "minilm" - multilingual MiniLM cross-encoder: ~1.7 s on CPU; best measured separation (default)
 #   "none"   - the dense BGE-M3 cosine similarity (no extra model; fastest)
-RERANKER = _env("RERANKER", "none").lower()
+RERANKER = _env("RERANKER", "minilm").lower()
 RERANK_CANDIDATES = int(_env("RERANK_CANDIDATES", "12"))
-RERANK_QUERIES = int(_env("RERANK_QUERIES", "1"))  # how many of the queries to rerank against
+RERANK_QUERIES = int(_env("RERANK_QUERIES", "2"))  # score against the best of the first N queries
 
 # Evidence whose score is below this means "not enough evidence -> abstain".
 # Scores are on different scales per RERANKER, so each has its own tuned default
 # (see docs/EVALUATION.md); ABSTAIN_THRESHOLD overrides all of them.
-ABSTAIN_THRESHOLDS = {"bge": 0.35, "minilm": 0.35, "none": 0.55}
+ABSTAIN_THRESHOLDS = {"minilm": 0.30, "none": 0.62, "bge": 0.10}
 ABSTAIN_THRESHOLD = float(_env("ABSTAIN_THRESHOLD", str(ABSTAIN_THRESHOLDS.get(RERANKER, 0.35))))
 
 # Translation book ids on Quranpedia (both published by the King Fahd Complex).

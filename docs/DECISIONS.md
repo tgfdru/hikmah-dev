@@ -34,3 +34,11 @@ Changes from the original plan (`docs/reference/plan.md`), agreed with Fawaz on 
 
 ## Repo
 - Work is pushed to branch `claude/loving-heisenberg-oekuju`.
+
+## Made during implementation (2026-09-28)
+- Search scoring: `RERANKER=minilm` over the top 12 candidates, best of the first two
+  queries, abstain below 0.30 — chosen from the retrieval evaluation (docs/EVALUATION.md).
+- Glossary: 84 terms (10 official + 74 Jamhara). 10 Jamhara matches with the wrong sense
+  were excluded (listed in `ingest/glossary.py`).
+- Bayyinat is parsed from the official PDF (with ligature repair); bayenat.net was not needed.
+- Honorific symbols in the Bayyinat PDF are omitted (no reliable Unicode mapping).
