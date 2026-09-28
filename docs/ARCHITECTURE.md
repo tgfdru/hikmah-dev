@@ -45,8 +45,8 @@ Ranges (`Q:112:1-4`) are assembled on demand from the store with ayah markers.
 `RERANKER` chooses how the 0-1 confidence is computed (see `docs/EVALUATION.md`):
 
 * `minilm` (default) — multilingual MiniLM cross-encoder over the top 12 fused
-  candidates, best score against the first 2 queries. Threshold 0.30. ~1.7 s on CPU.
-* `none` — best BGE-M3 cosine to any query. No extra model; 0.4 s. Threshold 0.62.
+  candidates, best score against the first 2 queries. Threshold 0.35. ~1.7 s on CPU.
+* `none` — best BGE-M3 cosine to any query. No extra model; 0.4 s. Threshold 0.62 (not reliable for abstaining, see EVALUATION).
 * `bge` — bge-reranker-v2-m3 (~7.5 s per query on a 4-core CPU; for GPU servers).
 
 The agent abstains when the best score < `ABSTAIN_THRESHOLD` (per-reranker default,

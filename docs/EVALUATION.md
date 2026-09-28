@@ -20,16 +20,35 @@ reformulation, as the agent's Context Analyzer produces.
 | none (dense cosine) | raw | 93% | 0.79 | 0.27 / 0.36 s | 0.60 | 34% | 100% |
 | none (dense cosine) | analyzed | 98% | 0.93 | 0.42 / 0.47 s | 0.62 | 5% | 100% |
 | minilm, 1st query | analyzed | 98% | 0.89 | 1.1 / 1.3 s | 0.25 | 5% | 100% |
-| **minilm, best of 2 queries (default)** | **analyzed** | **98%** | **0.93** | **1.7 s** | **0.30** | **2%** | **100%** |
+| **minilm, best of 2 queries (default)** | **analyzed** | **98%** | **0.93** | **1.7 s** | **0.35** | **2%** | **100%** |
 | bge-reranker-v2-m3, 1st query | analyzed | 98% | 0.92 | 7.5 / 8.3 s | 0.10 | 12% | 100% |
 
-**Chosen default: `RERANKER=minilm`, `RERANK_QUERIES=2`, `ABSTAIN_THRESHOLD=0.30`.**
-Reasons: best separation between answerable and unanswerable questions — every
-unanswerable question scored ≤ 0.27 while all answerable ones but one scored ≥ 0.69,
-so the threshold has a wide safety margin — at under 2 s on CPU. Dense-only scoring
-is faster (0.4 s) but its margin is thin (unanswerable up to 0.60 vs answerable from
-0.53); the bge reranker is slow on CPU and, scoring only the first query, abstained
-more often. With a GPU, `bge` becomes practical and should be re-tuned.
+**Chosen default: `RERANKER=minilm`, `RERANK_QUERIES=2`, `ABSTAIN_THRESHOLD=0.35`.**
+
+The tuned-set optimum was 0.30 (unanswerable ≤ 0.27; answerable ≥ 0.69 except one
+known miss). A container smoke test then found a *rephrased* fake-hadith request
+scoring 0.33, so the threshold was raised to 0.35 and checked on held-out questions:
+
+### Held-out check (questions written after tuning, `eval/retrieval_holdout.yaml`)
+
+10 new answerable + 10 new unanswerable questions (fake hadith about computers,
+airplanes, phones, the internet; "a verse about cooking pasta"; sport, TV …):
+
+| Scoring | Queries | Recall@6 | MRR | Threshold | Answerable but abstained | Unanswerable correctly abstained |
+|---|---|---|---|---|---|---|
+| **minilm, best of 2 (default)** | analyzed | **100%** | **1.00** | **0.35** | **0%** | **100%** |
+| minilm | raw (seeker words only) | 80% | 0.72 | 0.35 | 10% | 100% |
+| none (dense cosine) | analyzed | 100% | 1.00 | 0.62 | 20% | 90% |
+
+Highest unanswerable score 0.33 vs lowest answerable 0.39 — the margin at the
+bottom is narrow, so keep the da'i review and the structural rule for hadith requests
+(below). **Dense-only scoring (`none`) cannot separate the two groups reliably**
+(an unanswerable question scored 0.64, an answerable one 0.60): use it only for
+ranking, not for abstaining.
+
+Why minilm: the best separation at under 2 s on CPU. The bge reranker is slow on
+CPU (7.5 s) and, scoring only the first query, abstained more often; with a GPU it
+becomes practical and should be re-tuned with `RERANK_QUERIES=2`.
 
 Findings:
 * The Arabic reformulation matters: Recall@6 rises from 93% to 98% and MRR from
@@ -44,8 +63,8 @@ Findings:
 * The fake-hadith requests are also handled structurally: no hadith are stored, so
   `retrieve(..., types=["hadith"])` returns nothing.
 
-Caveat: thresholds were tuned on the same 52 questions they are reported on. Expect
-somewhat lower numbers on new questions; re-run after adding sources or cases.
+Caveat: 52 tuning + 20 held-out questions is a small sample. Re-run both sets after
+adding sources, changing models or changing how the agent writes queries.
 
 ## 2. Misquoted-ayah detection
 

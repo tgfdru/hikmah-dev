@@ -65,11 +65,11 @@ def _matches(found_id: str, expected: str) -> bool:
 
 
 # ---------------------------------------------------------------- retrieval ---
-def eval_retrieval(rerankers: list[str], k: int) -> None:
+def eval_retrieval(rerankers: list[str], k: int, cases_path: Path | None = None, name: str = "retrieval") -> None:
     from retrieval.hybrid import get_hybrid
     from retrieval.langid import detect_language
 
-    cases = yaml.safe_load((ROOT / "retrieval_cases.yaml").read_text(encoding="utf-8"))
+    cases = yaml.safe_load((cases_path or ROOT / "retrieval_cases.yaml").read_text(encoding="utf-8"))
     retriever = get_hybrid()
     report: dict = {"k": k, "index": retriever.manifest, "modes": {}}
     md = [f"# Retrieval evaluation ({date.today().isoformat()})", "",
@@ -134,7 +134,7 @@ def eval_retrieval(rerankers: list[str], k: int) -> None:
                "| threshold | answerable but abstained | unanswerable correctly abstained |", "|---|---|---|",
                *[f"| {s['t']:.2f} | {s['false_abstain']:.0%} | {s['correct_abstain']:.0%} |"
                  for s in m["sweep"] if 0.2 <= s["t"] <= 0.8], ""]
-    _save("retrieval", report, "\n".join(md))
+    _save(name, report, "\n".join(md))
 
 
 # --------------------------------------------------------------------- ayah ---
@@ -352,6 +352,7 @@ def main() -> None:
     r = sub.add_parser("retrieval")
     r.add_argument("--rerankers", default="none,minilm,bge")
     r.add_argument("--k", type=int, default=6)
+    r.add_argument("--cases", default=None, help="YAML file (default eval/retrieval_cases.yaml)")
     sub.add_parser("ayah")
     a = sub.add_parser("agent")
     a.add_argument("--api", default="http://localhost:8000")
@@ -360,7 +361,9 @@ def main() -> None:
     a.add_argument("--only", default="", help="comma-separated case ids")
     args = ap.parse_args()
     if args.cmd == "retrieval":
-        eval_retrieval([x.strip() for x in args.rerankers.split(",") if x.strip()], args.k)
+        cases = Path(args.cases) if args.cases else None
+        eval_retrieval([x.strip() for x in args.rerankers.split(",") if x.strip()], args.k, cases,
+                       "retrieval_holdout" if cases and "holdout" in cases.name else "retrieval")
     elif args.cmd == "ayah":
         eval_ayah()
     else:

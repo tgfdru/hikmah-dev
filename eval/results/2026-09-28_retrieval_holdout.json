@@ -1,0 +1,1610 @@
+{
+  "k": 6,
+  "index": {
+    "built_at": "2026-09-28T18:22:11.185158+00:00",
+    "embed_model": "BAAI/bge-m3",
+    "counts": {
+      "qa": 1116,
+      "quran": 6236
+    },
+    "total": 7352
+  },
+  "modes": {
+    "minilm/raw": {
+      "recall_at_k": 0.8,
+      "mrr": 0.72,
+      "latency_ms_mean": 817.4551248550415,
+      "latency_ms_p90": 1055.1557540893555,
+      "recommended_threshold": 0.2,
+      "sweep": [
+        {
+          "t": 0.1,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 0.7,
+          "answered_with_hit": 0.8,
+          "balanced": 0.8
+        },
+        {
+          "t": 0.15,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 0.9,
+          "answered_with_hit": 0.8,
+          "balanced": 0.9
+        },
+        {
+          "t": 0.2,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.8,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.25,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.8,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.3,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.8,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.35,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.8,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.4,
+          "false_abstain": 0.19999999999999996,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.9
+        },
+        {
+          "t": 0.45,
+          "false_abstain": 0.19999999999999996,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.9
+        },
+        {
+          "t": 0.5,
+          "false_abstain": 0.19999999999999996,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.9
+        },
+        {
+          "t": 0.55,
+          "false_abstain": 0.19999999999999996,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.9
+        },
+        {
+          "t": 0.6,
+          "false_abstain": 0.30000000000000004,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.6,
+          "balanced": 0.85
+        },
+        {
+          "t": 0.65,
+          "false_abstain": 0.4,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.5,
+          "balanced": 0.8
+        },
+        {
+          "t": 0.7,
+          "false_abstain": 0.4,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.5,
+          "balanced": 0.8
+        },
+        {
+          "t": 0.75,
+          "false_abstain": 0.4,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.5,
+          "balanced": 0.8
+        },
+        {
+          "t": 0.8,
+          "false_abstain": 0.5,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.4,
+          "balanced": 0.75
+        },
+        {
+          "t": 0.85,
+          "false_abstain": 0.5,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.4,
+          "balanced": 0.75
+        },
+        {
+          "t": 0.9,
+          "false_abstain": 0.5,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.4,
+          "balanced": 0.75
+        },
+        {
+          "t": 0.95,
+          "false_abstain": 0.8,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.2,
+          "balanced": 0.6
+        }
+      ],
+      "positive": [
+        {
+          "id": "jesus_son",
+          "hit": true,
+          "rank": 1,
+          "top": 0.7839,
+          "ms": 1064.3916130065918,
+          "got": [
+            "Q:19:35",
+            "Q:3:55",
+            "Q:19:37",
+            "Q:21:26",
+            "Q:19:88",
+            "Q:43:61"
+          ]
+        },
+        {
+          "id": "fast_month",
+          "hit": true,
+          "rank": 5,
+          "top": 0.571,
+          "ms": 837.670087814331,
+          "got": [
+            "Q:33:35",
+            "Q:58:4",
+            "Q:9:5",
+            "Q:2:184",
+            "Q:2:185",
+            "Q:2:194"
+          ]
+        },
+        {
+          "id": "moses",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9966,
+          "ms": 934.3321323394775,
+          "got": [
+            "Q:10:84",
+            "Q:11:17",
+            "Q:57:28",
+            "Q:2:136",
+            "Q:3:84",
+            "Q:6:109"
+          ]
+        },
+        {
+          "id": "wine",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9426,
+          "ms": 999.9990463256836,
+          "got": [
+            "QA:bayyinat:199:4",
+            "QA:bayyinat:199:2",
+            "Q:76:5",
+            "Q:83:27",
+            "Q:5:3",
+            "Q:78:34"
+          ]
+        },
+        {
+          "id": "women_cover",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6182,
+          "ms": 1055.1557540893555,
+          "got": [
+            "Q:24:31",
+            "QA:bayyinat:221:3",
+            "QA:bayyinat:214:4",
+            "Q:33:59",
+            "QA:bayyinat:221",
+            "Q:80:41"
+          ]
+        },
+        {
+          "id": "suffering",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9336,
+          "ms": 1138.420581817627,
+          "got": [
+            "QA:bayyinat:174",
+            "Q:10:107",
+            "Q:4:104",
+            "Q:42:19",
+            "Q:7:94",
+            "Q:44:42"
+          ]
+        },
+        {
+          "id": "quran_word",
+          "hit": false,
+          "rank": null,
+          "top": 0.9389,
+          "ms": 613.7144565582275,
+          "got": [
+            "Q:13:1",
+            "Q:81:19",
+            "Q:4:174",
+            "Q:16:102",
+            "Q:27:6",
+            "Q:2:252"
+          ]
+        },
+        {
+          "id": "pray_mecca",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9964,
+          "ms": 1037.0099544525146,
+          "got": [
+            "QA:bayyinat:9:2",
+            "QA:bayyinat:9:5",
+            "Q:2:144",
+            "Q:2:150",
+            "Q:2:142",
+            "Q:14:43"
+          ]
+        },
+        {
+          "id": "forced",
+          "hit": false,
+          "rank": null,
+          "top": 0.0748,
+          "ms": 936.9816780090332,
+          "got": [
+            "Q:2:131",
+            "QA:bayyinat:65:3",
+            "Q:27:31",
+            "Q:72:14",
+            "Q:56:90",
+            "Q:39:12"
+          ]
+        },
+        {
+          "id": "after_death",
+          "hit": true,
+          "rank": 1,
+          "top": 0.3869,
+          "ms": 496.84762954711914,
+          "got": [
+            "Q:23:15",
+            "Q:2:180",
+            "Q:37:53",
+            "Q:39:42",
+            "Q:40:11",
+            "Q:62:8"
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "id": "computer_hadith_v2",
+          "hard": false,
+          "top": 0.0498,
+          "ms": 566.4353370666504,
+          "got": [
+            "Q:73:1",
+            "Q:43:7",
+            "Q:20:32"
+          ]
+        },
+        {
+          "id": "airplanes",
+          "hard": false,
+          "top": 0.1324,
+          "ms": 995.0425624847412,
+          "got": [
+            "Q:34:10",
+            "Q:5:114",
+            "Q:2:248"
+          ]
+        },
+        {
+          "id": "dinosaurs",
+          "hard": false,
+          "top": 0.1551,
+          "ms": 881.1917304992676,
+          "got": [
+            "QA:bayyinat:34:3",
+            "Q:34:10",
+            "Q:2:67"
+          ]
+        },
+        {
+          "id": "phones",
+          "hard": false,
+          "top": 0.0093,
+          "ms": 567.4178600311279,
+          "got": [
+            "Q:41:12",
+            "Q:24:58",
+            "Q:26:205"
+          ]
+        },
+        {
+          "id": "internet_ar",
+          "hard": false,
+          "top": 0.1352,
+          "ms": 874.6209144592285,
+          "got": [
+            "QA:bayyinat:156:3",
+            "Q:5:114",
+            "Q:2:247"
+          ]
+        },
+        {
+          "id": "pasta",
+          "hard": false,
+          "top": 0.0202,
+          "ms": 957.0095539093018,
+          "got": [
+            "Q:5:3",
+            "Q:3:49",
+            "Q:79:13"
+          ]
+        },
+        {
+          "id": "electric_cars",
+          "hard": false,
+          "top": 0.0069,
+          "ms": 580.8188915252686,
+          "got": [
+            "Q:2:126",
+            "Q:91:13",
+            "Q:12:37"
+          ]
+        },
+        {
+          "id": "messi",
+          "hard": false,
+          "top": 0.0038,
+          "ms": 526.9591808319092,
+          "got": [
+            "Q:79:25",
+            "Q:104:3",
+            "Q:92:13"
+          ]
+        },
+        {
+          "id": "netflix",
+          "hard": false,
+          "top": 0.0138,
+          "ms": 570.2102184295654,
+          "got": [
+            "Q:74:2",
+            "Q:26:205",
+            "Q:88:12"
+          ]
+        },
+        {
+          "id": "coffee_hadith",
+          "hard": false,
+          "top": 0.0532,
+          "ms": 714.8733139038086,
+          "got": [
+            "Q:74:54",
+            "Q:76:5",
+            "Q:24:58"
+          ]
+        }
+      ]
+    },
+    "minilm/analyzed": {
+      "recall_at_k": 1.0,
+      "mrr": 1.0,
+      "latency_ms_mean": 1600.2800464630127,
+      "latency_ms_p90": 1980.7655811309814,
+      "recommended_threshold": 0.35,
+      "sweep": [
+        {
+          "t": 0.1,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.5,
+          "answered_with_hit": 1.0,
+          "balanced": 0.75
+        },
+        {
+          "t": 0.15,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.7,
+          "answered_with_hit": 1.0,
+          "balanced": 0.85
+        },
+        {
+          "t": 0.2,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.8,
+          "answered_with_hit": 1.0,
+          "balanced": 0.9
+        },
+        {
+          "t": 0.25,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.9,
+          "answered_with_hit": 1.0,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.3,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.9,
+          "answered_with_hit": 1.0,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.35,
+          "false_abstain": 0.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 1.0,
+          "balanced": 1.0
+        },
+        {
+          "t": 0.4,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.45,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.5,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.55,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.6,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.65,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.7,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.75,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.8,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.85,
+          "false_abstain": 0.09999999999999998,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.9,
+          "false_abstain": 0.19999999999999996,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.8,
+          "balanced": 0.9
+        },
+        {
+          "t": 0.95,
+          "false_abstain": 0.19999999999999996,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.8,
+          "balanced": 0.9
+        }
+      ],
+      "positive": [
+        {
+          "id": "jesus_son",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9787,
+          "ms": 2132.535457611084,
+          "got": [
+            "Q:3:59",
+            "QA:bayyinat:64",
+            "Q:19:88",
+            "Q:3:45",
+            "QA:bayyinat:64:2",
+            "Q:3:55"
+          ]
+        },
+        {
+          "id": "fast_month",
+          "hit": true,
+          "rank": 1,
+          "top": 0.997,
+          "ms": 1738.6384010314941,
+          "got": [
+            "QA:bayyinat:208",
+            "QA:bayyinat:208:4",
+            "Q:33:35",
+            "Q:2:185",
+            "Q:2:197",
+            "QA:bayyinat:203:4"
+          ]
+        },
+        {
+          "id": "moses",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9966,
+          "ms": 1438.1859302520752,
+          "got": [
+            "Q:10:84",
+            "Q:11:17",
+            "Q:57:28",
+            "Q:2:136",
+            "Q:3:84",
+            "Q:33:69"
+          ]
+        },
+        {
+          "id": "wine",
+          "hit": true,
+          "rank": 1,
+          "top": 0.993,
+          "ms": 1725.6715297698975,
+          "got": [
+            "QA:bayyinat:199",
+            "QA:bayyinat:199:5",
+            "Q:76:5",
+            "QA:bayyinat:200",
+            "QA:bayyinat:196:4",
+            "Q:2:219"
+          ]
+        },
+        {
+          "id": "women_cover",
+          "hit": true,
+          "rank": 1,
+          "top": 0.8768,
+          "ms": 1881.9472789764404,
+          "got": [
+            "QA:bayyinat:214",
+            "QA:bayyinat:220",
+            "QA:bayyinat:220:4",
+            "Q:24:31",
+            "QA:bayyinat:221:3",
+            "QA:bayyinat:214:4"
+          ]
+        },
+        {
+          "id": "suffering",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 1870.5897331237793,
+          "got": [
+            "QA:bayyinat:174:7",
+            "QA:bayyinat:174:6",
+            "Q:4:104",
+            "Q:29:21",
+            "Q:74:56",
+            "Q:20:88"
+          ]
+        },
+        {
+          "id": "quran_word",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9531,
+          "ms": 1785.614013671875,
+          "got": [
+            "QA:bayyinat:27:2",
+            "Q:13:1",
+            "QA:bayyinat:53",
+            "QA:bayyinat:27",
+            "QA:bayyinat:92:3",
+            "Q:4:174"
+          ]
+        },
+        {
+          "id": "pray_mecca",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9964,
+          "ms": 1856.9505214691162,
+          "got": [
+            "QA:bayyinat:9:2",
+            "QA:bayyinat:9",
+            "Q:2:144",
+            "Q:2:150",
+            "Q:7:29",
+            "Q:2:149"
+          ]
+        },
+        {
+          "id": "forced",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9985,
+          "ms": 863.8451099395752,
+          "got": [
+            "Q:2:256",
+            "Q:39:12",
+            "Q:8:73",
+            "Q:93:10",
+            "Q:2:131",
+            "Q:3:85"
+          ]
+        },
+        {
+          "id": "after_death",
+          "hit": true,
+          "rank": 1,
+          "top": 0.3869,
+          "ms": 883.7985992431641,
+          "got": [
+            "Q:23:15",
+            "Q:57:17",
+            "Q:6:36",
+            "Q:37:53",
+            "Q:39:42",
+            "Q:30:50"
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "id": "computer_hadith_v2",
+          "hard": false,
+          "top": 0.331,
+          "ms": 1980.7655811309814,
+          "got": [
+            "QA:bayyinat:158:3",
+            "Q:2:248",
+            "QA:bayyinat:158:2"
+          ]
+        },
+        {
+          "id": "airplanes",
+          "hard": false,
+          "top": 0.2166,
+          "ms": 2198.819875717163,
+          "got": [
+            "Q:33:16",
+            "Q:3:49",
+            "Q:5:110"
+          ]
+        },
+        {
+          "id": "dinosaurs",
+          "hard": false,
+          "top": 0.1966,
+          "ms": 1138.0977630615234,
+          "got": [
+            "Q:69:48",
+            "Q:24:1",
+            "Q:20:3"
+          ]
+        },
+        {
+          "id": "phones",
+          "hard": false,
+          "top": 0.041,
+          "ms": 1018.8601016998291,
+          "got": [
+            "Q:72:9",
+            "Q:50:41",
+            "Q:88:14"
+          ]
+        },
+        {
+          "id": "internet_ar",
+          "hard": false,
+          "top": 0.1352,
+          "ms": 1754.802942276001,
+          "got": [
+            "QA:bayyinat:156:3",
+            "Q:7:67",
+            "Q:19:30"
+          ]
+        },
+        {
+          "id": "pasta",
+          "hard": false,
+          "top": 0.0874,
+          "ms": 1628.2875537872314,
+          "got": [
+            "Q:23:51",
+            "Q:5:3",
+            "Q:37:67"
+          ]
+        },
+        {
+          "id": "electric_cars",
+          "hard": false,
+          "top": 0.0073,
+          "ms": 1718.7111377716064,
+          "got": [
+            "Q:5:110",
+            "Q:91:13",
+            "Q:2:126"
+          ]
+        },
+        {
+          "id": "messi",
+          "hard": false,
+          "top": 0.0422,
+          "ms": 1034.9810123443604,
+          "got": [
+            "Q:70:40",
+            "Q:28:15",
+            "Q:53:25"
+          ]
+        },
+        {
+          "id": "netflix",
+          "hard": false,
+          "top": 0.0651,
+          "ms": 1516.5019035339355,
+          "got": [
+            "Q:41:1",
+            "Q:45:1",
+            "Q:40:1"
+          ]
+        },
+        {
+          "id": "coffee_hadith",
+          "hard": false,
+          "top": 0.1097,
+          "ms": 1837.996482849121,
+          "got": [
+            "Q:76:5",
+            "Q:26:155",
+            "QA:bayyinat:52:3"
+          ]
+        }
+      ]
+    },
+    "none/raw": {
+      "recall_at_k": 0.7,
+      "mrr": 0.65,
+      "latency_ms_mean": 252.5844931602478,
+      "latency_ms_p90": 285.19225120544434,
+      "recommended_threshold": 0.55,
+      "sweep": [
+        {
+          "t": 0.1,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.15,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.2,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.25,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.3,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.35,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.4,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.1,
+          "answered_with_hit": 0.7,
+          "balanced": 0.55
+        },
+        {
+          "t": 0.45,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.1,
+          "answered_with_hit": 0.7,
+          "balanced": 0.55
+        },
+        {
+          "t": 0.5,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.3,
+          "answered_with_hit": 0.7,
+          "balanced": 0.65
+        },
+        {
+          "t": 0.55,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.5,
+          "answered_with_hit": 0.7,
+          "balanced": 0.75
+        },
+        {
+          "t": 0.6,
+          "false_abstain": 0.4,
+          "correct_abstain": 0.9,
+          "answered_with_hit": 0.5,
+          "balanced": 0.75
+        },
+        {
+          "t": 0.65,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.7,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.75,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.8,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.85,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.9,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.95,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        }
+      ],
+      "positive": [
+        {
+          "id": "jesus_son",
+          "hit": true,
+          "rank": 2,
+          "top": 0.6205,
+          "ms": 270.6584930419922,
+          "got": [
+            "Q:9:30",
+            "Q:19:34",
+            "Q:3:83",
+            "Q:19:88",
+            "Q:43:61",
+            "Q:3:55"
+          ]
+        },
+        {
+          "id": "fast_month",
+          "hit": true,
+          "rank": 1,
+          "top": 0.578,
+          "ms": 285.19225120544434,
+          "got": [
+            "Q:2:185",
+            "Q:58:4",
+            "Q:33:35",
+            "Q:5:2",
+            "Q:2:194",
+            "Q:9:5"
+          ]
+        },
+        {
+          "id": "moses",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6261,
+          "ms": 259.29927825927734,
+          "got": [
+            "Q:10:84",
+            "Q:11:17",
+            "Q:2:136",
+            "Q:57:28",
+            "Q:3:84",
+            "Q:42:13"
+          ]
+        },
+        {
+          "id": "wine",
+          "hit": true,
+          "rank": 1,
+          "top": 0.628,
+          "ms": 239.2423152923584,
+          "got": [
+            "QA:bayyinat:199",
+            "QA:bayyinat:199:2",
+            "Q:5:3",
+            "Q:76:5",
+            "Q:2:219",
+            "Q:6:70"
+          ]
+        },
+        {
+          "id": "women_cover",
+          "hit": true,
+          "rank": 1,
+          "top": 0.5946,
+          "ms": 224.41625595092773,
+          "got": [
+            "Q:24:31",
+            "QA:bayyinat:221:3",
+            "QA:bayyinat:221",
+            "Q:33:59",
+            "QA:bayyinat:214:4",
+            "QA:bayyinat:214"
+          ]
+        },
+        {
+          "id": "suffering",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6134,
+          "ms": 246.80018424987793,
+          "got": [
+            "QA:bayyinat:174",
+            "Q:74:56",
+            "Q:29:21",
+            "Q:42:19",
+            "Q:44:42",
+            "Q:10:107"
+          ]
+        },
+        {
+          "id": "quran_word",
+          "hit": false,
+          "rank": null,
+          "top": 0.6278,
+          "ms": 324.8422145843506,
+          "got": [
+            "Q:2:252",
+            "Q:4:174",
+            "Q:16:102",
+            "Q:13:1",
+            "Q:27:6",
+            "Q:26:192"
+          ]
+        },
+        {
+          "id": "pray_mecca",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6054,
+          "ms": 231.23669624328613,
+          "got": [
+            "QA:bayyinat:9:2",
+            "QA:bayyinat:9:3",
+            "Q:2:144",
+            "Q:2:150",
+            "Q:8:35",
+            "QA:bayyinat:205:2"
+          ]
+        },
+        {
+          "id": "forced",
+          "hit": false,
+          "rank": null,
+          "top": 0.5719,
+          "ms": 246.83880805969238,
+          "got": [
+            "Q:39:12",
+            "Q:68:35",
+            "Q:6:125",
+            "Q:27:31",
+            "Q:2:132",
+            "QA:bayyinat:65:3"
+          ]
+        },
+        {
+          "id": "after_death",
+          "hit": false,
+          "rank": null,
+          "top": 0.5837,
+          "ms": 233.95252227783203,
+          "got": [
+            "Q:57:17",
+            "Q:3:85",
+            "Q:39:42",
+            "Q:2:180",
+            "Q:19:72",
+            "Q:62:8"
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "id": "computer_hadith_v2",
+          "hard": false,
+          "top": 0.573,
+          "ms": 227.7088165283203,
+          "got": [
+            "Q:20:32",
+            "Q:4:174",
+            "Q:34:10"
+          ]
+        },
+        {
+          "id": "airplanes",
+          "hard": false,
+          "top": 0.6046,
+          "ms": 263.1504535675049,
+          "got": [
+            "Q:34:10",
+            "Q:5:110",
+            "Q:5:114"
+          ]
+        },
+        {
+          "id": "dinosaurs",
+          "hard": false,
+          "top": 0.4953,
+          "ms": 277.5716781616211,
+          "got": [
+            "Q:38:18",
+            "Q:42:7",
+            "Q:27:82"
+          ]
+        },
+        {
+          "id": "phones",
+          "hard": false,
+          "top": 0.5797,
+          "ms": 224.85613822937012,
+          "got": [
+            "Q:52:29",
+            "Q:42:48",
+            "Q:29:36"
+          ]
+        },
+        {
+          "id": "internet_ar",
+          "hard": false,
+          "top": 0.5289,
+          "ms": 252.0620822906494,
+          "got": [
+            "Q:5:114",
+            "Q:19:30",
+            "Q:5:12"
+          ]
+        },
+        {
+          "id": "pasta",
+          "hard": false,
+          "top": 0.5584,
+          "ms": 245.4061508178711,
+          "got": [
+            "Q:23:51",
+            "Q:5:3",
+            "Q:42:7"
+          ]
+        },
+        {
+          "id": "electric_cars",
+          "hard": false,
+          "top": 0.5653,
+          "ms": 228.40404510498047,
+          "got": [
+            "Q:2:258",
+            "Q:91:13",
+            "Q:12:37"
+          ]
+        },
+        {
+          "id": "messi",
+          "hard": false,
+          "top": 0.3806,
+          "ms": 254.32157516479492,
+          "got": [
+            "Q:5:72",
+            "Q:96:14",
+            "Q:90:7"
+          ]
+        },
+        {
+          "id": "netflix",
+          "hard": false,
+          "top": 0.4688,
+          "ms": 290.7261848449707,
+          "got": [
+            "Q:74:2",
+            "Q:1:6",
+            "Q:54:27"
+          ]
+        },
+        {
+          "id": "coffee_hadith",
+          "hard": false,
+          "top": 0.5013,
+          "ms": 225.00371932983398,
+          "got": [
+            "Q:74:54",
+            "Q:96:10",
+            "Q:5:89"
+          ]
+        }
+      ]
+    },
+    "none/analyzed": {
+      "recall_at_k": 1.0,
+      "mrr": 1.0,
+      "latency_ms_mean": 438.499116897583,
+      "latency_ms_p90": 554.375171661377,
+      "recommended_threshold": 0.6,
+      "sweep": [
+        {
+          "t": 0.1,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 1.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.15,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 1.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.2,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 1.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.25,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 1.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.3,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 1.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.35,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.0,
+          "answered_with_hit": 1.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.4,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.1,
+          "answered_with_hit": 1.0,
+          "balanced": 0.55
+        },
+        {
+          "t": 0.45,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.1,
+          "answered_with_hit": 1.0,
+          "balanced": 0.55
+        },
+        {
+          "t": 0.5,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.2,
+          "answered_with_hit": 1.0,
+          "balanced": 0.6
+        },
+        {
+          "t": 0.55,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.2,
+          "answered_with_hit": 1.0,
+          "balanced": 0.6
+        },
+        {
+          "t": 0.6,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.9,
+          "answered_with_hit": 1.0,
+          "balanced": 0.95
+        },
+        {
+          "t": 0.65,
+          "false_abstain": 0.30000000000000004,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7,
+          "balanced": 0.85
+        },
+        {
+          "t": 0.7,
+          "false_abstain": 0.8,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.2,
+          "balanced": 0.6
+        },
+        {
+          "t": 0.75,
+          "false_abstain": 0.9,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.1,
+          "balanced": 0.55
+        },
+        {
+          "t": 0.8,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.85,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.9,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        },
+        {
+          "t": 0.95,
+          "false_abstain": 1.0,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.0,
+          "balanced": 0.5
+        }
+      ],
+      "positive": [
+        {
+          "id": "jesus_son",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6773,
+          "ms": 488.450288772583,
+          "got": [
+            "Q:19:34",
+            "QA:bayyinat:64",
+            "Q:9:30",
+            "QA:bayyinat:64:6",
+            "Q:19:88",
+            "Q:3:59"
+          ]
+        },
+        {
+          "id": "fast_month",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6874,
+          "ms": 399.2807865142822,
+          "got": [
+            "QA:bayyinat:208",
+            "QA:bayyinat:208:4",
+            "Q:2:185",
+            "QA:bayyinat:176",
+            "QA:bayyinat:203:4",
+            "Q:26:21"
+          ]
+        },
+        {
+          "id": "moses",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6496,
+          "ms": 386.5349292755127,
+          "got": [
+            "Q:3:84",
+            "Q:2:136",
+            "Q:57:28",
+            "Q:2:285",
+            "Q:10:84",
+            "Q:92:6"
+          ]
+        },
+        {
+          "id": "wine",
+          "hit": true,
+          "rank": 1,
+          "top": 0.7017,
+          "ms": 398.7283706665039,
+          "got": [
+            "QA:bayyinat:199:2",
+            "QA:bayyinat:199",
+            "Q:5:90",
+            "Q:5:3",
+            "Q:76:5",
+            "Q:5:91"
+          ]
+        },
+        {
+          "id": "women_cover",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6046,
+          "ms": 424.93462562561035,
+          "got": [
+            "QA:bayyinat:220",
+            "QA:bayyinat:220:2",
+            "Q:24:31",
+            "QA:bayyinat:221:3",
+            "QA:bayyinat:214:4",
+            "QA:bayyinat:214:2"
+          ]
+        },
+        {
+          "id": "suffering",
+          "hit": true,
+          "rank": 1,
+          "top": 0.7634,
+          "ms": 363.65199089050293,
+          "got": [
+            "QA:bayyinat:174:6",
+            "QA:bayyinat:174",
+            "Q:7:12",
+            "Q:74:56",
+            "Q:29:21",
+            "Q:42:19"
+          ]
+        },
+        {
+          "id": "quran_word",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6911,
+          "ms": 433.2151412963867,
+          "got": [
+            "QA:bayyinat:27",
+            "QA:bayyinat:27:2",
+            "QA:bayyinat:25:4",
+            "QA:bayyinat:30",
+            "QA:bayyinat:25",
+            "Q:2:252"
+          ]
+        },
+        {
+          "id": "pray_mecca",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6054,
+          "ms": 413.64455223083496,
+          "got": [
+            "QA:bayyinat:9:2",
+            "Q:96:10",
+            "Q:14:40",
+            "Q:2:144",
+            "QA:bayyinat:9:3",
+            "Q:2:150"
+          ]
+        },
+        {
+          "id": "forced",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6871,
+          "ms": 523.3469009399414,
+          "got": [
+            "Q:2:256",
+            "Q:10:99",
+            "Q:93:10",
+            "Q:68:18",
+            "Q:91:15",
+            "Q:72:2"
+          ]
+        },
+        {
+          "id": "after_death",
+          "hit": true,
+          "rank": 1,
+          "top": 0.6615,
+          "ms": 580.1651477813721,
+          "got": [
+            "Q:23:15",
+            "Q:26:81",
+            "Q:16:111",
+            "Q:19:66",
+            "Q:58:6",
+            "Q:6:36"
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "id": "computer_hadith_v2",
+          "hard": false,
+          "top": 0.5785,
+          "ms": 434.2925548553467,
+          "got": [
+            "QA:bayyinat:158:2",
+            "Q:20:32",
+            "QA:bayyinat:31"
+          ]
+        },
+        {
+          "id": "airplanes",
+          "hard": false,
+          "top": 0.6366,
+          "ms": 374.4804859161377,
+          "got": [
+            "QA:bayyinat:16:2",
+            "Q:34:10",
+            "Q:2:260"
+          ]
+        },
+        {
+          "id": "dinosaurs",
+          "hard": false,
+          "top": 0.5561,
+          "ms": 379.3919086456299,
+          "got": [
+            "Q:69:48",
+            "Q:87:10",
+            "Q:20:3"
+          ]
+        },
+        {
+          "id": "phones",
+          "hard": false,
+          "top": 0.5797,
+          "ms": 434.603214263916,
+          "got": [
+            "Q:52:29",
+            "Q:42:48",
+            "Q:29:36"
+          ]
+        },
+        {
+          "id": "internet_ar",
+          "hard": false,
+          "top": 0.5689,
+          "ms": 386.9137763977051,
+          "got": [
+            "QA:bayyinat:158:2",
+            "Q:19:30",
+            "QA:bayyinat:158:4"
+          ]
+        },
+        {
+          "id": "pasta",
+          "hard": false,
+          "top": 0.5584,
+          "ms": 371.8104362487793,
+          "got": [
+            "Q:23:51",
+            "Q:5:3",
+            "Q:3:49"
+          ]
+        },
+        {
+          "id": "electric_cars",
+          "hard": false,
+          "top": 0.5738,
+          "ms": 359.16614532470703,
+          "got": [
+            "Q:91:13",
+            "Q:2:258",
+            "Q:2:126"
+          ]
+        },
+        {
+          "id": "messi",
+          "hard": false,
+          "top": 0.3806,
+          "ms": 616.4898872375488,
+          "got": [
+            "Q:5:72",
+            "Q:96:14",
+            "Q:90:7"
+          ]
+        },
+        {
+          "id": "netflix",
+          "hard": false,
+          "top": 0.4688,
+          "ms": 446.5060234069824,
+          "got": [
+            "Q:74:2",
+            "Q:70:21",
+            "Q:1:6"
+          ]
+        },
+        {
+          "id": "coffee_hadith",
+          "hard": false,
+          "top": 0.5605,
+          "ms": 554.375171661377,
+          "got": [
+            "QA:bayyinat:52:3",
+            "Q:76:5",
+            "QA:bayyinat:52:2"
+          ]
+        }
+      ]
+    }
+  }
+}

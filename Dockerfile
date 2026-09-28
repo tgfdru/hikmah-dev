@@ -1,6 +1,9 @@
 # Knowledge & retrieval layer image. The agent/API service can use this image as
 # its base (FROM this, add agent/ + api/) or install requirements.txt the same way.
-FROM python:3.11-slim
+# BASE_IMAGE can point at a mirror if Docker Hub rate-limits you, e.g.
+#   --build-arg BASE_IMAGE=public.ecr.aws/docker/library/python:3.11-slim
+ARG BASE_IMAGE=python:3.11-slim
+FROM ${BASE_IMAGE}
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \

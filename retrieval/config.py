@@ -67,7 +67,7 @@ RERANK_QUERIES = int(_env("RERANK_QUERIES", "2"))  # score against the best of t
 # Evidence whose score is below this means "not enough evidence -> abstain".
 # Scores are on different scales per RERANKER, so each has its own tuned default
 # (see docs/EVALUATION.md); ABSTAIN_THRESHOLD overrides all of them.
-ABSTAIN_THRESHOLDS = {"minilm": 0.30, "none": 0.62, "bge": 0.10}
+ABSTAIN_THRESHOLDS = {"minilm": 0.35, "none": 0.62, "bge": 0.10}
 ABSTAIN_THRESHOLD = float(_env("ABSTAIN_THRESHOLD", str(ABSTAIN_THRESHOLDS.get(RERANKER, 0.35))))
 
 # Translation book ids on Quranpedia (both published by the King Fahd Complex).
