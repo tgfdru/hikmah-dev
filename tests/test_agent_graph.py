@@ -118,3 +118,74 @@ def test_unknown_cited_id_is_an_issue():
     issues = check_draft(draft(cited_ids=["QA:bayyinat:999"]), ev, "en", "A")
     assert any("QA:bayyinat:999" in i for i in issues)
     assert check_draft(draft(), ev, "en", "A") == []
+
+
+def test_malformed_nested_tool_call_is_repaired():
+    nested = {"raw_args": {"language": "en", "knowledge_level": "beginner", "background": "unknown",
+                           "tone": "curious", "core_question": {
+                               "core_question": "لماذا يعبد المسلمون الكعبة؟", "arabic_query": "الكعبة القبلة",
+                               "asks_for_hadith": False, "personal_case": False}}}
+    out, _ = run({"analyze": nested, "route": routing("A"), "generate": draft()})
+    assert out["status"] == "ok"
+
+
+def test_unrepairable_output_is_retried():
+    broken = {"raw_args": {"language": "en"}}
+    out, fake = run({"analyze": [broken, analysis()], "route": routing("A"), "generate": draft()})
+    assert out["status"] == "ok" and fake.stages().count("analyze") == 2
+
+
+def test_term_question_without_evidence_uses_glossary(monkeypatch):
+    monkeypatch.setattr(settings, "ABSTAIN_THRESHOLD", 0.95)    # no search evidence passes
+    msgs = [{"role": "seeker", "text": "What does Tawhid mean? I have never heard this word before."}]
+    gdraft = draft(reply="Tawhid means believing that God is One ...", reply_ar="التوحيد ...", cited_ids=[])
+    out, fake = run({"analyze": analysis(asks_term_meaning=True, asked_term="التوحيد"), "route": routing("A"),
+                     "generate": [gdraft, gdraft]}, messages=msgs)
+    gen_prompt = [m for s, m in fake.calls if s == "generate"][0][1][1]
+    gid = next(line.split("]")[0][3:] for line in gen_prompt.splitlines() if line.startswith("- [GL:"))
+    assert "retrieve:glossary_only" in out["trace"] and gid.startswith("GL:")
+
+
+def test_glossary_citation_is_accepted(monkeypatch):
+    monkeypatch.setattr(settings, "ABSTAIN_THRESHOLD", 0.95)
+    msgs = [{"role": "seeker", "text": "What does Tawhid mean?"}]
+    from retrieval.glossary import glossary_for
+    from agent.nodes import gl_id
+    gid = gl_id(glossary_for(["Tawhid"], "en")[0])
+    gdraft = draft(reply="Tawhid means ...", reply_ar="التوحيد ...", cited_ids=[gid])
+    out, _ = run({"analyze": analysis(asks_term_meaning=True, asked_term="التوحيد"), "route": routing("A"), "generate": gdraft},
+                 messages=msgs)
+    assert out["status"] == "ok" and out["citations"][0]["type"] == "glossary"
+
+
+def test_level_c_without_evidence_refers_to_specialist(monkeypatch):
+    monkeypatch.setattr(settings, "ABSTAIN_THRESHOLD", 0.95)
+    out, fake = run({"analyze": analysis(), "route": routing("C")},
+                    messages=[{"role": "seeker", "text": "Is it true that Islam kills people who leave it?"}])
+    assert out["status"] == "refer" and out["reply"] == templates.REFER_SPECIALIST["en"]
+    assert "generate" not in fake.stages()
+
+
+def test_arabic_quotation_marks_are_allowed():
+    d = draft(reply_ar="معنى «التوحيد» إفراد الله بالعبادة: [[Q:2:144]]")
+    out, _ = run({"analyze": analysis(), "route": routing("A"), "generate": d})
+    assert out["status"] == "ok" and out["attempts"] == 1
+
+
+def test_verse_typed_by_model_is_replaced_with_store_text():
+    from retrieval.mock import MockRetriever
+    verse = MockRetriever().get_verbatim("Q:2:144", "en").text_ar   # text taken from the store, not typed
+    d = draft(reply=f"Allah says: «{verse}» — this is the meaning.", cited_ids=["Q:2:144"])
+    from agent.nodes import repair_draft
+    from retrieval import config as kbc
+    if not kbc.VERBATIM_DB.exists():
+        pytest.skip("needs the verbatim store (ayah matching)")
+    fixed = repair_draft(d, MockRetriever().retrieve(["x"], "en"))
+    assert "[[Q:2:144]]" in fixed.reply and verse not in fixed.reply
+
+
+def test_exact_verse_request_without_evidence_abstains(monkeypatch):
+    monkeypatch.setattr(settings, "ABSTAIN_THRESHOLD", 0.95)
+    out, fake = run({"analyze": analysis(asks_for_verse=True), "route": routing("C")},
+                    messages=[{"role": "seeker", "text": "Which verse mentions smartphones? Give me the exact verse."}])
+    assert out["status"] == "abstain" and "retrieve:no_verse" in out["trace"]

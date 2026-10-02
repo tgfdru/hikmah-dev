@@ -73,3 +73,8 @@ def test_render_quran_uses_quran_brackets_and_translation():
 def test_render_hadith_never_uses_quran_brackets():
     out = rules.render(_ev(id="H:bukhari:1", type="hadith", source="صحيح البخاري", ref="1", grade="صحيح"), "en")
     assert "﴿" not in out and "«نص»" in out and "صحيح البخاري" in out and "صحيح" in out
+
+
+def test_render_urdu_translation_without_quotes():
+    out = rules.render(_ev(translation="ترجمہ"), "ur")
+    assert "“" not in out and "ترجمہ" in out

@@ -204,6 +204,14 @@ def _resolve_citation(cid: str, lang: str):
 
     if cid.startswith(("Q:", "H:")):
         return get_verbatim(cid, lang)
+    if cid.startswith("GL:"):  # approved glossary entry cited by the agent (data/glossary.json)
+        from retrieval.glossary import load_glossary
+
+        key = cid[3:]
+        for t in load_glossary():
+            if str(t.get("jamhara_id") or t["ar"]) == key:
+                return {"text_ar": t["ar"] + " — " + (t.get("usage_rule_ar") or t.get("definition_en") or "")}
+        return None
     try:
         from retrieval.hybrid import get_hybrid
 

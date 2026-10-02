@@ -2,6 +2,8 @@
 
     analyze -> route --(D)--> refer -> END
                   \\-> retrieve --(no evidence / no hadith)--> abstain -> END
+                          |--(level C, no evidence)--> refer (specialist)
+                          |--(only a glossary term)--> generate
                           \\-> generate -> verify --(retry)--> generate
                                               \\-> END (ok | unverified)
 """
@@ -22,7 +24,7 @@ def _after_route(s: AgentState) -> str:
 
 
 def _after_retrieve(s: AgentState) -> str:
-    return "abstain" if s.get("status") == "abstain" else "generate"
+    return {"abstain": "abstain", "refer": "refer"}.get(s.get("status") or "", "generate")
 
 
 def _after_verify(s: AgentState) -> str:
@@ -37,7 +39,8 @@ def build_graph():
     g.set_entry_point("analyze")
     g.add_edge("analyze", "route")
     g.add_conditional_edges("route", _after_route, {"refer": "refer", "retrieve": "retrieve"})
-    g.add_conditional_edges("retrieve", _after_retrieve, {"abstain": "abstain", "generate": "generate"})
+    g.add_conditional_edges("retrieve", _after_retrieve,
+                            {"abstain": "abstain", "refer": "refer", "generate": "generate"})
     g.add_edge("generate", "verify")
     g.add_conditional_edges("verify", _after_verify, {"generate": "generate", END: END})
     g.add_edge("refer", END)
@@ -69,6 +72,7 @@ def suggest(messages: list[dict], style: str | None = None) -> dict:
         },
         "citations": [c.model_dump() for c in s.get("citations", [])],
         "issues": s.get("issues", []),
+        "retry_issues": s.get("retry_issues", []),
         "attempts": s.get("attempts", 0),
         "best_score": round(float(s.get("best_score", 0.0) or 0.0), 3),
         "trace": s.get("trace", []),

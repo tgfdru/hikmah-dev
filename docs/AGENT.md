@@ -7,8 +7,10 @@ knowledge layer (`retrieval/`, see HANDOFF.md). Code: `agent/`, HTTP API: `api/`
 ## 1. Pipeline
 
 ```
-analyze ─► route ──(D)──────────────────────────────► refer ──► END
-               └─► retrieve ──(no evidence / no hadith)► abstain ► END
+analyze ─► route ──(D)──────────────────────────────► refer (personal) ──► END
+               └─► retrieve ──(no evidence / no hadith)► abstain ──► END
+                        ├──(level C, no evidence)──────► refer (specialist) ► END
+                        ├──(term question, glossary only)► generate
                         └─► generate ─► verify ──(issues, attempt 1)─► generate
                                             └─► END  (ok | unverified)
 ```
@@ -20,7 +22,7 @@ analyze ─► route ──(D)────────────────�
 | 3 | Hybrid Retriever | `nodes.py:retrieve` | `retrieve([seeker words, Arabic query, core question], lang)`; keeps evidence ≥ `ABSTAIN_THRESHOLD`; hadith requests use `types=["hadith"]` only; adds the correct verse of a misquote from `get_verbatim` | no |
 | 4 | Draft Generator | `nodes.py:generate` | Draft in the seeker's language + Arabic copy + note for the da'i; level-specific rules; relevant glossary terms (`glossary_for`); Quran/hadith **only as placeholders** `[[Q:2:144]]` | yes (`Draft`) |
 | 5 | Citation Verifier | `nodes.py:verify` / `check_draft` | Deterministic checks (below), optional LLM judge (`VERIFY_LLM_JUDGE=1`); replaces placeholders with the exact text from the store | optional (`Judgement`) |
-| – | Refer | `nodes.py:refer` | Level D: fixed template (`agent/templates.py`), no ruling, no generation | only to translate a template into a language without one |
+| – | Refer | `nodes.py:refer` | Level D: fixed personal-case template; Level C with no evidence: fixed "ask a specialist" template (`agent/templates.py`). No ruling, no generation | only to translate a template into a language without one |
 | – | Abstain | `nodes.py:abstain` | No evidence above the threshold, or a hadith request with no authentic hadith in the sources | same |
 
 Typical LLM calls per request: 3 (analyze, route, generate) + 1 per retry
@@ -34,7 +36,9 @@ These do not depend on the model behaving well (`agent/rules.py`, `check_draft`)
    retrieved evidence (or a verse quoted inside a cited Bayyinat passage,
    `quran_refs_in`) **and** resolve in the verbatim store (`get_verbatim`). Anything else
    is rejected. Verse text in the final reply is always the store's text.
-2. **No quotation marks of scripture by the model.** `﴿ ﴾` or `« »` outside a placeholder,
+   *Repair:* if the model typed a verse that **is** in the evidence, the verifier replaces
+   that span with its placeholder (so the store's exact text is shown) before checking.
+2. **No scripture typed by the model.** The Quran brackets `﴿ ﴾` outside a placeholder,
    or Arabic text that matches an ayah (`find_quran_quotes`) outside a placeholder → rejected.
 3. **Every cited id is real.** `cited_ids` must be retrieved evidence ids.
 4. **Level C** drafts may not claim consensus/certainty (`rules.CERTAINTY_PHRASES`).
@@ -46,13 +50,29 @@ These do not depend on the model behaving well (`agent/rules.py`, `check_draft`)
 7. **Level D never reaches the generator**; hadith requests never fall back to
    Quran/Bayyinat evidence (HANDOFF §5.7).
 
+### Glossary path (term questions)
+
+"What does Tawhid mean?" or "Translate الشريعة" often has no search hit above the
+threshold, but the approved **glossary** (challenge pack + Jamhara, `data/glossary.json`)
+answers it. When the analyzer marks `asks_term_meaning` and names the term
+(`asked_term`), and the glossary has it, the generator drafts from the glossary entry
+and cites it as `GL:<jamhara id>` (type `glossary` in `citations`). The verifier accepts
+`GL:` ids only for entries that were given to the generator.
+
+### Robust structured output
+
+`space-bunny-free` sometimes returns a malformed tool call (fields nested inside another
+field) or none at all. `agent/llm.py:structured` lifts nested fields back to the top
+level when that makes the output valid, otherwise retries (up to 3 calls) before failing
+the request with a clear error.
+
 ## 3. Status values returned
 
 | status | Meaning | What the da'i sees |
 |---|---|---|
 | `ok` | Draft passed verification | Draft + sources |
 | `unverified` | Failed verification twice | Draft with ⚠ marks + list of issues |
-| `refer` | Level D | Fixed referral text (no ruling) + red note |
+| `refer` | Level D, or Level C without evidence | Fixed referral text (no ruling) + red/orange note |
 | `abstain` | Not enough evidence / no authentic hadith | Fixed "no reliable source" text + note |
 
 ## 4. Configuration (`.env`)

@@ -74,5 +74,6 @@ def test_regenerate_requires_valid_style(client):
 def test_llm_not_configured_is_503(client, monkeypatch):
     llm.set_llm_factory(None)
     monkeypatch.setattr(settings, "AI_API_KEY", "")
+    monkeypatch.setattr(settings, "MODEL_ANALYZE", "paid-model")  # *-free models need no key
     r = client.post("/suggest", json=BODY, headers={"X-API-Key": "k-test"})
     assert r.status_code == 503

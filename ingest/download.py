@@ -73,6 +73,12 @@ def download_quranpedia(force: bool = False) -> Path:
             _get(f"{QURANPEDIA_DUMPS}/{name}", dest)
         digest = expected.get(name)
         if digest and _sha256(dest) != digest:
+            # Quranpedia's CDN can serve a stale copy for an hour after a new dump
+            # (manifest updated, file not). A query string keyed on the expected
+            # hash bypasses that cache; the SHA-256 check below still applies.
+            print(f"  stale CDN copy of {name}; retrying without cache")
+            _get(f"{QURANPEDIA_DUMPS}/{name}?v={digest[:16]}", dest)
+        if digest and _sha256(dest) != digest:
             raise RuntimeError(f"SHA-256 mismatch for {name}; delete it and retry")
 
     for lang, book_id in config.QURAN_TRANSLATIONS.items():

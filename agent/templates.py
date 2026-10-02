@@ -35,6 +35,25 @@ REFER = {
            "à toute question générale sur l'islam."),
 }
 
+# Level C (disputed / sensitive) with no evidence above the threshold: point to a specialist.
+REFER_SPECIALIST = {
+    "ar": ("سؤالك في موضوع يحتاج إلى بيانٍ علمي دقيق ومفصَّل، ولا نريد أن نجيب عنه إجابةً مختصرة قد تُفهَم "
+           "على غير وجهها. ننصحك بعرضه على عالِمٍ متخصص أو جهة علمية موثوقة، ويسعدنا أن نساعدك في أي سؤال آخر عن الإسلام."),
+    "en": ("Your question is about a topic that needs a careful, detailed scholarly explanation, and we do not want "
+           "to give a short answer that could be misunderstood. We suggest putting it to a qualified specialist or a "
+           "trusted scholarly body. We are happy to help with any other question you have about Islam."),
+    "ur": ("آپ کا سوال ایسے موضوع سے متعلق ہے جس کے لیے محتاط اور تفصیلی علمی وضاحت درکار ہے، اور ہم ایسا مختصر جواب "
+           "نہیں دینا چاہتے جو غلط سمجھا جائے۔ براہِ کرم اسے کسی مستند ماہر عالم یا معتبر علمی ادارے کے سامنے رکھیں۔ "
+           "اسلام کے بارے میں کسی اور سوال میں مدد کر کے ہمیں خوشی ہوگی۔"),
+    "id": ("Pertanyaan Anda menyangkut topik yang memerlukan penjelasan ilmiah yang cermat dan rinci, dan kami tidak "
+           "ingin memberikan jawaban singkat yang bisa disalahpahami. Kami sarankan Anda menanyakannya kepada ulama "
+           "yang ahli atau lembaga keilmuan terpercaya. Kami senang membantu pertanyaan lain tentang Islam."),
+    "fr": ("Votre question porte sur un sujet qui demande une explication savante précise et détaillée, et nous ne "
+           "voulons pas donner une réponse courte qui pourrait être mal comprise. Nous vous suggérons de la poser à un "
+           "spécialiste qualifié ou à une instance savante reconnue. Nous serons heureux de vous aider pour toute "
+           "autre question sur l'islam."),
+}
+
 ABSTAIN = {
     "ar": ("لم نجد في المصادر المعتمدة لدينا ما يكفي للإجابة عن هذا السؤال إجابةً موثَّقة، ولا نريد أن نقول شيئًا "
            "بلا مصدر. هل يمكنك توضيح سؤالك أكثر؟"),

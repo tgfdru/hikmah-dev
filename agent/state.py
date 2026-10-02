@@ -31,6 +31,13 @@ class Analysis(BaseModel):
         description="A short Arabic search query for the approved sources (key terms, no quotes of verses)")
     asks_for_hadith: bool = Field(
         description="True if the seeker explicitly asks for a hadith / saying of the Prophet as evidence")
+    asks_for_verse: bool = Field(
+        default=False, description="True if the seeker asks for the exact text or location of a Quran verse "
+                                   "about something specific")
+    asked_term: str = Field(default="", description="Arabic form of the term asked about, or empty")
+    asks_term_meaning: bool = Field(
+        default=False,
+        description="True if the seeker asks what an Islamic term means or how to translate it (e.g. Tawhid, Sharia)")
     personal_case: bool = Field(
         description="True if the seeker asks for a ruling on their own specific situation (marriage, money, "
                     "worship validity, family dispute, medical or legal matter)")
@@ -78,15 +85,19 @@ class AgentState(TypedDict, total=False):
     language: str
     analysis: Analysis
     misquotes: list[dict]         # [{"ref_id", "quoted", "similarity"}]
+    terms: list[dict]             # approved glossary entries named in the seeker's message
     level_hint: str | None        # deterministic hint for the router (never final)
     routing: Routing
     evidence: list[Evidence]
     best_score: float
     abstain_reason: str | None
+    refer_reason: str | None      # "personal" (level D) | "specialist" (level C without evidence)
+    glossary: dict[str, dict]     # GL id -> glossary entry offered to the generator
     draft: Draft
     attempts: int
     issues: list[str]
     verdict: str                  # verifier: "pass" | "retry" | "fail"
+    retry_issues: list[str]       # problems found in rejected drafts (diagnostics)
     # final
     status: Status
     final_reply: str

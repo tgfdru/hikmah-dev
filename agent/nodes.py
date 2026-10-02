@@ -12,6 +12,7 @@ Stage map (docs/DISCLOSURE.md numbering):
 from __future__ import annotations
 
 import logging
+import re
 
 from agent import llm, rules, settings, templates
 from agent.prompts import load
@@ -76,14 +77,44 @@ def _quran_refs_in(text: str) -> list[str]:
         return []
 
 
-def _glossary(texts: list[str], lang: str) -> str:
+def _glossary_terms(texts: list[str], lang: str, limit: int = 15) -> list[dict]:
     try:
-        from retrieval.glossary import format_for_prompt, glossary_for
+        from retrieval.glossary import glossary_for
 
-        return format_for_prompt(glossary_for(texts, lang), lang)
+        return glossary_for(texts, lang, limit)
     except Exception as exc:
         log.debug("glossary unavailable: %s", exc)
-        return ""
+        return []
+
+
+def gl_id(term: dict) -> str:
+    """Stable id for a glossary entry: GL:<Jamhara word id>, or GL:<Arabic term> for pack-only terms."""
+    return f"GL:{term.get('jamhara_id') or term['ar']}"
+
+
+# Some Jamhara definitions embed Quran verses in PDF glyph codes (Arabic presentation forms)
+# that cannot be rendered or verified; cut them out so the model never copies them.
+_GLYPHS = re.compile(r"[\uFB50-\uFDFF\uFE70-\uFEFF﴾﴿]+")
+
+
+def _clean_definition(text: str) -> str:
+    text = re.split(r"ومن شواهده|انظر\s*:", text or "")[0]
+    return re.sub(r"\s+", " ", _GLYPHS.sub(" ", text)).strip(" .،")
+
+
+def _glossary_block(terms: list[dict], lang: str) -> tuple[str, dict[str, dict]]:
+    lines, ids = [], {}
+    for t in terms:
+        gid = gl_id(t)
+        ids[gid] = t
+        equivalent = t.get(lang) or t.get(f"jamhara_{lang}") or t.get("en") or t.get("jamhara_en") or ""
+        if lang == "ar":
+            note = t.get("usage_rule_ar") or _clean_definition(t.get("definition_ar", ""))
+        else:
+            note = t.get("definition_en") or t.get("usage_rule_ar") or ""
+        rule = f" [usage rule: {t['usage_rule_ar']}]" if lang != "ar" and t.get("usage_rule_ar") else ""
+        lines.append(f"- [{gid}] {t['ar']} → {equivalent} — {note}{rule}")
+    return "\n".join(lines), ids
 
 
 def _localize(table: dict[str, str], lang: str) -> str:
@@ -125,7 +156,9 @@ def analyze(state: AgentState) -> dict:
                  for m in _quotes_in(seeker_text)]
 
     hint = "D" if (rules.level_d_hint(seeker_text) or a.personal_case) else None
-    return {"analysis": a, "language": language, "misquotes": misquotes, "level_hint": hint,
+    # Approved glossary entries for the term the seeker asks about (if any).
+    terms = _glossary_terms([a.asked_term], language, limit=3) if a.asked_term.strip() else []
+    return {"analysis": a, "language": language, "misquotes": misquotes, "level_hint": hint, "terms": terms,
             "attempts": 0, "issues": [], "trace": _trace(state, "analyze")}
 
 
@@ -145,7 +178,8 @@ def route(state: AgentState) -> dict:
     # following the pack's rule to pick the more cautious level when in doubt.
     if r.level != "D" and a.personal_case and rules.level_d_hint(seeker_text):
         r = Routing(level="D", reason=r.reason + " (رُفع إلى D: سؤال عن حالة شخصية)")
-    return {"routing": r, "trace": _trace(state, "route")}
+    return {"routing": r, "refer_reason": "personal" if r.level == "D" else None,
+            "trace": _trace(state, "route")}
 
 
 # ------------------------------------------------------------- 3 retrieve ---
@@ -165,7 +199,7 @@ def retrieve(state: AgentState) -> dict:
         best = max((e.score for e in found), default=0.0)
         if not kept:
             return {"evidence": [], "best_score": best, "abstain_reason": "hadith_not_found",
-                    "status": "abstain", "trace": _trace(state, "retrieve")}
+                    "status": "abstain", "trace": _trace(state, "retrieve:no_hadith")}
     else:
         found = retriever.retrieve(queries, lang, k=6)
         kept = [e for e in found if e.score >= threshold]
@@ -178,8 +212,21 @@ def retrieve(state: AgentState) -> dict:
             kept.insert(0, e.model_copy(update={"score": 1.0}))
 
     if not kept:
+        if state.get("terms") and state["analysis"].asks_term_meaning:
+            # A question about an approved term (Tawhid, Sharia, ...): the glossary from the
+            # challenge pack / Jamhara is the approved source, so draft from it.
+            return {"evidence": [], "best_score": best, "abstain_reason": None,
+                    "trace": _trace(state, "retrieve:glossary_only")}
+        if state["analysis"].asks_for_verse:
+            # "Give me the exact verse about X" with no matching verse: abstain, never improvise.
+            return {"evidence": [], "best_score": best, "abstain_reason": "verse_not_found",
+                    "status": "abstain", "trace": _trace(state, "retrieve:no_verse")}
+        if state["routing"].level == "C":
+            # Disputed/sensitive topic with no evidence: refer to a specialist (pack, level C).
+            return {"evidence": [], "best_score": best, "status": "refer", "refer_reason": "specialist",
+                    "trace": _trace(state, "retrieve:specialist")}
         return {"evidence": [], "best_score": best, "abstain_reason": "low_confidence",
-                "status": "abstain", "trace": _trace(state, "retrieve")}
+                "status": "abstain", "trace": _trace(state, "retrieve:low_confidence")}
     return {"evidence": kept, "best_score": best, "abstain_reason": None, "trace": _trace(state, "retrieve")}
 
 
@@ -212,7 +259,10 @@ def generate(state: AgentState) -> dict:
     a, lang, r = state["analysis"], state["language"], state["routing"]
     evidence = state["evidence"]
     docs, embedded = _evidence_block(evidence)
-    glossary = _glossary([_conversation(state["messages"]), *[e.text_ar for e in evidence]], lang)
+    terms = {gl_id(t): t for t in state.get("terms", [])}
+    for t in _glossary_terms([_conversation(state["messages"]), *[e.text_ar for e in evidence]], lang):
+        terms.setdefault(gl_id(t), t)
+    glossary, glossary_ids = _glossary_block(list(terms.values()), lang)
 
     misquote_note = ""
     wrong = [m for m in state.get("misquotes", []) if not m["is_exact"]]
@@ -230,7 +280,7 @@ def generate(state: AgentState) -> dict:
         f"background={a.background}\nReal question: {a.core_question}\n"
         f"{_LEVEL_RULES.get(r.level, _LEVEL_RULES['B'])}\n"
         f"{_STYLE.get(state.get('style') or '', '')}{misquote_note}\n\n"
-        f"<evidence>\n{docs}\n</evidence>\n\n"
+        f"<evidence>\n{docs or 'none — answer only from the glossary entries below'}\n</evidence>\n\n"
         f"<allowed_quran_refs>{', '.join(embedded) or 'none'}</allowed_quran_refs>\n\n"
         f"<glossary>\n{glossary or 'none'}\n</glossary>{retry_note}"
     )
@@ -238,7 +288,8 @@ def generate(state: AgentState) -> dict:
         ("system", load("generate").replace("{language}", lang)),
         ("user", user),
     ])
-    return {"draft": d, "attempts": state.get("attempts", 0) + 1, "trace": _trace(state, "generate")}
+    return {"draft": d, "glossary": glossary_ids, "attempts": state.get("attempts", 0) + 1,
+            "trace": _trace(state, "generate")}
 
 
 # --------------------------------------------------------------- 5 verify ---
@@ -250,10 +301,35 @@ def _allowed_ids(evidence: list[Evidence]) -> set[str]:
     return allowed
 
 
-def check_draft(d: Draft, evidence: list[Evidence], lang: str, level: str) -> list[str]:
+def _quote_to_placeholder(text: str, allowed: set[str], evidence_key: str = "") -> str:
+    """Replace Quran text the model typed itself with a placeholder when that verse is in the
+    evidence — as a retrieved id, or copied from a retrieved passage (Bayyinat quotes verses) —
+    so the reply shows the store's exact text instead (deterministic repair)."""
+    from retrieval.normalize_ar import norm as normalize
+
+    for q in _quotes_in(rules.strip_placeholders(text)):
+        copied = bool(evidence_key) and normalize(q.quoted) in evidence_key
+        if (rules.is_covered(q.ref_id, allowed) or copied) and q.quoted in text:
+            span = re.compile(r"[«\"“(]?\s*" + re.escape(q.quoted) + r"\s*[»\"”)]?")
+            text = span.sub(f"[[{q.ref_id}]]", text, count=1)
+    return text
+
+
+def repair_draft(d: Draft, evidence: list[Evidence]) -> Draft:
+    from retrieval.normalize_ar import norm as normalize
+
+    allowed = _allowed_ids(evidence)
+    key = normalize(" ".join(e.text_ar for e in evidence))
+    return d.model_copy(update={"reply": _quote_to_placeholder(d.reply, allowed, key),
+                                "reply_ar": _quote_to_placeholder(d.reply_ar, allowed, key)})
+
+
+def check_draft(d: Draft, evidence: list[Evidence], lang: str, level: str,
+                glossary_ids: set[str] | None = None) -> list[str]:
     """Deterministic verification. Returns the list of problems (empty = passes)."""
     issues: list[str] = []
     allowed = _allowed_ids(evidence)
+    glossary_ids = glossary_ids or set()
     for rid in dict.fromkeys(rules.placeholders(d.reply) + rules.placeholders(d.reply_ar)):
         if not rules.is_covered(rid, allowed):
             issues.append(f"placeholder [[{rid}]] is not in the retrieved evidence")
@@ -261,13 +337,13 @@ def check_draft(d: Draft, evidence: list[Evidence], lang: str, level: str) -> li
             issues.append(f"placeholder [[{rid}]] does not exist in the verbatim store")
     ev_ids = {e.id for e in evidence}
     for cid in d.cited_ids:
-        if cid not in ev_ids and not rules.is_covered(cid, allowed):
+        if cid not in ev_ids and cid not in glossary_ids and not rules.is_covered(cid, allowed):
             issues.append(f"cited id {cid} is not in the evidence")
     if not d.cited_ids and not rules.placeholders(d.reply):
         issues.append("the reply cites no evidence; cite the evidence ids you used")
     for field, txt in (("reply", d.reply), ("reply_ar", d.reply_ar)):
         if rules.QUOTE_MARKS.search(rules.strip_placeholders(txt)):
-            issues.append(f"{field} uses ﴿﴾ or «» outside a placeholder; use placeholders only")
+            issues.append(f"{field} uses the Quran brackets ﴿﴾ outside a placeholder; use placeholders only")
     for q in _quotes_in(rules.strip_placeholders(d.reply)):
         issues.append(f"the reply contains Quran-like text ({q.ref_id}) outside a placeholder; "
                       f"use [[{q.ref_id}]] instead")
@@ -298,10 +374,16 @@ def _render(text: str, lang: str, evidence: dict[str, Evidence]) -> str:
     return rules.tidy(rules.PLACEHOLDER.sub(sub, text))
 
 
-def _citations(d: Draft, evidence: list[Evidence], lang: str) -> list[Citation]:
+def _citations(d: Draft, evidence: list[Evidence], lang: str,
+               glossary: dict[str, dict] | None = None) -> list[Citation]:
     by_id = {e.id: e for e in evidence}
     out: list[Citation] = []
     for cid in dict.fromkeys([*rules.placeholders(d.reply), *d.cited_ids]):
+        if glossary and cid in glossary:
+            t = glossary[cid]
+            out.append(Citation(id=cid, type="glossary", source=t.get("source", "Glossary"), ref=t["ar"],
+                                source_url=t.get("source_url", "")))
+            continue
         e = by_id.get(cid) or (_verbatim(cid, lang) if cid.startswith(("Q:", "H:")) else None)
         if e and all(c.id != e.id for c in out):
             out.append(Citation(id=e.id, type=e.type, source=e.source, ref=e.ref,
@@ -310,15 +392,18 @@ def _citations(d: Draft, evidence: list[Evidence], lang: str) -> list[Citation]:
 
 
 def verify(state: AgentState) -> dict:
-    d, evidence, lang = state["draft"], state["evidence"], state["language"]
+    evidence, lang = state["evidence"], state["language"]
+    d = repair_draft(state["draft"], evidence)
     level = state["routing"].level
-    issues = check_draft(d, evidence, lang, level)
+    glossary = state.get("glossary", {})
+    issues = check_draft(d, evidence, lang, level, set(glossary))
     if not issues and settings.VERIFY_LLM_JUDGE:
         issues = _judge(d, evidence)
 
     attempts = state.get("attempts", 1)
     if issues and attempts < settings.MAX_DRAFT_ATTEMPTS:
-        return {"issues": issues, "verdict": "retry", "trace": _trace(state, "verify:retry")}
+        return {"issues": issues, "verdict": "retry", "retry_issues": [*state.get("retry_issues", []), *issues],
+                "trace": _trace(state, "verify:retry")}
 
     by_id = {e.id: e for e in evidence}
     note = d.note_for_dai
@@ -331,7 +416,7 @@ def verify(state: AgentState) -> dict:
         "final_reply": _render(d.reply, lang, by_id),
         "final_reply_ar": _render(d.reply_ar, "ar", by_id),
         "note_for_dai": note,
-        "citations": _citations(d, evidence, lang),
+        "citations": _citations(d, evidence, lang, glossary),
         "trace": _trace(state, "verify"),
     }
 
@@ -339,11 +424,18 @@ def verify(state: AgentState) -> dict:
 # ------------------------------------------------------- refer / abstain ---
 def refer(state: AgentState) -> dict:
     lang, r = state["language"], state["routing"]
+    if state.get("refer_reason") == "specialist":
+        table = templates.REFER_SPECIALIST
+        note = (f"🟠 مستوى C بلا أدلة كافية في المصادر المعتمدة (أعلى درجة {state.get('best_score', 0):.2f}): "
+                f"أُحيل السائل لمتخصص. {r.reason}")
+    else:
+        table = templates.REFER
+        note = f"🔴 مستوى D (حالة شخصية/فتوى): لا يُعطى حكم. {r.reason} — أُحيل السائل لعالِم مؤهَّل."
     return {
         "status": "refer",
-        "final_reply": _localize(templates.REFER, lang),
-        "final_reply_ar": templates.REFER["ar"],
-        "note_for_dai": f"🔴 مستوى D (حالة شخصية/فتوى): لا يُعطى حكم. {r.reason} — أُحيل السائل لعالِم مؤهَّل.",
+        "final_reply": _localize(table, lang),
+        "final_reply_ar": table["ar"],
+        "note_for_dai": note,
         "citations": [], "evidence": [], "issues": [],
         "trace": _trace(state, "refer"),
     }

@@ -98,7 +98,7 @@ def health() -> dict:
         "models_loaded": _state["warm"],
         "warm_up_error": _state["warm_error"],
         "verbatim_store": kb.VERBATIM_DB.exists(),
-        "llm_configured": bool(settings.AI_API_KEY),
+        "llm_configured": bool(settings.AI_API_KEY) or settings.AI_MODEL.endswith("-free"),
         "llm_model": settings.AI_MODEL,
         "abstain_threshold": settings.ABSTAIN_THRESHOLD,
         "service_until": settings.SERVICE_UNTIL.isoformat() if settings.SERVICE_UNTIL else None,
@@ -119,7 +119,7 @@ def _run(req: SuggestRequest, style: str | None) -> SuggestResponse:
         "event": "suggest", "conversation_id": req.conversation_id, "suggestion_id": out["suggestion_id"],
         "style": style, "status": out["status"], "level": out["level"],
         "language": out["analysis"].get("language"), "cited": [c["id"] for c in out["citations"]],
-        "issues": len(out["issues"]), "attempts": out["attempts"], "best_score": out["best_score"],
+        "issues": len(out["issues"]), "retry_issues": out["retry_issues"], "attempts": out["attempts"], "best_score": out["best_score"],
         "latency_ms": out["latency_ms"], "trace": out["trace"],
     })
     return SuggestResponse(conversation_id=req.conversation_id, **{

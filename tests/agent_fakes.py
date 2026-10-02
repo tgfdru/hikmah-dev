@@ -9,8 +9,8 @@ from agent.state import Analysis, Draft, Routing
 
 
 class _Bound:
-    def __init__(self, fake: "FakeLLM", stage: str):
-        self.fake, self.stage = fake, stage
+    def __init__(self, fake: "FakeLLM", stage: str, raw: bool = False):
+        self.fake, self.stage, self.raw = fake, stage, raw
 
     def invoke(self, messages):
         self.fake.calls.append((self.stage, messages))
@@ -19,16 +19,21 @@ class _Bound:
             i = self.fake.counters.get(self.stage, 0)
             self.fake.counters[self.stage] = i + 1
             answer = answer[min(i, len(answer) - 1)]
-        return answer
+        if not self.raw:
+            return answer
+        if isinstance(answer, dict) and "raw_args" in answer:   # simulate a malformed tool call
+            raw = type("Raw", (), {"tool_calls": [{"args": answer["raw_args"]}]})()
+            return {"parsed": None, "raw": raw, "parsing_error": ValueError("bad")}
+        return {"parsed": answer, "raw": None, "parsing_error": None}
 
 
 class _Client:
     def __init__(self, fake: "FakeLLM", stage: str):
         self.fake, self.stage = fake, stage
 
-    def with_structured_output(self, schema, method=None):
+    def with_structured_output(self, schema, method=None, include_raw=False):
         assert method == "function_calling", "space-bunny-free needs method='function_calling'"
-        return _Bound(self.fake, self.stage)
+        return _Bound(self.fake, self.stage, raw=include_raw)
 
     def invoke(self, messages):
         return _Bound(self.fake, self.stage).invoke(messages)
@@ -48,7 +53,7 @@ class FakeLLM:
 def analysis(**kw) -> Analysis:
     base = dict(language="en", knowledge_level="beginner", background="unknown", tone="curious",
                 core_question="لماذا يعبد المسلمون الكعبة؟", arabic_query="استقبال الكعبة في الصلاة عبادة الله",
-                asks_for_hadith=False, personal_case=False)
+                asks_for_hadith=False, asks_term_meaning=False, personal_case=False)
     base.update(kw)
     return Analysis(**base)
 

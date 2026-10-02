@@ -14,8 +14,10 @@ from retrieval.contract import Evidence
 PLACEHOLDER = re.compile(r"\[\[\s*((?:Q|H):[^\]\s]+)\s*\]\]")
 _QID = re.compile(r"^Q:(\d{1,3}):(\d{1,3})(?:-(\d{1,3}))?$")
 
-# Quran / hadith quotation marks may appear only in text rendered from the store.
-QUOTE_MARKS = re.compile(r"[﴿﴾«»]")
+# The ornate Quran brackets may appear only in text rendered from the store.
+# (« » are ordinary quotation marks in Arabic, so they are allowed; Quran-like text inside
+# any quotes is caught by ayah matching in the verifier.)
+QUOTE_MARKS = re.compile(r"[﴿﴾]")
 
 # Level C: phrases that claim a certainty or consensus the evidence does not give.
 CERTAINTY_PHRASES = [
@@ -111,7 +113,10 @@ def render(e: Evidence, lang: str) -> str:
     if e.type == "quran":
         block = f"﴿{e.text_ar}﴾ [{e.ref}]"
         if lang != "ar" and e.translation:
-            block += f"\n“{e.translation}” ({_quran_label(e.id, lang)})"
+            # Arabic-script translations (Urdu) are not put in quotation marks, so they are never
+            # mistaken for quoted verse text.
+            tr = e.translation if lang == "ur" else f"“{e.translation}”"
+            block += f"\n{tr} ({_quran_label(e.id, lang)})"
         return f"\n\n{block}\n\n"
     if e.type == "hadith":
         meta = "، ".join(x for x in [e.source, e.ref, e.grade] if x)
