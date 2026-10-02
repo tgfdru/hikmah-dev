@@ -1,0 +1,24 @@
+# Agent + API image (Nader's part). Shares the knowledge volume built by `kb-build`.
+#   docker compose --profile build run --rm kb-build      # once: store + index
+#   docker compose up -d api                              # API on 127.0.0.1:8000
+ARG BASE_IMAGE=python:3.11-slim
+FROM ${BASE_IMAGE}
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    WORK_DIR=/var/lib/mueen \
+    HF_HOME=/var/lib/mueen/models/hf
+
+WORKDIR /app
+COPY requirements.txt requirements-agent.txt ./
+RUN pip install -r requirements.txt -r requirements-agent.txt
+
+COPY retrieval/ retrieval/
+COPY agent/ agent/
+COPY api/ api/
+COPY data/glossary.json data/glossary.json
+
+VOLUME ["/var/lib/mueen"]
+EXPOSE 8000
+# One worker per ~3.5 GB RAM; with several workers QDRANT_URL must point to the Qdrant server.
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

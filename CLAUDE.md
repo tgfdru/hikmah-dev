@@ -1,7 +1,7 @@
 # Mu'een — repository guide for AI coding agents
 
 Knowledge & retrieval layer of an assistant that drafts source-backed replies for
-da'is. The agent/API layer (`agent/`, `api/`) is built on top by another teammate.
+da'is, plus the agent/API layer (`agent/`, `api/`, owned by Nader — see docs/AGENT.md).
 
 ## Non-negotiable rules
 
@@ -38,6 +38,8 @@ RETRIEVER=mock ...                        # 3 fixed evidence items, no models
 * `ingest/` build pipeline — download → quran → bayyinat → build_index
 * `eval/` cases + runner; results in `eval/results/`, summary in docs/EVALUATION.md
 * `docs/HANDOFF.md` how the agent uses this layer; `docs/DECISIONS.md` scope decisions
+* `agent/` LangGraph agent, `api/` FastAPI service — docs/AGENT.md, docs/API_INTEGRATION.md, docs/AGENT_WORKLOG.md
+* Agent rule: the model writes `[[Q:..]]`/`[[H:..]]` placeholders only; `agent/rules.py` + `nodes.check_draft` must keep rejecting anything else
 
 ## Conventions
 

@@ -34,6 +34,23 @@ services:
     depends_on:
       - qdrant
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"   # put a reverse proxy with HTTPS in front; the site's server calls it
+    env_file: .env
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      WORK_DIR: /var/lib/mueen
+      HF_HOME: /var/lib/mueen/models/hf
+    volumes:
+      - mueen_kb:/var/lib/mueen
+    depends_on:
+      - qdrant
+
 volumes:
   qdrant_storage:
   mueen_kb:

@@ -1,0 +1,7 @@
+# Agent + API layer (Nader's part). Install on top of requirements.txt:
+#   pip install -r requirements.txt -r requirements-agent.txt
+langgraph==1.2.12
+langchain-core==1.6.6
+langchain-openai==1.6.7
+fastapi==0.142.2
+uvicorn==0.54.0

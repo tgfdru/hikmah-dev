@@ -24,13 +24,20 @@ Any tool added later must be added here immediately.
 | `space-bunny-free` via OpenCode Zen | LLM behind an OpenAI-compatible API | opencode.ai/zen | Evaluation only: LLM-judge of faithfulness and tone | Evaluation |
 | Dorar hadith API (optional, off) | Public search API | dorar.net | Live search of graded hadith when enabled | 3 |
 
-## Agent layer (built on top by the agent owner — to be completed there)
+## Agent layer (`agent/`, `api/` — Nader)
 
 | Tool / model | Type | Source | Role | Stage |
 |---|---|---|---|---|
-| `space-bunny-free` (default) or another model on the same OpenAI-compatible endpoint | LLM via API | opencode.ai/zen | Context analysis, level routing, drafting, LLM-judge | 1, 2, 4, 5 |
-| LangGraph | Agent orchestration (MIT) | LangChain Inc. | State graph of the five stages | 1–5 |
-| FastAPI + Pydantic | Web framework | PyPI | `/suggest`, `/suggest/regenerate`, `/feedback` | All |
+| `space-bunny-free` (default; any model on the same endpoint via `AI_MODEL` / `AI_MODEL_<STAGE>`) | LLM via OpenAI-compatible API | opencode.ai/zen | Context analysis (`Analysis`), level routing (`Routing`), drafting (`Draft`), optional faithfulness judge (`Judgement`); translates the fixed referral/abstain templates into languages that have no reviewed version | 1, 2, 4, 5 |
+| LangGraph | Agent orchestration library (MIT) | LangChain Inc. / PyPI | State graph of the stages: analyze → route → retrieve → generate → verify, with refer / abstain branches and one retry | 1–5 |
+| langchain-openai / langchain-core | LLM client (MIT) | PyPI | Calls the endpoint; structured output with `method="function_calling"` | 1, 2, 4, 5 |
+| Pydantic | Data validation (MIT) | PyPI | Schemas of every LLM output and of the API | 1–5, API |
+| FastAPI + Uvicorn | Web framework + ASGI server (MIT / BSD) | PyPI | `/suggest`, `/suggest/regenerate`, `/feedback`, `/stats`, `/health`; API-key check and service end date | API |
+| fastText lid.176 (from the knowledge layer) | Language identification | fasttext.cc (Meta) | Seeker's language; the LLM's answer is the fallback | 1 |
+| RapidFuzz via `find_quran_quotes` (knowledge layer) | Fuzzy matching | PyPI | Detects misquoted verses in the seeker's message; detects Quran-like text the model wrote outside a placeholder | 1, 5 |
+| Verbatim store via `get_verbatim` (knowledge layer) | SQLite lookup | Quranpedia (King Fahd Complex print) | The only source of verse text in replies; deterministic check that every reference exists | 5 |
+| Regular-expression rules (our code, `agent/rules.py`) | Deterministic rules | — | Level-D hint, placeholder parsing, range coverage, consensus-claim check, rendering | 2, 5 |
+| Docker (`Dockerfile.api`, compose service `api`) | Packaging | docker.com | Deployment of the API next to Qdrant | Deployment |
 
 ## AI-assisted development
 

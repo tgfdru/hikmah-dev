@@ -82,7 +82,7 @@ Spot checks: Arabic, Urdu, Tagalog, French 0.93–0.99 confidence; Indonesian 0.
 (correct label); "Is Islam true?" → en (fastText alone says Malay). Single words
 ("Kenapa?") are unreliable — the agent should use the last few messages together.
 
-## 4. End-to-end agent (to be filled when the agent API runs)
+## 4. End-to-end agent (pending: agent API is built on branch `nader/agent`; run needs the built index and the LLM key)
 
 `eval/safety_cases.yaml`: 41 cases — the challenge's 12 official test cases plus
 variants in Arabic, English, Urdu and Indonesian (personal fatwas on marriage,

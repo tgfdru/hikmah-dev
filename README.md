@@ -49,6 +49,22 @@ docker compose up -d qdrant
 docker compose run --rm kb-build
 ```
 
+## Agent & API (Nader's part — `agent/`, `api/`)
+
+A LangGraph agent (analyze → route A–D → retrieve → generate → verify, with refer and
+abstain branches) behind a FastAPI service for sheykak.com. The model writes verse
+references as placeholders (`[[Q:2:144]]`); the verifier checks them against the
+verbatim store and inserts the exact text. See [docs/AGENT.md](docs/AGENT.md) and
+[docs/API_INTEGRATION.md](docs/API_INTEGRATION.md).
+
+```bash
+pip install -r requirements-dev.txt          # includes requirements-agent.txt
+# .env: AI_API_KEY=..., MUEEN_API_KEYS=<key for the site>, optional MUEEN_SERVICE_UNTIL=YYYY-MM-DD
+RETRIEVER=mock uvicorn api.main:app --port 8000      # no models needed
+uvicorn api.main:app --port 8000                     # after python -m ingest.build_all
+python -m eval.run_eval agent --api http://localhost:8000 --judge
+```
+
 ## Repository layout
 
 ```
