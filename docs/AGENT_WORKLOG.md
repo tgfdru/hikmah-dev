@@ -146,3 +146,8 @@ docker compose up -d qdrant
 docker compose --profile build run --rm kb-build
 docker compose up -d api        # على 127.0.0.1:8000؛ ضع أمامه reverse proxy بـ HTTPS
 ```
+
+### 2026-10-03 — الرفع
+- **الأوامر:** `git push -u origin nader/agent`
+- **النتيجة:** نجاح — الفرع `nader/agent` على GitHub.
+- **Commit:** `fc2c174` (الوكيل + الـ API + الاختبارات + التوثيق)
