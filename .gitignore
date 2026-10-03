@@ -20,3 +20,6 @@ qdrant_data/
 eval/results/*.tmp.json
 data/models/
 .claude/settings.local.json
+
+# Agent run log (privacy-safe, but local only)
+data/logs/
