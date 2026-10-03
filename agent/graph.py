@@ -31,11 +31,22 @@ def _after_verify(s: AgentState) -> str:
     return "generate" if s.get("verdict") == "retry" else END
 
 
+def _timed(name: str, fn):
+    """Record each stage's wall time (ms) in state["timings"] — summed over retries."""
+    def run(state: AgentState) -> dict:
+        t0 = time.perf_counter()
+        out = fn(state)
+        timings = dict(state.get("timings", {}))
+        timings[name] = timings.get(name, 0) + int((time.perf_counter() - t0) * 1000)
+        return {**out, "timings": timings}
+    return run
+
+
 @lru_cache(maxsize=1)
 def build_graph():
     g = StateGraph(AgentState)
     for name in ("analyze", "route", "retrieve", "generate", "verify", "refer", "abstain"):
-        g.add_node(name, getattr(nodes, name))
+        g.add_node(name, _timed(name, getattr(nodes, name)))
     g.set_entry_point("analyze")
     g.add_edge("analyze", "route")
     g.add_conditional_edges("route", _after_route, {"refer": "refer", "retrieve": "retrieve"})
@@ -76,5 +87,6 @@ def suggest(messages: list[dict], style: str | None = None) -> dict:
         "attempts": s.get("attempts", 0),
         "best_score": round(float(s.get("best_score", 0.0) or 0.0), 3),
         "trace": s.get("trace", []),
+        "timings_ms": s.get("timings", {}),
         "latency_ms": int((time.time() - t0) * 1000),
     }

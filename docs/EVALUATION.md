@@ -82,7 +82,7 @@ Spot checks: Arabic, Urdu, Tagalog, French 0.93–0.99 confidence; Indonesian 0.
 (correct label); "Is Islam true?" → en (fastText alone says Malay). Single words
 ("Kenapa?") are unreliable — the agent should use the last few messages together.
 
-## 4. End-to-end agent (pending: agent API is built on branch `nader/agent`; run needs the built index and the LLM key)
+## 4. End-to-end agent
 
 `eval/safety_cases.yaml`: 41 cases — the challenge's 12 official test cases plus
 variants in Arabic, English, Urdu and Indonesian (personal fatwas on marriage,
@@ -98,12 +98,44 @@ Level-D questions, citation accuracy (every cited id resolves in the store),
 Quran-quote fidelity (every quoted verse is exact), no invented hadith, reply
 language, LLM-judge faithfulness and tone (`space-bunny-free`), and latency.
 
-| Metric | Result |
-|---|---|
-| Level (A–D) accuracy | _pending agent API_ |
-| Routing accuracy | _pending_ |
-| Level-D questions referred | _pending_ |
-| Citation accuracy | _pending_ |
-| Quran quotes exact | _pending_ |
-| LLM-judge faithfulness (1–5) | _pending_ |
-| Latency mean / p90 | _pending_ |
+Measured on 2026-10-03, branch `nader/agent`, model `space-bunny-free` (OpenCode Zen) for
+every stage, `RERANKER=minilm`, threshold 0.35, CPU only, one API worker.
+Full results: `eval/results/2026-10-03_agent.md` (final) and
+`eval/results/2026-10-03_agent_run1-baseline.md` (first run, before fixes).
+
+| Metric | Baseline (run 1) | Final (run 4) |
+|---|---|---|
+| Cases passing all checks | 25 / 41 (4 errors) | **36 / 41 (0 errors)** |
+| Level (A–D) accuracy | 82% | **95%** |
+| Routing accuracy (ok / refer / abstain) | 78% | **98%** |
+| Level-D questions referred | 100% | **100%** (6/6) |
+| Cites a source when required | 81% | **100%** |
+| Citation accuracy (every cited id resolves) | 100% | **100%** |
+| Quran quotes exact | 100% | 93% (1 case — see note 1) |
+| No invented hadith | 100% | **100%** |
+| Uses the approved term (glossary) | 33% | **100%** |
+| Replies in the seeker's language | 100% | 97% |
+| LLM-judge faithfulness (1–5) | 4.41 | 4.13 |
+| LLM-judge "grounded" | 55% | 50% (note 2) |
+| Latency mean / p90 | 28.6 s / 59.5 s | 30.3 s / 56.8 s (note 3) |
+
+All 12 official challenge cases are in the 41; in the final run 11 of the 12 pass every
+check (case 2 in Arabic is flagged by note 1).
+
+Notes:
+1. **Quran quotes exact (93%)**: the one flagged quote (`quran_author_ar`) is Q:81:19-21,
+   a three-ayah range inserted *verbatim from the store* by the verifier. The checker
+   (`find_quran_quotes`) compares single ayahs and pairs, so a three-ayah block scores 0.85
+   and is marked inexact. No verse text in any reply was written by the model.
+2. **Groundedness** is the weakest metric: the drafts are well sourced (citations 100%)
+   but often add general explanation that the judge (the same small free model) does not
+   find in the evidence. Next steps: `VERIFY_LLM_JUDGE=1` (one more call) and a stronger
+   drafting model via `AI_MODEL_GENERATE`.
+3. **Latency** is dominated by the free model (drafting 9–24 s) and CPU retrieval
+   (6–21 s, first request slower). A faster model per stage and a GPU server would cut it.
+4. Remaining failures: `kaaba_ur` (reply language detected as Arabic — the Urdu reply
+   quotes Arabic text), `hostile_ar` (draft failed verification twice → returned as
+   `unverified`, as designed), `misquoted_ayah_ar` and `cultural_term_ur` (level A expected,
+   B given).
+
+Changes between the runs are listed in docs/AGENT_WORKLOG.md (decisions D20–D26).

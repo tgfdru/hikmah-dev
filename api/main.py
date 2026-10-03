@@ -120,7 +120,7 @@ def _run(req: SuggestRequest, style: str | None) -> SuggestResponse:
         "style": style, "status": out["status"], "level": out["level"],
         "language": out["analysis"].get("language"), "cited": [c["id"] for c in out["citations"]],
         "issues": len(out["issues"]), "retry_issues": out["retry_issues"], "attempts": out["attempts"], "best_score": out["best_score"],
-        "latency_ms": out["latency_ms"], "trace": out["trace"],
+        "latency_ms": out["latency_ms"], "timings_ms": out["timings_ms"], "trace": out["trace"],
     })
     return SuggestResponse(conversation_id=req.conversation_id, **{
         k: out[k] for k in ("suggestion_id", "status", "level", "reply", "reply_ar", "note_for_dai",

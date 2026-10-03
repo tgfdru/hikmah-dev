@@ -105,3 +105,4 @@ class AgentState(TypedDict, total=False):
     note_for_dai: str
     citations: list[Citation]
     trace: list[str]              # stage names, for logs and debugging
+    timings: dict[str, int]       # ms per stage (summed over retries)

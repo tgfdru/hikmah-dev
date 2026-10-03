@@ -124,7 +124,8 @@ regenerate style, API key, service end date, privacy of the run log.
 ## 8. Known limits
 
 * Latency: 3 sequential LLM calls + retrieval (retrieval measured by the knowledge
-  layer at ≈1.7 s on CPU with `minilm`). End-to-end latency is **not measured yet** —
-  it will be reported in EVALUATION.md §4. A faster model per stage can be set with `AI_MODEL_*`.
+  layer at ≈1.7 s on CPU with `minilm`). Measured end to end with `space-bunny-free`:
+  mean 30 s, p90 57 s (EVALUATION.md §4); drafting is the slowest stage. A faster model per
+  stage can be set with `AI_MODEL_*`. The response includes `timings_ms` per stage (logged too).
 * Hadith: none in the store while Dorar is off (see DECISIONS); hadith requests abstain.
 * Translations of verses exist for `en`/`ur`; other languages get English.
