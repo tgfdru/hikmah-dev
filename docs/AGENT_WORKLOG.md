@@ -41,6 +41,8 @@
 | D26 | 2026-10-03 | تجاوز نسخة الـ CDN القديمة في Quranpedia عند اختلاف الـ SHA-256 (تعديل صغير في `ingest/download.py`) | فشل البناء بسبب عدم تطابق الملف مع الـ manifest |
 | D27 | 2026-10-05 | إعداد بديل مجاني: Gemini عبر Google AI Studio (مشروع بلا فوترة) — نموذج خفيف للتحليل والتصنيف و`gemini-3.8-flash` للكتابة | نماذج OpenCode المجانية الأخرى ترفض الاستخدام من خارج OpenCode، وقد يُقفل `space-bunny-free` بالطريقة نفسها؛ اشتراك OpenCode Go مخصص لأدوات البرمجة فلا يُستخدم للوكيل |
 | D28 | 2026-10-05 | نماذج احتياطية تلقائية `AI_MODEL_FALLBACK` عند الضغط (429/5xx) | الخطة المجانية لـ Gemini ترجع 503 أحيانًا |
+| D29 | 2026-10-05 | اختيار بروتوكول الاتصال لكل نموذج تلقائيًا (`AI_PROTOCOL=auto`): على OpenCode Zen نماذج `gpt-*` عبر `/responses` و`claude-*` عبر `/messages` | النماذج المدفوعة ترفض `/chat/completions` بخطأ `ModelProtocolUnsupported` |
+| D30 | 2026-10-05 | مقارنة الإعدادات بمُحكِّم واحد مستقل (`deepseek-v4.1-flash`) عبر `eval/rejudge.py` | المحكّم الافتراضي هو نموذج الكتابة نفسه، فيرفع الدرجة (Gemini 97% ذاتيًا مقابل ~60% بمحكّم مستقل) |
 
 ---
 
@@ -188,3 +190,10 @@ docker compose up -d api        # على 127.0.0.1:8000؛ ضع أمامه revers
 - **ملفات:** `agent/llm.py` (`_FallbackClient`)، `agent/settings.py` (`AI_MODEL_FALLBACK`)، `.gitignore` (`.env.*`)، `.env.example`، `docs/DISCLOSURE.md`، `docs/EVALUATION.md` §4.1، اختباران جديدان.
 - **الأوامر:** `set -a; . ./.env.gemini; set +a` ثم `uvicorn api.main:app` ثم `python -m eval.run_eval agent --api http://localhost:8000 --judge`
 - **النتيجة:** **40/41** بلا أخطاء؛ المستوى 100%، التوجيه 98%، اللغة 100%، الاستشهاد 100%. الحالة الوحيدة الفاشلة `hostile_ar` (اقتباس Q:5:91 خارج المعرّف مرتين → `unverified`). متوسط الزمن 32.8 ثانية (متذبذب حسب ضغط Google).
+
+### 2026-10-05 — S11: نماذج OpenCode Zen المدفوعة (رصيد $5)
+- **ما تم:** الرصيد يعمل، لكن `gpt-5.4-nano` و`claude-haiku-4-5` ترفض `/chat/completions` (`ModelProtocolUnsupported`) → إضافة `_protocol()` في `agent/llm.py` (Responses لـ GPT عبر `use_responses_api`، وAnthropic Messages لـ Claude عبر `langchain-anthropic`). تجربة الحالة الأولى: ok / B، الكتابة 14 ث.
+- **ملفات:** `agent/llm.py`، `agent/settings.py` (`AI_PROTOCOL`)، `requirements-agent.txt`، `.env.example`، `eval/rejudge.py` (جديد)، `tests/test_agent_rules.py`، `docs/EVALUATION.md` §4.2، `docs/DISCLOSURE.md`.
+- **الأوامر:** `AI_MODEL_ANALYZE=gpt-5.4-nano AI_MODEL_ROUTE=gpt-5.4-nano AI_MODEL=claude-haiku-4-5 uvicorn api.main:app` ثم `AI_MODEL=deepseek-v4.1-flash python -m eval.run_eval agent --api http://localhost:8000 --judge` ثم `AI_MODEL=deepseek-v4.1-flash python -m eval.rejudge <ملفات النتائج>`
+- **النتيجة:** **37/41** بلا أخطاء؛ الأسرع (متوسط 20.8 ث، p90 31.7 ث). بمحكّم مستقل واحد: Gemini أمانة 4.3 وإسناد ~60%، وZen 4.0 وإسناد ~38%. **القرار:** Gemini يبقى الإعداد الرئيسي، وZen احتياطي مدفوع سريع.
+- **للمراجع الشرعي:** المحكّم رصد ادعاءات تخالف الأدلة في `apostasy_en` و`all_muslims_agree_*` — تُعرض في المراجعة.

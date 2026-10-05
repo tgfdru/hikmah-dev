@@ -40,17 +40,44 @@ def _api_key(model: str) -> str:
     raise LLMNotConfigured(f"AI_API_KEY is not set and model '{model}' needs one (see .env.example)")
 
 
+def _protocol(model: str) -> str:
+    """Which wire protocol the endpoint expects for this model.
+
+    OpenCode Zen serves GPT models only on /responses and Claude models only on
+    /messages (Anthropic format); everything else on /chat/completions. Override with
+    AI_PROTOCOL=chat|responses|anthropic for other endpoints.
+    """
+    if settings.AI_PROTOCOL in ("chat", "responses", "anthropic"):
+        return settings.AI_PROTOCOL
+    if "opencode.ai/zen" in settings.AI_BASE_URL:
+        if model.startswith("gpt-"):
+            return "responses"
+        if model.startswith("claude-"):
+            return "anthropic"
+    return "chat"
+
+
 def _client(model: str, stage: str):
+    common = dict(model=model, timeout=settings.LLM_TIMEOUT, max_retries=settings.LLM_MAX_RETRIES)
+    protocol = _protocol(model)
+    if protocol == "anthropic":
+        from langchain_anthropic import ChatAnthropic
+
+        # The Anthropic SDK appends /v1/messages itself.
+        base = settings.AI_BASE_URL.rstrip("/").removesuffix("/v1")
+        return ChatAnthropic(base_url=base, api_key=_api_key(model), max_tokens=4096,
+                             temperature=_TEMPERATURE.get(stage, 0.2), **common)
+
     from langchain_openai import ChatOpenAI
 
-    return ChatOpenAI(
-        base_url=settings.AI_BASE_URL,
-        api_key=_api_key(model),
-        model=model,
-        temperature=_TEMPERATURE.get(stage, 0.2),
-        timeout=settings.LLM_TIMEOUT,
-        max_retries=settings.LLM_MAX_RETRIES,
-    )
+    extra = {}
+    if protocol == "responses":
+        extra["use_responses_api"] = True
+        if not model.startswith("gpt-5"):  # GPT-5 reasoning models reject temperature
+            extra["temperature"] = _TEMPERATURE.get(stage, 0.2)
+    else:
+        extra["temperature"] = _TEMPERATURE.get(stage, 0.2)
+    return ChatOpenAI(base_url=settings.AI_BASE_URL, api_key=_api_key(model), **common, **extra)
 
 
 def _is_overload(exc: Exception) -> bool:
@@ -159,4 +186,7 @@ def structured(stage: str, schema: type[T], messages: list[tuple[str, str]], ret
 def text(stage: str, messages: list[tuple[str, str]]) -> str:
     """Plain-text call (used only to translate fixed templates into rare languages)."""
     out = _factory(stage).invoke(messages)
-    return getattr(out, "content", str(out)).strip()
+    content = getattr(out, "text", None)  # AIMessage.text joins content blocks (Responses/Anthropic)
+    if not isinstance(content, str):
+        content = getattr(out, "content", str(out))
+    return content.strip() if isinstance(content, str) else str(content).strip()

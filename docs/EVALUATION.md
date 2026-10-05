@@ -168,3 +168,45 @@ The one failure (`hostile_ar`) is a draft that quoted Q:5:91 outside a placehold
 and was returned as `unverified` (by design); the quote-fidelity flag is that same
 unverified draft. Latency on the free tier varies with Google's load (drafting median
 14 s, max 74 s when the fallback chain was used).
+
+### 4.2 Paid models on OpenCode Zen ("balanced") and a common judge — 2026-10-05
+
+Models: `gpt-5.4-nano` (analyze, route; OpenAI Responses protocol) and
+`claude-haiku-4-5` (drafting; Anthropic Messages protocol), selected per model by
+`agent/llm.py::_protocol` (D29). Results: `eval/results/2026-10-05_agent_zen-balanced.md`.
+
+| Metric | space-bunny-free (run 4) | Gemini (free tier) | Zen balanced (paid) |
+|---|---|---|---|
+| Cases passing all checks | 36 / 41 | **40 / 41** | 37 / 41 |
+| Level (A–D) accuracy | 95% | **100%** | 95% |
+| Routing accuracy | 98% | 98% | 95% |
+| Level-D questions referred | 100% | 100% | 100% |
+| Citation accuracy | 100% | 100% | 100% |
+| Quran quotes exact | 93% | 92% | 100% |
+| Avoids forbidden claims | — | 100% | 67% |
+| Replies in the seeker's language | — | 100% | 100% |
+| Latency mean / p90 | 30.3 s / 56.8 s | 32.8 s / 55.1 s | **20.8 s / 31.7 s** |
+
+Failures (Zen balanced): `all_muslims_agree_en` (draft failed verification → `unverified`,
+and contains a phrase on the avoid list), `cultural_term_en` (abstained), `apostasy_en`
+and `sectarian_c` (level B given, C expected).
+
+**Common judge.** The `--judge` scores in §4.1 were produced by the drafting model's own
+family (self-judging). To compare fairly, the saved replies of both runs were re-judged by
+one independent model, `deepseek-v4.1-flash`, with `python -m eval.rejudge`
+(`eval/results/2026-10-05_rejudge_deepseek.txt`; two passes, the spread is shown):
+
+| | Gemini (free tier) | Zen balanced (paid) |
+|---|---|---|
+| Faithfulness (1–5) | 4.26–4.29 | 4.00 |
+| "Grounded" | 58–61% | 37–40% |
+
+So the Gemini 4.90 / 97% in §4.1 was inflated by self-judging; with an independent judge
+groundedness is the weakest metric for every configuration. The judge mostly flags general
+explanation added beyond the evidence; in a few cases (e.g. `apostasy_en`,
+`all_muslims_agree_*`) it flags claims that contradict the evidence, which the sharia
+reviewer must see. Next step: `VERIFY_LLM_JUDGE=1` with an independent judge model.
+
+Conclusion: Gemini stays the main configuration (best accuracy and grounding, free);
+Zen balanced is the fastest and a paid backup if the free tier is throttled.
+

@@ -111,3 +111,17 @@ def test_fallback_client_does_not_hide_real_errors():
 
     with _pt.raises(ValueError):
         _FallbackClient([Broken(), Good()]).invoke([])
+
+
+def test_protocol_per_model_on_opencode_zen(monkeypatch):
+    from agent import llm, settings
+
+    monkeypatch.setattr(settings, "AI_BASE_URL", "https://opencode.ai/zen/v1")
+    monkeypatch.setattr(settings, "AI_PROTOCOL", "auto")
+    assert llm._protocol("gpt-5.4-nano") == "responses"
+    assert llm._protocol("claude-haiku-4-5") == "anthropic"
+    assert llm._protocol("space-bunny-free") == "chat"
+    monkeypatch.setattr(settings, "AI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
+    assert llm._protocol("gpt-5.4-nano") == "chat"   # other endpoints: chat unless forced
+    monkeypatch.setattr(settings, "AI_PROTOCOL", "responses")
+    assert llm._protocol("anything") == "responses"

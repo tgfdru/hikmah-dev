@@ -22,6 +22,7 @@ Any tool added later must be added here immediately.
 | SQLite | Database | Python stdlib | Verbatim store: single source of truth for Quran text | 5 |
 | Pydantic | Data validation | PyPI | `Evidence` contract shared with the agent | 3, 4, 5 |
 | `space-bunny-free` via OpenCode Zen | LLM behind an OpenAI-compatible API | opencode.ai/zen | Evaluation only: LLM-judge of faithfulness and tone | Evaluation |
+| `deepseek-v4.1-flash` via OpenCode Zen | LLM behind an OpenAI-compatible API | opencode.ai/zen | Evaluation only: independent judge for re-scoring saved replies (`eval/rejudge.py`) | Evaluation |
 | Dorar hadith API (optional, off) | Public search API | dorar.net | Live search of graded hadith when enabled | 3 |
 
 ## Agent layer (`agent/`, `api/` — Nader)
@@ -30,8 +31,10 @@ Any tool added later must be added here immediately.
 |---|---|---|---|---|
 | `space-bunny-free` (default; any model on the same endpoint via `AI_MODEL` / `AI_MODEL_<STAGE>`) | LLM via OpenAI-compatible API | opencode.ai/zen | Context analysis (`Analysis`), level routing (`Routing`), drafting (`Draft`), optional faithfulness judge (`Judgement`); translates the fixed referral/abstain templates into languages that have no reviewed version | 1, 2, 4, 5 |
 | Gemini (`gemini-3.1-flash-lite`, `gemini-3.8-flash`, fallbacks `gemini-3.5-flash`, `gemini-3.5-flash-lite`) — alternative configuration | LLM via Google AI Studio's OpenAI-compatible API (free tier) | ai.google.dev | Same roles as above when configured (`.env`: `AI_BASE_URL`, `AI_MODEL_*`, `AI_MODEL_FALLBACK`); evaluated in EVALUATION.md §4.1 | 1, 2, 4, 5 |
+| `gpt-5.4-nano`, `claude-haiku-4-5` via OpenCode Zen (paid) — alternative configuration | LLMs via OpenCode Zen (OpenAI Responses and Anthropic Messages protocols) | opencode.ai/zen | `gpt-5.4-nano`: context analysis and routing; `claude-haiku-4-5`: drafting; evaluated in EVALUATION.md §4.2 | 1, 2, 4, 5 |
 | LangGraph | Agent orchestration library (MIT) | LangChain Inc. / PyPI | State graph of the stages: analyze → route → retrieve → generate → verify, with refer / abstain branches and one retry | 1–5 |
 | langchain-openai / langchain-core | LLM client (MIT) | PyPI | Calls the endpoint; structured output with `method="function_calling"` | 1, 2, 4, 5 |
+| langchain-anthropic | LLM client (MIT) | PyPI | Calls Claude models through the Anthropic Messages protocol (OpenCode Zen) | 1, 2, 4, 5 |
 | Pydantic | Data validation (MIT) | PyPI | Schemas of every LLM output and of the API | 1–5, API |
 | FastAPI + Uvicorn | Web framework + ASGI server (MIT / BSD) | PyPI | `/suggest`, `/suggest/regenerate`, `/feedback`, `/stats`, `/health`; API-key check and service end date | API |
 | fastText lid.176 (from the knowledge layer) | Language identification | fasttext.cc (Meta) | Seeker's language; the LLM's answer is the fallback | 1 |
