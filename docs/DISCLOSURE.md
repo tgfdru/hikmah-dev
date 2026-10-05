@@ -17,6 +17,7 @@ Any tool added later must be added here immediately.
 | rank_bm25 + our Arabic normalization | Keyword search (Apache-2.0) | PyPI | Exact-term matching (names, terms, surah names) | 3 |
 | Reciprocal Rank Fusion | Algorithm (our code) | Cormack et al., 2009 | Merges dense and keyword results | 3 |
 | RapidFuzz | Fuzzy string matching (MIT) | PyPI | Detects misquoted ayahs (`match_ayah`) | 1, 5 |
+| Apache Lucene 10.4 (`lucene-core`) + OpenJDK 21 | Search library (Apache-2.0) + Java runtime (GPLv2+CE) | Maven Central / Debian | Reads the selected books out of the official Shamela database at build time only (`ingest/java/ShamelaDump.java`) | Ingestion |
 | PyMuPDF | PDF text extraction (AGPL-3.0) | PyPI | Extracts the Bayyinat book at build time only (not shipped in the runtime path) | Ingestion |
 | sentence-transformers / PyTorch (CPU) | ML runtime | PyPI | Runs BGE-M3 and rerankers | Indexing, 3 |
 | SQLite | Database | Python stdlib | Verbatim store: single source of truth for Quran text | 5 |

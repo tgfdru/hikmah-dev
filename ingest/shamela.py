@@ -155,17 +155,27 @@ def clean(body: str) -> str:
 
 
 def _ref(pages: list[tuple[str | None, int | None]]) -> str:
-    part, first = pages[0]
-    last = pages[-1][1]
-    span = f"{first}" if first == last or last is None else f"{first}-{last}"
-    return (f"ج {part} " if part else "") + f"ص {span}" if first else "—"
+    """Printed volume and page: "ج 2 ص 45-46". Some books name parts instead of numbering
+    them ("المقدمة", "الكتاب"); a few have no printed page numbers at all."""
+    numbered = [(part, pg) for part, pg in pages if pg]
+    if not numbered:
+        return ""
+    part, first = numbered[0]
+    last = numbered[-1][1]
+    span = f"ص {first}" if first == last else f"ص {first}-{last}"
+    part = (part or "").strip()
+    if part.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")).isdigit():
+        return f"ج {part} {span}"
+    if part == "المقدمة":
+        return f"المقدمة، {span}"
+    return span
 
 
-def build() -> None:
+def build(refresh: bool = False) -> None:
     selection = yaml.safe_load(SELECTION.read_text(encoding="utf-8"))
     books = {b["id"]: {**b, "group": g} for g, items in selection.items() for b in items}
     pages_file = RAW / "pages.jsonl"
-    if not pages_file.exists() or "--refresh" in sys.argv:
+    if not pages_file.exists() or refresh:
         download(list(books))
         extract(list(books))
     pages: dict[int, list[tuple[int, str]]] = {}
@@ -198,7 +208,7 @@ def build() -> None:
                 records.append({
                     "id": f"SH:{book}:{pid_part}", "type": "dawah", "title": info["title"],
                     "text_ar": text, "translations": {}, "source": source,
-                    "ref": f"{info['title']}، {_ref(buf_pages)}", "grade": None,
+                    "ref": "، ".join(x for x in (info["title"], _ref(buf_pages)) if x), "grade": None,
                     "source_url": BOOK_URL.format(book=book, page=first_id),
                     "book_id": book, "group": info["group"], "quran_refs": quran_refs_in(text),
                 })
@@ -245,4 +255,4 @@ def _split_long(text: str) -> list[str]:
 
 
 if __name__ == "__main__":
-    build()
+    build(refresh="--refresh" in sys.argv)

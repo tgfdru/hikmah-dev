@@ -12,6 +12,7 @@ nothing is scraped from mirrors.
 | Urdu translation | Quranpedia translation book **1966** | Muhammad Ibrahim Junagarhi, *published by the King Fahd Complex*, 1417 AH (some ayahs revised by Rowad Translation Center, as noted by the publisher) | Verbatim store | 2026-09-28 |
 | Quran topics | Quranpedia `topics.json.gz` | Topic labels per ayah (3,673 ayahs) — used **only** to help search, never shown as text | Search index | 2026-09-28 |
 | Q&A on doubts | "بينات: أسئلة وأجوبة عن الإسلام" — dawa.center/file/7937 (Usul Center, 2024 / 1445 AH) | All 263 questions: question, similar phrasings, short answer, detailed answer | Search index (1,116 passages) | PDF downloaded 2026-09-28 |
+| Classical & dawah books | Shamela full database — shamela.ws/page/download (named in the updated pack, 2026-10) | 33 selected books (`ingest/shamela_books.yaml`): 24 answering other religions and modern ideologies + 9 early creed works (authors died ≤ 300 AH) | Search index (6,766 passages, type `dawah`) | Database version 1448, read 2026-10-05 |
 | Terminology | Jamhara dictionary — islamic-content.com/dictionary | English (and Urdu when published) equivalents + definitions for key terms, each with its URL | `data/glossary.json` | 2026-09-28 |
 | Terminology (official) | The pack's own "نماذج لقاموس المصطلحات الأساسية" (page 8) | The 10 terms with their usage rules | `data/glossary.json` (`status: official_challenge`) | — |
 | Hadith (optional) | dorar.net/hadith | Live search, **off by default**, authentic grades only | Not stored (a cache of returned results only) | Not tested: dorar.net blocks cloud IPs |
@@ -30,6 +31,11 @@ nothing is scraped from mirrors.
 * **Jamhara**: "حقوق الاستفادة من المحتوى لكل مسلم". Pages fetched politely (public
   dictionary pages allowed by robots.txt, 2 s between requests, cached). Each glossary
   entry keeps its source URL.
+* **Shamela**: the pack lists the full Shamela database as an allowed source. Most
+  selected works are classical (public domain); modern books and editions may carry
+  their authors'/editors' rights, so — as with every source — the text is **not**
+  committed: `python -m ingest.shamela` downloads it from shamela.ws. Each passage links
+  to its page on shamela.ws and cites the printed volume and page.
 * **Dorar**: only its public search API, only when enabled; results are shown as
   returned with a link back; nothing is stored beyond a local cache.
 
@@ -54,3 +60,20 @@ nothing is scraped from mirrors.
   font whose characters cannot be mapped reliably; they are omitted rather than
   guessed.
 * **Titles**: taken from the book's table of contents, matched by question number.
+* **Shamela selection**: chosen with Nader and Shaker (2026-10-05), rules at the top of
+  `ingest/shamela_books.yaml`: books answering other religions and modern ideologies,
+  and early creed works; inner-Muslim sectarian polemics and works aimed at named
+  persons are left out (the pack puts "judging persons and groups" out of scope).
+  Content-team review of the list is still pending.
+* **Shamela extraction**: the 13 GB database keeps all book text in one Lucene index.
+  `ingest/shamela.py` downloads only the stored-text files of that index (~4.8 GB, HTTP
+  range requests into the official zip), the catalogue and the selected books' page
+  tables; `ingest/java/ShamelaDump.java` (Java 21+, Apache Lucene 10.4) reads the pages
+  of the selected books. Text is kept as published except: HTML tags and footnote
+  markers removed, ﷽ written out. The modern editors' footnotes are not indexed (they
+  are not the author's text). Pages are joined into ~1,400-character passages; the
+  ref gives the printed volume and page ("ج 2 ص 531"); 20 passages from the opening
+  pages of 5 books have no printed page number, so their ref is the book title only.
+* **Verses inside Shamela passages**: kept exactly as the book prints them (not
+  replaced). When a passage cites "[سورة: n]", `quran_refs_in` turns that into a
+  verse id, so the agent shows the verse from the verbatim store, never from the book.

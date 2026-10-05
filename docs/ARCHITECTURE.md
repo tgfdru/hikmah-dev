@@ -11,8 +11,9 @@
  │                    quran.jsonl + bayyinat.jsonl             │     │   2. BM25 on normalized tokens ──► top 20     │
  │                              │                              │     │   3. Reciprocal Rank Fusion                  │
  │                              ▼                              │     │   4. score 0-1 (dense cosine or reranker)    │
- │           ingest/build_index.py (embedding cache) ──────────┼────►│   5. ≤2 passages per Bayyinat question, top k │
+ │           ingest/build_index.py (embedding cache) ──────────┼────►│   5. ≤2 per Bayyinat question / Shamela book │
  │              Qdrant collection + bm25.pkl + docs.jsonl      │     │   (+ Dorar hadith if enabled)                 │
+ │ Shamela DB (selected books) ──► ingest/shamela.py ──► shamela.jsonl │     │                                              │
  │ Jamhara ──► ingest/glossary.py ──► data/glossary.json ──────┼────►│ glossary_for(texts) / format_for_prompt      │
  │ fastText lid.176 ─────────────────────────────────────────┼────►│ detect_language(text)                        │
  └────────────────────────────────────────────────────────────┘     └──────────────────────────────────────────────┘
@@ -27,6 +28,7 @@ Every indexed record becomes an `Evidence` (see `retrieval/contract.py`):
 | `Q:2:144` | quran | ayah, diacritized | KFC en/ur (None for ar) | `البقرة: 144` | quranpedia.net ayah page |
 | `QA:bayyinat:9` | qa | question + similar phrasings + gist + short answer | None | `بينات، السؤال 9` | Bayyinat PDF `#page=65` |
 | `QA:bayyinat:9:3` | qa | question title + a ~1,400-char part of the detailed answer | None | `بينات، السؤال 9 (الجواب التفصيلي، الجزء 2)` | PDF `#page=67` |
+| `SH:10895:380` | dawah | ~1,400-char passage of a selected Shamela book (`:380:2` … when one page gives several) | None | `منحة القريب المجيب في الرد على عباد الصليب، ج 2 ص 531` | shamela.ws/book/10895/380 |
 | `H:bukhari:1` | hadith | as returned by Dorar (optional) | None | `صحيح البخاري - رقم 1` | Dorar search link |
 
 Ranges (`Q:112:1-4`) are assembled on demand from the store with ayah markers.
@@ -35,7 +37,7 @@ Ranges (`Q:112:1-4`) are assembled on demand from the store with ayah markers.
 
 * Embedded for Quran: Arabic without diacritics + English translation + Quranpedia
   topic labels (so "Kaaba" finds the qibla verses). Only the exact ayah is shown.
-* Embedded for Bayyinat: title + passage without diacritics.
+* Embedded for Bayyinat and Shamela: title + passage without diacritics.
 * BM25 tokens: normalized Arabic (alef/ya/ta-marbuta unified, light "ال/وال/بال"
   stripping) + English words minus stop words.
 * Point ids are `uuid5(logical id)`, so re-indexing one source never overwrites another.
