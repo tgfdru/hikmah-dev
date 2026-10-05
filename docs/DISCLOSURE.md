@@ -29,6 +29,7 @@ Any tool added later must be added here immediately.
 | Tool / model | Type | Source | Role | Stage |
 |---|---|---|---|---|
 | `space-bunny-free` (default; any model on the same endpoint via `AI_MODEL` / `AI_MODEL_<STAGE>`) | LLM via OpenAI-compatible API | opencode.ai/zen | Context analysis (`Analysis`), level routing (`Routing`), drafting (`Draft`), optional faithfulness judge (`Judgement`); translates the fixed referral/abstain templates into languages that have no reviewed version | 1, 2, 4, 5 |
+| Gemini (`gemini-3.1-flash-lite`, `gemini-3.8-flash`, fallbacks `gemini-3.5-flash`, `gemini-3.5-flash-lite`) — alternative configuration | LLM via Google AI Studio's OpenAI-compatible API (free tier) | ai.google.dev | Same roles as above when configured (`.env`: `AI_BASE_URL`, `AI_MODEL_*`, `AI_MODEL_FALLBACK`); evaluated in EVALUATION.md §4.1 | 1, 2, 4, 5 |
 | LangGraph | Agent orchestration library (MIT) | LangChain Inc. / PyPI | State graph of the stages: analyze → route → retrieve → generate → verify, with refer / abstain branches and one retry | 1–5 |
 | langchain-openai / langchain-core | LLM client (MIT) | PyPI | Calls the endpoint; structured output with `method="function_calling"` | 1, 2, 4, 5 |
 | Pydantic | Data validation (MIT) | PyPI | Schemas of every LLM output and of the API | 1–5, API |

@@ -78,3 +78,36 @@ def test_render_hadith_never_uses_quran_brackets():
 def test_render_urdu_translation_without_quotes():
     out = rules.render(_ev(translation="ترجمہ"), "ur")
     assert "“" not in out and "ترجمہ" in out
+
+
+def test_fallback_client_moves_on_when_model_is_overloaded():
+    from agent.llm import _FallbackClient
+
+    class Busy(Exception):
+        status_code = 503
+
+    class Bad:
+        def invoke(self, m):
+            raise Busy("high demand")
+
+    class Good:
+        def invoke(self, m):
+            return "ok"
+
+    assert _FallbackClient([Bad(), Good()]).invoke([]) == "ok"
+
+
+def test_fallback_client_does_not_hide_real_errors():
+    import pytest as _pt
+    from agent.llm import _FallbackClient
+
+    class Broken:
+        def invoke(self, m):
+            raise ValueError("bad request")
+
+    class Good:
+        def invoke(self, m):
+            return "ok"
+
+    with _pt.raises(ValueError):
+        _FallbackClient([Broken(), Good()]).invoke([])

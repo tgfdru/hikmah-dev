@@ -100,7 +100,7 @@ language, LLM-judge faithfulness and tone (`space-bunny-free`), and latency.
 
 Measured on 2026-10-03, branch `nader/agent`, model `space-bunny-free` (OpenCode Zen) for
 every stage, `RERANKER=minilm`, threshold 0.35, CPU only, one API worker.
-Full results: `eval/results/2026-10-03_agent.md` (final) and
+Full results: `eval/results/2026-10-03_agent_run4-space-bunny.md` (final) and
 `eval/results/2026-10-03_agent_run1-baseline.md` (first run, before fixes).
 
 | Metric | Baseline (run 1) | Final (run 4) |
@@ -139,3 +139,32 @@ Notes:
    B given).
 
 Changes between the runs are listed in docs/AGENT_WORKLOG.md (decisions D20–D26).
+
+### 4.1 Same agent on Gemini (Google AI Studio, free tier) — 2026-10-05
+
+No code change except model fallback (D28). Models: `gemini-3.1-flash-lite` (analyze,
+route), `gemini-3.8-flash` (drafting) with fallback `gemini-3.5-flash` →
+`gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`; LLM-judge `gemini-3.5-flash-lite`.
+Results: `eval/results/2026-10-05_agent_gemini.md`.
+
+| Metric | space-bunny-free (run 4) | Gemini (free tier) |
+|---|---|---|
+| Cases passing all checks | 36 / 41 | **40 / 41** |
+| Level (A–D) accuracy | 95% | **100%** |
+| Routing accuracy | 98% | 98% |
+| Level-D questions referred | 100% | 100% |
+| Citation accuracy | 100% | 100% |
+| Uses the approved term | 100% | 100% |
+| Replies in the seeker's language | 97% | **100%** |
+| Quran quotes exact | 93% | 92% (1 case, note) |
+| LLM-judge faithfulness (1–5) | 4.13 | 4.90* |
+| LLM-judge "grounded" | 50% | 97%* |
+| Latency mean / p90 | 30.3 s / 56.8 s | 32.8 s / 55.1 s |
+
+\* The judge model differs between the two runs (each run's judge is its own default
+model), so the judge scores are not strictly comparable; the deterministic metrics are.
+
+The one failure (`hostile_ar`) is a draft that quoted Q:5:91 outside a placeholder twice
+and was returned as `unverified` (by design); the quote-fidelity flag is that same
+unverified draft. Latency on the free tier varies with Google's load (drafting median
+14 s, max 74 s when the fallback chain was used).

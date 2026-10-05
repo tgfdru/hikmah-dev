@@ -22,6 +22,9 @@ MODEL_GENERATE = kb._env("AI_MODEL_GENERATE", AI_MODEL)
 MODEL_JUDGE = kb._env("AI_MODEL_JUDGE", AI_MODEL)
 LLM_TIMEOUT = float(kb._env("AI_TIMEOUT", "60"))
 LLM_MAX_RETRIES = int(kb._env("AI_MAX_RETRIES", "2"))
+# Fallback models (same endpoint), tried in order when the stage's model is overloaded or
+# unavailable (HTTP 429 / 5xx), e.g. free tiers under load. Empty = no fallback.
+FALLBACK_MODELS = [m.strip() for m in kb._env("AI_MODEL_FALLBACK", "").split(",") if m.strip()]
 
 # How many drafts the generator may produce before the verifier gives up
 # (1 = no retry). The plan: retry once, then show the draft marked "unverified".

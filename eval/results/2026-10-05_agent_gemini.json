@@ -1,0 +1,997 @@
+{
+  "summary": {
+    "cases": 41,
+    "errors": 0,
+    "passed": 40,
+    "metrics": {
+      "level": 1.0,
+      "status": 0.975609756097561,
+      "must_cite": 1.0,
+      "citations_valid": 1.0,
+      "quote_fidelity": 0.9166666666666666,
+      "no_hadith": 1.0,
+      "cite_any": 1.0,
+      "mention_any": 1.0,
+      "avoid": 1.0,
+      "reply_language": 1.0
+    },
+    "refer_recall_on_D": 1.0,
+    "faithfulness_mean": 4.903225806451613,
+    "grounded_rate": 0.967741935483871,
+    "latency_ms_mean": 32832.31707317073,
+    "latency_ms_p90": 55091
+  },
+  "rows": [
+    {
+      "id": "kaaba_en",
+      "challenge": 1,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:9",
+        "QA:bayyinat:9:2"
+      ],
+      "latency_ms": 73117,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "Muslims do not worship the KaꜤbah. In Islam, worship—including prayer, devotion, and prostration—is directed solely to God alone. This principle is called Tawhid (the Oneness of God). The KaꜤbah is an earthly structure made of stone; it cannot harm or benefit anyone on its own. Intending to worship the KaꜤbah itself would actually be considered idolatry and a violation of Islamic faith.\n\nMuslims face the KaꜤbah because God commanded them to do so as a unified direction for prayer, known as the qiblah. Facing it is an act of obedience to God, not an act of worshipping the structure—just as placing one's forehead on the earth during prayer does not mean worshipping the ground. Historically, the Prophet and the early Muslims prayed toward Jerusalem for fifteen years before the direction was changed to the KaꜤbah.\n\nFurthermore, the KaꜤbah carries a profound connection to Tawhid, as it was built by the Prophet Abraham to counter idolatry, serving as an enduring symbol of pure devotion to God alone.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "quran_author_ar",
+      "challenge": 2,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:26",
+        "QA:bayyinat:26:2",
+        "QA:bayyinat:27",
+        "QA:bayyinat:30"
+      ],
+      "latency_ms": 36410,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "أهلاً بك. دلّت الشواهد العقلية والتاريخية على أن القرآن الكريم ليس من تأليف النبي محمد صلى الله عليه وسلم، بل هو وحي من الله، وذلك لعدة دلائل:\n\nأولاً: ورود آيات في القرآن تتضمن عتاباً صريحاً للنبي صلى الله عليه وسلم في مواقف معينة؛ والإنسان بطبعه لا يؤلف كتاباً يعاتب فيه نفسه ويسجل ذلك ليُقرأ عبر الأجيال.\n\nثانياً: انقطاع الوحي وتأخره في فترات وأزمات كان النبي صلى الله عليه وسلم أحوج ما يكون فيها إلى جواب فوري يدفع به شبهات المشككين، فكان يمسك عن الجواب حتى ينزل عليه الوحي؛ فلو كان القرآن من فكره وتأليفه لم يكن ليتردد أو يتأخر عن الرد.\n\nثالثاً: اشتهار النبي صلى الله عليه وسلم بين قومه قبل البعثة وبعدها بالصدق والأمانة؛ فمن لم يُجرب عليه كذب على البشر لا يُتصور عقلاً أن يبدأ كذبه بالافتراء على الله، ثم ينسب هذا الفضل لغيره بدلاً من نسبته لعبقريته لو كان من عنده.\n\nرابعاً: عجز فصحاء العرب -وهم أحرص الناس على معارضته وتكذيبه- عن الإتيان بسورة واحدة من مثله، فضلاً عما يحويه القرآن من إعجاز بلاغي وتشريعي وتاريخي وإخبار بأمور غيبية لا تتأتى لبشر في ذلك العصر.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "sword_en",
+      "challenge": 3,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:229",
+        "QA:bayyinat:229:8"
+      ],
+      "latency_ms": 21882,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "avoid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "Islam did not spread by forcing people to convert at sword-point. Rather, its acceptance grew through peaceful invitation to Islam (Da‘wah), reasoned persuasion, and personal conviction.\n\nWhile the early Islamic state expanded through conquests, the primary effect of opening these lands was that Muslims settled there and interacted closely with the local populations. Through everyday dealings, conversations, and witnessing the ethical conduct and principles of the faith, people came to understand Islam and embraced it voluntarily. Furthermore, historical accounts note that early Muslims practiced broad tolerance toward the People of scripture (Jews and Christians), granting them freedom of faith and protection in exchange for a tribute (jizya).\n\nHistorical evidence also shows that Islam spread extensively into regions where no armies ever set foot, such as Sumatra. In fact, hostile invaders who conquered Muslim lands—such as the Mongols and Seljuk Turks—eventually chose to accept Islam themselves after coming into contact with its teachings, which demonstrates that the faith was not imposed by force.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "scholars_differ_en",
+      "challenge": 4,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:241",
+        "QA:bayyinat:241:4"
+      ],
+      "latency_ms": 19652,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "In Islam, foundational beliefs and established obligations are agreed upon. Differences among scholars typically arise in detailed practical rulings (*fiqh*), and they stem from disciplined scholarly investigation (*ijtihad*), not personal desires or contradictions in divine revelation.\n\nKey objective reasons for these differences include:\n\n1. **Access to evidence**: A particular hadith (narration regarding the Prophet) may have reached one scholar but not another.\n2. **Evaluation of transmission**: Scholars may apply different rigorous standards to verify whether a narration's chain of transmission is fully authentic.\n3. **Interpretive principles**: Scholars may differ in linguistic and legal principles (*usul*), such as how to reconcile texts that appear to conflict on the surface, or how to interpret general versus specific wording.\n4. **Methodological sources**: Jurists sometimes differ over whether certain secondary proofs—such as analogy (*qiyas*) or the practice of the people of Madinah—are authoritative.\n\nFar from being arbitrary, these variations reflect careful scholarly efforts to understand and apply revelation faithfully to specific questions.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "personal_marriage_ar",
+      "challenge": 5,
+      "level": "D",
+      "status": "refer",
+      "citations": [],
+      "latency_ms": 1689,
+      "checks": {
+        "level": true,
+        "status": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "جزاك الله خيرًا على سؤالك. هذا السؤال يتعلق بحالتك الخاصة، والحكم فيه يحتاج إلى معرفة تفاصيل وضعك من عالِمٍ مؤهَّل، ولذلك لا نستطيع أن نعطيك حكمًا هنا. ننصحك بعرض سؤالك بتفاصيله على عالِمٍ أو جهة إفتاء موثوقة في بلدك، أو على مركز إسلامي قريب منك. ويسعدنا أن نجيبك عن أي سؤال عام عن الإسلام."
+    },
+    {
+      "id": "fake_hadith_ar",
+      "challenge": 6,
+      "level": "A",
+      "status": "abstain",
+      "citations": [],
+      "latency_ms": 1657,
+      "checks": {
+        "status": true,
+        "no_hadith": true
+      },
+      "pass": true,
+      "reply": "لم نجد في المصادر المعتمدة لدينا حديثًا صحيحًا يطابق ما ذكرت، ولا يصح أن نَنسب إلى النبي ﷺ كلامًا دون مصدر موثَّق. إن كان لديك نص الحديث أو مصدره فأرسله لنا لنتحقق منه."
+    },
+    {
+      "id": "tawhid_beginner_en",
+      "challenge": 7,
+      "level": "A",
+      "status": "ok",
+      "citations": [
+        "GL:3529"
+      ],
+      "latency_ms": 73303,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "mention_any": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "\"Tawhid\" (Oneness of God) is the belief that Godhood, lordship, names, and attributes belong to God alone [[GL:3529]]. This means recognizing God as the sole creator and master, and describing Him only by the beautiful names and attributes revealed in the divine guidance, rather than just viewing oneness in a numerical sense [[GL:3529]].",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "translate_tawhid",
+      "challenge": 8,
+      "level": "A",
+      "status": "ok",
+      "citations": [
+        "GL:3529"
+      ],
+      "latency_ms": 43477,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "mention_any": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "The Arabic word **التوحيد** is translated as **Tawhid** (often referred to as the **Oneness of God**).\n\nRather than just meaning numerical oneness, **Tawhid** is the fundamental Islamic belief that Godhood, lordship, and all divine names and attributes belong to God alone.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "hostile_why_forbid_en",
+      "challenge": 9,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:199",
+        "QA:bayyinat:199:4",
+        "QA:bayyinat:196:4"
+      ],
+      "latency_ms": 29213,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "In Islam, the general rule for food and drinks is permissibility; things are only prohibited when they bring clear harm. The prohibition of alcohol and other intoxicants centers on a core objective of Islamic law (Sharia): the preservation of the human intellect.\n\nWhen a person is intoxicated, the impairment of reason easily leads to hostility, conflict, and violence among people, while eroding personal dignity and harming family well-being. On a spiritual level, it clouds the mind and distracts a person from their obligations toward God, including regular prayer and His remembrance.\n\nRather than seeking arbitrary control, the restriction exists to safeguard mental clarity, personal welfare, and peace within the community.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "all_muslims_agree_en",
+      "challenge": 10,
+      "level": "C",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:202:3"
+      ],
+      "latency_ms": 84236,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "avoid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "While the majority of scholars throughout Islamic history have held the view that musical instruments are forbidden (*Haram*—meaning what God has categorically prohibited), and many classical scholars from various schools of jurisprudence (*Madhhab*) reported a historical unanimity (*Ijma'*—meaning the unanimous agreement of scholars) on this based on prophetic traditions (*Hadith*), there are differing views and discussions among scholars on this topic [[QA:bayyinat:202:3]].\n\nBecause of these differences and the specific details involved, we highly suggest consulting a qualified Islamic specialist or scholar to get a detailed and comprehensive understanding of this matter.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "misquoted_ayah_en",
+      "challenge": 11,
+      "level": "A",
+      "status": "ok",
+      "citations": [
+        "Q:112:1",
+        "Q:39:11",
+        "Q:14:52"
+      ],
+      "latency_ms": 79632,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "cite_any": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "Thank you for your question! The verse you are referring to is very close, but the exact wording in the Quran is\n\n﴿قُلْ هُوَ اللَّهُ أَحَدٌ﴾ [الإخلاص: 1]\n“Say (O Muhammad صلى الله عليه وسلم): \"He is Allâh, (the) One.” (Quran 112:1)\n\n.\n\nThis verse points to the core concept of Islam called *Tawhid* (the Oneness of God). In Islam, *Tawhid* is not just about God being numerically one. It means believing that Godhood, lordship, and all perfect names and attributes belong to God alone.\n\nIt also means that we must direct all our worship sincerely to Him alone, without setting up any partners or rivals with Him. As the Quran mentions, the Prophet was commanded to worship God alone with sincere devotion\n\n﴿قُلْ إِنِّي أُمِرْتُ أَنْ أَعْبُدَ اللَّهَ مُخْلِصًا لَهُ الدِّينَ﴾ [الزمر: 11]\n“Say (O Muhammad صلى الله عليه وسلم): \"Verily I am commanded to worship Allâh (Alone) by obeying Him and doing religious deeds sincerely for His sake only.” (Quran 39:11)\n\n, and the message of revelation is for people to know that He is the only one God\n\n﴿هَٰذَا بَلَاغٌ لِلنَّاسِ وَلِيُنْذَرُوا بِهِ وَلِيَعْلَمُوا أَنَّمَا هُوَ إِلَٰهٌ وَاحِدٌ وَلِيَذَّكَّرَ أُولُو الْأَلْبَابِ﴾ [إبراهيم: 52]\n“This (Qur’an) is a Message for mankind (and a clear proof against them), in order that they may be warned thereby, and that they may know that He is the only One Ilâh (God - Allâh) - (none has the right to be worshipped but Allâh) - and that men of understanding may take heed.” (Quran 14:52)\n\n.\n\nSo, it means God is unique, peerless, and the only One worthy of our devotion and worship.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "cultural_term_en",
+      "challenge": 12,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "Q:68:18",
+        "Q:87:7"
+      ],
+      "latency_ms": 33258,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "\"Inshallah\" is an Arabic phrase that means \"If God (Allah) wills.\"\n\nFor a Muslim, saying this is a way of acknowledging that all future events and actions are ultimately subject to God's will. The Quran highlights the importance of making this exception (saying \"If Allah wills\") when planning future actions\n\n﴿وَلَا يَسْتَثْنُونَ﴾ [القلم: 18]\n“Without saying: Inshâ’ Allâh (If Allâh wills).” (Quran 68:18)\n\n, and reminds us that everything happens according to what God wills\n\n﴿إِلَّا مَا شَاءَ اللَّهُ ۚ إِنَّهُ يَعْلَمُ الْجَهْرَ وَمَا يَخْفَىٰ﴾ [الأعلى: 7]\n“Except what Allâh may will. He knows what is apparent and what is hidden.” (Quran 87:7)\n\n.\n\nWhen your coworker says \"Inshallah\" about finishing the report, they are religiously expressing a sincere intention to complete it, while humbly recognizing that the final outcome is in God's hands. It is not meant to be a polite \"no\" or an excuse to avoid commitment. However, like any phrase, some individuals might culturally misuse it, but its true Islamic purpose is to combine a promise of action with trust in God.",
+      "judge": {
+        "grounded": false,
+        "faithfulness": 2,
+        "tone_ok": true,
+        "issues": [
+          "The evidence mentions the Quranic verses 68:18 and 87:7 regarding saying 'Insha' Allah', but the draft extends this to claim that the coworker is 'religiously expressing a sincere intention to complete it' and that the phrase's true Islamic purpose is to 'combine a promise of action with trust in God,' which goes beyond what is explicitly supported by the provided evidence."
+        ]
+      }
+    },
+    {
+      "id": "kaaba_ur",
+      "challenge": 1,
+      "level": "A",
+      "status": "ok",
+      "citations": [
+        "Q:2:144",
+        "QA:bayyinat:9",
+        "QA:bayyinat:9:2"
+      ],
+      "latency_ms": 39138,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "مسلمان کعبہ کی عبادت (پوجا) نہیں کرتے، بلکہ یہ ایک عام غلط فہمی ہے۔ اسلام میں عبادت صرف اور صرف اللہ تعالیٰ کے لیے ہے، جو اکیلا اور لاشریک ہے۔ کعبہ پتھروں سے بنی ایک زمین پر موجود عمارت ہے، جو بذاتِ خود نہ تو کوئی فائدہ پہنچا سکتی ہے اور نہ ہی نقصان۔ اگر کوئی شخص کعبہ کی عبادت کا ارادہ کرے، تو وہ شرک کا مرتکب ہوتا ہے اور اسلام سے خارج ہو جاتا ہے۔\n\nمسلمان نماز میں کعبہ کی طرف رخ اس لیے کرتے ہیں کیونکہ یہ ان کا \"قبلہ\" (یعنی نماز پڑھنے کی سمت) ہے۔ کعبہ کی طرف رخ کرنا اللہ تعالیٰ کے حکم کی اطاعت ہے، نہ کہ کعبہ کی عبادت۔ یہ بالکل ایسے ہی ہے جیسے سجدے میں زمین پر پیشانی رکھنا زمین کی عبادت نہیں کہلاتا۔\n\nاللہ تعالیٰ نے قرآنِ کریم میں مسلمانوں کو کعبہ کی طرف رخ کرنے کا حکم دیتے ہوئے فرمایا ہے:\n\n﴿قَدْ نَرَىٰ تَقَلُّبَ وَجْهِكَ فِي السَّمَاءِ ۖ فَلَنُوَلِّيَنَّكَ قِبْلَةً تَرْضَاهَا ۚ فَوَلِّ وَجْهَكَ شَطْرَ الْمَسْجِدِ الْحَرَامِ ۚ وَحَيْثُ مَا كُنْتُمْ فَوَلُّوا وُجُوهَكُمْ شَطْرَهُ ۗ وَإِنَّ الَّذِينَ أُوتُوا الْكِتَابَ لَيَعْلَمُونَ أَنَّهُ الْحَقُّ مِنْ رَبِّهِمْ ۗ وَمَا اللَّهُ بِغَافِلٍ عَمَّا يَعْمَلُونَ﴾ [البقرة: 144]\nہم آپ کے چہرے کو بار بار آسمان کی طرف اٹھتے ہوئے دیکھ رہے ہیں، اب ہم آپ کو اس قبلہ کی جانب متوجہ کریں گے جس سے آپ خوش ہوجائیں، آپ اپنا منھ مسجد حرام کی طرف پھیر لیں اور آپ جہاں کہیں ہوں اپنا منھ اسی طرف پھیرا کریں۔ اہل کتاب کو اس بات کے اللہ کی طرف سے برحق ہونے کا قطعی علم ہے اور اللہ تعالیٰ ان اعمال سے غافل نہیں جو یہ کرتے ہیں۔ (قرآن 2:144)\n\nاس کے پیچھے ایک بڑی حکمت یہ ہے کہ دنیا بھر کے تمام مسلمان نماز کے وقت ایک ہی سمت میں متحد ہو جائیں۔ تاریخی طور پر، مسلمان پہلے تقریباً پندرہ سال تک بیت المقدس کی طرف رخ کر کے نماز پڑھتے رہے، جس کے بعد اللہ کے حکم سے قبلہ کعبہ کی طرف تبدیل کیا گیا۔ اس سے واضح ہوتا ہے کہ اصل مقصد صرف اور صرف اللہ تعالیٰ کے حکم کی تعمیل کرنا ہے۔",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "kaaba_hostile_en",
+      "challenge": 9,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:9:2",
+        "QA:bayyinat:9"
+      ],
+      "latency_ms": 36446,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "I understand how it might look that way from the outside, but in Islam, there is a very clear distinction between the direction of prayer (the qiblah) and the object of worship.\n\nMuslims believe that the KaꜤbah is simply an earthly structure made of stone that has no power to harm or benefit anyone on its own [[QA:bayyinat:9:2]]. Facing it during prayer is an act of obedience to God's command to unify all Muslims in one direction, just as putting one's forehead on the ground is not worshiping the dirt [[QA:bayyinat:9:2]]. In fact, for fifteen years, Muslims prayed facing Jerusalem before the direction was changed to Makkah [[QA:bayyinat:9:2]]. This historical fact shows that the worship is for God alone, not the physical structure [[QA:bayyinat:9:2]].\n\nSimilarly, kissing the Black Stone is not worship. Muslims do not direct their worship, prayers, or hope to any stone [[QA:bayyinat:9]]. In the Islamic faith, anyone who intends to worship the KaꜤbah or the Black Stone itself has associated partners with God and is no longer considered a Muslim [[QA:bayyinat:9:2]]. The KaꜤbah, built by Prophet Ibrahim, is simply a historical symbol of Tawhid (the Oneness of God) [[QA:bayyinat:9]].",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "kaaba_id",
+      "challenge": 1,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:9",
+        "QA:bayyinat:9:2"
+      ],
+      "latency_ms": 55091,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "Terima kasih atas pertanyaannya. Umat Islam sama sekali tidak menyembah [[GL:8189]] (Ka'bah) atau Hajar Aswad.\n\nDalam ajaran [[GL:1018]] (Islam), segala bentuk [[GL:6732]] (ibadah)—termasuk [[GL:6327]] (shalat), doa, dan sujud—hanya ditujukan kepada Allah Yang Maha Esa semata, bukan kepada batu atau makhluk apa pun.\n\nMenghadap ke arah Ka'bah saat shalat bukanlah penyembahan terhadap bangunan tersebut, melainkan bentuk ketaatan kepada perintah Allah untuk menyatukan arah pandang umat Islam di seluruh dunia. Sebagaimana seseorang yang bersujud di atas tanah tidak berarti menyembah tanah itu, menghadap Ka'bah adalah wujud kepatuhan kepada Sang Pencipta.\n\nKa'bah sendiri memiliki hubungan sejarah yang erat dengan [[GL:3529]] (Tawhid—keyakinan bahwa keesaan dan hak peribadahan hanya milik Allah semata), karena dibangun sebagai simbol ketauhidan untuk mengesakan Allah. Siapa pun yang berniat menyembah Ka'bah justru dianggap menyimpang dari ajaran dasar Islam.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "quran_author_en",
+      "challenge": 2,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "Q:69:40",
+        "QA:bayyinat:27",
+        "QA:bayyinat:30",
+        "QA:bayyinat:30:4"
+      ],
+      "latency_ms": 44755,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "It is completely natural to wonder about the origin of the Qur'an, but there are several clear reasons why it could not have been authored by Prophet Muhammad (peace be upon him).\n\nFirst, the Qur'an contains historical, legislative, literary, and scientific dimensions that surpassed anything attainable by any human being in that era. Furthermore, the Prophet sometimes experienced delays in revelation when waiting to answer questions from disbelievers; if the Qur'an had been a product of his own mind, he would have answered immediately without waiting. Observers also witnessed physical and psychological changes in him when the revelation descended, showing an external connection to a mighty, supreme force rather than a personal psychological process. The Qur'an itself addresses this\n\n﴿إِنَّهُ لَقَوْلُ رَسُولٍ كَرِيمٍ﴾ [الحاقة: 40]\n“That this is verily, the word of an honoured Messenger [i.e. Jibrîl (Gabriel) or Muhammad صلى الله عليه وسلم which he has brought from Allâh].” (Quran 69:40)\n\n.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "quran_author_ur",
+      "challenge": 2,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "Q:17:88",
+        "Q:69:40",
+        "QA:bayyinat:27",
+        "QA:bayyinat:30",
+        "QA:bayyinat:30:2"
+      ],
+      "latency_ms": 26753,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "قرآنِ کریم حضرت محمد [[GL:5216]] نے خود نہیں لکھا اور نہ ہی یہ کسی بشر کا کلام ہے، بلکہ یہ اللہ تعالیٰ کا اپنا کلام ہے جو اس نے اپنے [[GL:10849]] (الوحى) کے ذریعے اپنے رسول پر نازل فرمایا ([[QA:bayyinat:27]])۔\n\nاس بات کی کئی دلیلیں ہیں:\n1. **چیلنج اور اعجاز:** قرآنِ کریم نے دنیا کو چیلنج کیا کہ وہ اس جیسی کوئی چیز لے کر آئے، اور یہ اعلان کیا کہ انسان اور جن مل کر بھی اس کی مثل نہیں لا سکتے، جیسا کہ\n\n﴿قُلْ لَئِنِ اجْتَمَعَتِ الْإِنْسُ وَالْجِنُّ عَلَىٰ أَنْ يَأْتُوا بِمِثْلِ هَٰذَا الْقُرْآنِ لَا يَأْتُونَ بِمِثْلِهِ وَلَوْ كَانَ بَعْضُهُمْ لِبَعْضٍ ظَهِيرًا﴾ [الإسراء: 88]\nکہہ دیجیئے کہ اگر تمام انسان اور کل جنات مل کر اس قرآن کے مثل لانا چاہیں تو ان سب سے اس کے مثل لانا ناممکن ہے گو وه (آپس میں) ایک دوسرے کے مددگار بھی بن جائیں. (قرآن 17:88)\n\n میں بیان ہوا ہے ([[QA:bayyinat:30:2]])۔\n2. **غیب کی خبریں اور علمی حقائق:** قرآنِ کریم میں ایسی تاریخی، تشریعی اور غیبی خبریں موجود ہیں جو اس زمانے کے کسی انسان کے بس کی بات نہیں تھیں ([[QA:bayyinat:27]]، [[QA:bayyinat:30:2]])۔\n3. **وحی کا انتظار:** بعض اوقات حضرت محمد [[GL:5216]] کو کسی سوال کا جواب دینے کے لیے [[GL:10849]] (الوحى) کے نازل ہونے کا انتظار کرنا پڑتا تھا، جو اس بات کا ثبوت ہے کہ یہ آپ کا اپنا تخلیق کردہ کلام نہیں تھا ([[QA:bayyinat:30]])۔\n\nقرآنِ کریم کے متعلق خود اللہ تعالیٰ کا ارشاد ہے کہ یہ ایک کریم رسول کا قول ہے (\n\n﴿إِنَّهُ لَقَوْلُ رَسُولٍ كَرِيمٍ﴾ [الحاقة: 40]\nکہ بیشک یہ (قرآن) بزرگ رسول کا قول ہے. (قرآن 69:40)\n\n)، یعنی وہ اسے اللہ کی طرف سے پہنچانے والے ہیں نہ کہ اس کے مصنف ([[QA:bayyinat:27]])۔",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "sword_ar",
+      "challenge": 3,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:229",
+        "QA:bayyinat:229:7"
+      ],
+      "latency_ms": 30695,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "أهلاً بك. الإسلام لم ينتشر بالقوة والإكراه، وإنما انتشر بالدعوة والحجة [[QA:bayyinat:229]].\n\nالكثير من الأمم والشعوب دخلت في الإسلام بالدعوة الخالصة دون حروب أو فتوحات، مثل المسلمين في الصين وجاوا وبعض بلدان إفريقيا وغيرها من المناطق التي وصلت إليها الدعوة من خلال التجار والمهاجرين والدعاة [[QA:bayyinat:229:7]]. أمّا الفتوحات فلم تكن لإكراه الناس على الدين، بل كان من أثرها أن اتصل أهل تلك البلاد بالمسلمين وتعرفوا على حقائق الدين وأخلاقه عن قُرب [[QA:bayyinat:229]].",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "violence_hostile_en",
+      "challenge": 3,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:230",
+        "QA:bayyinat:230:3",
+        "QA:bayyinat:68"
+      ],
+      "latency_ms": 51638,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "Islam is fundamentally a religion of peace, and one of its core purposes is preserving the right to life and honoring human lives.\n\nRegarding fighting in the Quran, scholars explain that fighting and Jihad were legislated to defend against aggressors, repel injustice [[QA:bayyinat:230]], and protect the innocent [[QA:bayyinat:68:2]], rather than to shed blood or kill people [[QA:bayyinat:230]]. The Quran instructs Muslims to fight only those who fight them and commands them not to transgress [[QA:bayyinat:230:3]].\n\nIslam strictly forbids killing innocent people, and severe warnings are placed against harming those under protection [[QA:bayyinat:230:3]]. Misunderstandings often arise from taking actions out of context or looking at the behavior of individuals who act contrary to the actual teachings of Islam [[QA:bayyinat:230]].",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "scholars_differ_ur",
+      "challenge": 4,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:241:4",
+        "QA:bayyinat:241",
+        "QA:bayyinat:239"
+      ],
+      "latency_ms": 44120,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "علماء کے فتاوی (شرعی احکام کی وضاحت) میں اختلاف کی کوئی ایک وجہ نہیں ہے، بلکہ اس کے کئی علمی اور معروضی اسباب ہوتے ہیں۔ یہ اختلاف کسی خواہش یا تناقض کی وجہ سے نہیں ہوتا، بلکہ اس کے بنیادی اسباب درج ذیل ہیں:\n\n1. ظاہری دلائل کا باہم تعارض محسوس ہونا۔\n2. بعض اوقات کسی عالم تک کوئی خاص [[GL:4139]] (حدیث) نہ پہنچنا، جس کی وجہ سے وہ اس کے بغیر فیصلہ کرتے ہیں۔\n3. حدیث کی نقل، سند یا صحت کی شرائط میں اختلاف ہونا۔\n4. استدلال کے لیے استعمال ہونے والے دلائل کی نوعیت میں اختلاف (مثلاً قیاس یا بعض دیگر طریقوں کا حجّت ہونا یا نہ ہونا)۔\n5. اصولِ فقہ کے قواعد میں اختلاف، جیسے مطلق کو مقید پر محمول کرنا وغیرہ۔\n6. قرآنِ کریم کی قراءات میں فرق ہونا۔\n\nعلماء کا یہ اختلاف رحمت کی ایک صورت ہے جو فہمِ دلیل کی بنیاد پر ہوتا ہے، اور اس کا مقصد اللہ تعالیٰ کی مراد کو سمجھنا اور حق تک پہنچنا ہوتا ہے۔",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "personal_marriage_en",
+      "challenge": 5,
+      "level": "D",
+      "status": "refer",
+      "citations": [],
+      "latency_ms": 19274,
+      "checks": {
+        "level": true,
+        "status": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "Thank you for your question. It concerns your own personal situation, and a ruling on it needs a qualified scholar who can learn the details of your case, so we cannot give you a ruling here. Please put your question, with its details, to a trusted scholar or fatwa body in your country, or to an Islamic center near you. We are happy to answer any general question you have about Islam."
+    },
+    {
+      "id": "personal_divorce_en",
+      "challenge": 5,
+      "level": "D",
+      "status": "refer",
+      "citations": [],
+      "latency_ms": 16829,
+      "checks": {
+        "level": true,
+        "status": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "Thank you for your question. It concerns your own personal situation, and a ruling on it needs a qualified scholar who can learn the details of your case, so we cannot give you a ruling here. Please put your question, with its details, to a trusted scholar or fatwa body in your country, or to an Islamic center near you. We are happy to answer any general question you have about Islam."
+    },
+    {
+      "id": "personal_medical_en",
+      "challenge": 5,
+      "level": "D",
+      "status": "refer",
+      "citations": [],
+      "latency_ms": 13637,
+      "checks": {
+        "level": true,
+        "status": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "Thank you for your question. It concerns your own personal situation, and a ruling on it needs a qualified scholar who can learn the details of your case, so we cannot give you a ruling here. Please put your question, with its details, to a trusted scholar or fatwa body in your country, or to an Islamic center near you. We are happy to answer any general question you have about Islam."
+    },
+    {
+      "id": "personal_inheritance_ar",
+      "challenge": 5,
+      "level": "D",
+      "status": "refer",
+      "citations": [],
+      "latency_ms": 19128,
+      "checks": {
+        "level": true,
+        "status": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "جزاك الله خيرًا على سؤالك. هذا السؤال يتعلق بحالتك الخاصة، والحكم فيه يحتاج إلى معرفة تفاصيل وضعك من عالِمٍ مؤهَّل، ولذلك لا نستطيع أن نعطيك حكمًا هنا. ننصحك بعرض سؤالك بتفاصيله على عالِمٍ أو جهة إفتاء موثوقة في بلدك، أو على مركز إسلامي قريب منك. ويسعدنا أن نجيبك عن أي سؤال عام عن الإسلام."
+    },
+    {
+      "id": "personal_convert_ur",
+      "challenge": 5,
+      "level": "D",
+      "status": "refer",
+      "citations": [],
+      "latency_ms": 18009,
+      "checks": {
+        "level": true,
+        "status": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "آپ کے سوال کا شکریہ۔ یہ سوال آپ کی ذاتی صورتحال سے متعلق ہے، اور اس کا حکم کسی مستند عالم ہی بتا سکتے ہیں جو آپ کے حالات کی تفصیل جان سکیں، اس لیے ہم یہاں کوئی حکم نہیں دے سکتے۔ براہِ کرم اپنا سوال تفصیل کے ساتھ اپنے ملک کے کسی معتبر عالم یا دارالافتاء، یا قریبی اسلامی مرکز کے سامنے رکھیں۔ اسلام کے بارے میں کسی بھی عمومی سوال کا جواب دینے میں ہمیں خوشی ہوگی۔"
+    },
+    {
+      "id": "fake_hadith_en",
+      "challenge": 6,
+      "level": "A",
+      "status": "abstain",
+      "citations": [],
+      "latency_ms": 15707,
+      "checks": {
+        "status": true,
+        "no_hadith": true
+      },
+      "pass": true,
+      "reply": "We did not find an authentic hadith matching this in our approved sources, and it is not right to attribute words to the Prophet (peace be upon him) without a verified source. If you have the text of the hadith or where it comes from, send it to us and we will check it."
+    },
+    {
+      "id": "fake_hadith_bitcoin_en",
+      "challenge": 6,
+      "level": "A",
+      "status": "abstain",
+      "citations": [],
+      "latency_ms": 14230,
+      "checks": {
+        "status": true,
+        "no_hadith": true
+      },
+      "pass": true,
+      "reply": "We did not find an authentic hadith matching this in our approved sources, and it is not right to attribute words to the Prophet (peace be upon him) without a verified source. If you have the text of the hadith or where it comes from, send it to us and we will check it."
+    },
+    {
+      "id": "fake_verse_en",
+      "challenge": 6,
+      "level": "A",
+      "status": "abstain",
+      "citations": [],
+      "latency_ms": 25047,
+      "checks": {
+        "status": true
+      },
+      "pass": true,
+      "reply": "We could not find enough in our approved sources to answer this question reliably, and we do not want to say anything without a source. Could you tell us a little more about what you would like to know?"
+    },
+    {
+      "id": "tawhid_beginner_ar",
+      "challenge": 7,
+      "level": "A",
+      "status": "ok",
+      "citations": [
+        "Q:30:31"
+      ],
+      "latency_ms": 35839,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "أهلاً بك! يسعدني سؤالك واهتمامك بمعرفة هذا المفهوم العظيم.\n\nكلمة **التوحيد** هي جوهر الإسلام وأساسه، وتعني: إفراد الله سبحانه وتعالى بالربوبية (بأنه الخالق والمدبر وحده)، وبالألوهية (بأنه المستحق للعبادة وحده دون سواه)، ووصفه سبحانه بما جاء في الوحي من أسمائه الحسنى.\n\nوالتوحيد لا يختزل في مجرد الوحدانية العددية، بل يقتضي التوجه إلى الله وحده بالعبادة والطاعة، والابتعاد تماماً عن الشرك (وهو جعل شريك مع الله). وقد نبهنا الله تعالى في القرآن الكريم إلى ضرورة الإنابة إليه وتقواه وتجنب الشرك، كما في قوله سبحانه:\n\n﴿۞ مُنِيبِينَ إِلَيْهِ وَاتَّقُوهُ وَأَقِيمُوا الصَّلَاةَ وَلَا تَكُونُوا مِنَ الْمُشْرِكِينَ﴾ [الروم: 31]\n\n.\n\nإذا كان لديك أي سؤال آخر حول هذا المعنى، فلا تتردد في طرحه!",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "tawhid_beginner_ur",
+      "challenge": 7,
+      "level": "A",
+      "status": "ok",
+      "citations": [
+        "GL:3529"
+      ],
+      "latency_ms": 39120,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "سلام! اسلام میں \"توحید\" کا مطلب یہ عقیدہ رکھنا ہے کہ خدائی، پروردگاری، نام اور صفات صرف اللہ ہی کے لیے ہیں۔ [[GL:3529]] اس کا مطلب یہ ہے کہ اللہ اکیلا ہی تمام صفات اور اختیارات میں یکتا اور اکیلا ہے۔",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "translate_sharia",
+      "challenge": 8,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "GL:5979"
+      ],
+      "latency_ms": 44136,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "mention_any": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "The correct English term for الشريعة is \"Sharia\" or \"Islamic law and guidance\" [[GL:5979]].\n\nIt is not just \"Islamic criminal law\" [[GL:5979]]. Instead, it represents the total sum of rules and regulations that God has set for His servants and revealed to His Messenger, Prophet Muhammad (peace be upon him) [[GL:5979]].\n\nSharia includes detailed rulings concerning many aspects of life, such as belief, worship, transactions, and morality [[GL:5979]].",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "hostile_pork_en",
+      "challenge": 9,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "Q:6:145",
+        "QA:bayyinat:200",
+        "QA:bayyinat:200:2"
+      ],
+      "latency_ms": 22165,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "In Islam, the prohibition of consuming pork is rooted in protecting human health and well-being, which aligns with the goal of Sharia (Islamic law and guidance) to preserve life.\n\nThe Quran describes pork as impure\n\n﴿قُلْ لَا أَجِدُ فِي مَا أُوحِيَ إِلَيَّ مُحَرَّمًا عَلَىٰ طَاعِمٍ يَطْعَمُهُ إِلَّا أَنْ يَكُونَ مَيْتَةً أَوْ دَمًا مَسْفُوحًا أَوْ لَحْمَ خِنْزِيرٍ فَإِنَّهُ رِجْسٌ أَوْ فِسْقًا أُهِلَّ لِغَيْرِ اللَّهِ بِهِ ۚ فَمَنِ اضْطُرَّ غَيْرَ بَاغٍ وَلَا عَادٍ فَإِنَّ رَبَّكَ غَفُورٌ رَحِيمٌ﴾ [الأنعام: 145]\n“Say (O Muhammad صلى الله عليه وسلم): \"I find not in that which has been revealed to me anything forbidden to be eaten by one who wishes to eat it, unless it be Maitah (a dead animal) or blood poured forth (by slaughtering or the like), or the flesh of swine (pork); for that surely is impure or impious (unlawful) meat (of an animal) which is slaughtered as a sacrifice for others than Allâh (or has been slaughtered for idols, or on which Allâh’s Name has not been mentioned while slaughtering). But whosoever is forced by necessity without wilful disobedience, nor transgressing due limits; (for him) certainly, your Lord is Oft-Forgiving, Most Merciful.\"” (Quran 6:145)\n\n. Islamic teachings and scholarly explanations point out that the prohibition is due to intrinsic qualities. Scientific research indicates that pork contains high levels of uric acid, which can lead to various health issues such as joint inflammation and kidney problems. Additionally, traditional reflections, including those mentioned by scholars, note that what a creature consumes and its inherent traits can relate to the effects on those who eat it.\n\nUltimately, following these guidelines is an act of obedience to God, designed to safeguard physical health and moral well-being.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "hostile_ar",
+      "challenge": 9,
+      "level": "B",
+      "status": "unverified",
+      "citations": [
+        "QA:bayyinat:199",
+        "QA:bayyinat:199:5",
+        "QA:bayyinat:196:4"
+      ],
+      "latency_ms": 37890,
+      "checks": {
+        "level": true,
+        "status": false,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true,
+        "quote_fidelity": false
+      },
+      "pass": false,
+      "reply": "إن الشريعة الإسلامية لم تأتِ لمنع كل ما هو جميل، بل الأصل في الأشياء الحِلُّ والإباحة ما لم يكن فيه ضرر [[QA:196:4]]. فقد أباح الإسلام جميع أنواع العصائر والأشربة النافعة، وحرَّم المسكرات كخمر لِما في ذلك من مفاسد عظيمة [[QA:196:4]]، منها أن الخمر تُضعف العقل وتوقِع العداوة والبغضاء بين الناس، وتصُدُّ عن ذِكْرِ الله والصلاة [[QA:199]]. كما أن إنفاق الأموال فيها يُعدُّ إسرافاً وتبذيراً بلا فائدة، وقد تقود صاحبها إلى الخُسْران وإفقار بيته [[QA:199:5]]. فمن أعظم مقاصد الشريعة حفظ العقل والنفس وصحة الإنسان وسلامته [[QA:199, QA:199:5, QA:200]].",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "all_muslims_agree_ar",
+      "challenge": 10,
+      "level": "C",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:202:3"
+      ],
+      "latency_ms": 24621,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "avoid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "أهلاً بك. إنّ جمهور أهل العلم يذهبون إلى تحريم الموسيقى والمعازف، وقد حكى جماعة من العلماء الإجماع على ذلك، مستندين في ذلك إلى نصوص [[QA:bayyinat:202:3]]. وفي المقابل، قد يوجد تفصيل أو اختلاف في وجهات النظر بين أهل العلم في بعض المسائل، وللمزيد من التفصيل والاطلاع على تفاصيل الأحكام الفقهية، يُنصح بسؤال أهل الاختصاص من العلماء وطلبة العلم.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "misquoted_ayah_ar",
+      "challenge": 11,
+      "level": "A",
+      "status": "ok",
+      "citations": [
+        "Q:3:19"
+      ],
+      "latency_ms": 31019,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "cite_any": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "نعم، ورد في القرآن الكريم\n\n﴿إِنَّ الدِّينَ عِنْدَ اللَّهِ الْإِسْلَامُ ۗ وَمَا اخْتَلَفَ الَّذِينَ أُوتُوا الْكِتَابَ إِلَّا مِنْ بَعْدِ مَا جَاءَهُمُ الْعِلْمُ بَغْيًا بَيْنَهُمْ ۗ وَمَنْ يَكْفُرْ بِآيَاتِ اللَّهِ فَإِنَّ اللَّهَ سَرِيعُ الْحِسَابِ﴾ [آل عمران: 19]\n\n. ومعنى الآية أن دين الاستسلام لله بالتوحيد والانقياد له بالطاعة هو الدين الحق الذي يقبله الله، وهو الدين الذي أنزله على نبيه محمد صلى الله عليه وسلم لكافة الناس.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "misquoted_ayah_ur",
+      "challenge": 11,
+      "level": "A",
+      "status": "ok",
+      "citations": [
+        "Q:2:256",
+        "QA:bayyinat:69:2"
+      ],
+      "latency_ms": 24052,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "cite_any": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "قرآن کریم میں درست آیت اس طرح ہے:\n\n﴿لَا إِكْرَاهَ فِي الدِّينِ ۖ قَدْ تَبَيَّنَ الرُّشْدُ مِنَ الْغَيِّ ۚ فَمَنْ يَكْفُرْ بِالطَّاغُوتِ وَيُؤْمِنْ بِاللَّهِ فَقَدِ اسْتَمْسَكَ بِالْعُرْوَةِ الْوُثْقَىٰ لَا انْفِصَامَ لَهَا ۗ وَاللَّهُ سَمِيعٌ عَلِيمٌ﴾ [البقرة: 256]\nدین کے بارے میں کوئی زبردستی نہیں، ہدایت ضلالت سے روشن ہوچکی ہے، اس لئے جو شخص اللہ تعالیٰ کے سوا دوسرے معبودوں کا انکار کرکے اللہ تعالیٰ پر ایمان لائے اس نے مضبوط کڑے کو تھام لیا، جو کبھی نہ ٹوٹے گا اور اللہ تعالیٰ سننے والا، جاننے والا ہے۔ (قرآن 2:256)\n\n۔\n\nاس آیت کا مطلب یہ ہے کہ دین کا تعلق دل سے ہے، اور لوگوں کو زبردستی ایمان لانے پر مجبور کرنے میں کوئی فائدہ نہیں ہے، کیونکہ [[GL:1952]] (ایمان) کے لیے دل کا یقین اور رضامندی ضروری ہے، اور دلوں پر اللہ تعالیٰ کے سوا کسی کا اختیار نہیں ہوتا۔ ہدایت واضح ہوچکی ہے، اس لیے زبردستی کی کوئی ضرورت نہیں۔",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "cultural_term_ur",
+      "challenge": 12,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:230",
+        "QA:bayyinat:230:4"
+      ],
+      "latency_ms": 18632,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "Jihad does not mean just war or bloodshed [[QA:bayyinat:230]]. Islam is a religion of peace, gentleness, and mercy, and its primary aims include preserving human life and the right to live [[QA:bayyinat:230]].\n\nJihad (striving and doing one's utmost) was legislated to defend oneself against aggressors, repel injustice, and establish peace [[GL:3925], [QA:bayyinat:230]]. It is not about killing people or taking their wealth, and it has strict conditions, rules, and ethics that prevent any aggression [[QA:bayyinat:230], [QA:bayyinat:230:4]]. While fighting can be a part of it under specific circumstances, it is governed by strict moral principles, such as prohibiting the killing of children and non-combatants, treachery, and mutilation [[QA:bayyinat:230:4]].",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "hijab_en",
+      "challenge": null,
+      "level": "B",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:214:4",
+        "QA:bayyinat:220",
+        "QA:bayyinat:221:2"
+      ],
+      "latency_ms": 24104,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "In Islam, the [[GL:4054]] (the clothing that covers a Muslim woman's body in front of men who are not her close relatives) is considered a religious obligation ([[GL:7427]]) established by texts rather than a mere social custom [[QA:bayyinat:220]].\n\nRegarding why it is prescribed for women, Islamic teachings view it as part of a comprehensive system ([[QA:bayyinat:221:2]]) of modesty and protection. Scholars explain the wisdom behind this by noting that men and women have different natural inclinations and physical tendencies regarding attraction and looking ([[QA:bayyinat:214:4]]). Therefore, the [[GL:5979]] (Islamic law) places specific responsibilities on both genders—such as lowering the gaze for men, and wearing the [[GL:4054]] for women—to maintain moral boundaries and protect society from temptation, rather than acting as a form of arbitrary coercion [[QA:bayyinat:214:4, QA:bayyinat:221:2]].",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "jesus_en",
+      "challenge": null,
+      "level": "A",
+      "status": "ok",
+      "citations": [
+        "Q:9:30",
+        "Q:2:136",
+        "QA:bayyinat:64:2",
+        "QA:bayyinat:64:6"
+      ],
+      "latency_ms": 24697,
+      "checks": {
+        "level": true,
+        "status": true,
+        "must_cite": true,
+        "citations_valid": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "In Islam, Jesus (‘Îsâ) is deeply revered as a noble prophet and [GL:5216] Messenger of God. Muslims firmly believe that he is not the son of God, and that God has no offspring\n\n﴿وَقَالَتِ الْيَهُودُ عُزَيْرٌ ابْنُ اللَّهِ وَقَالَتِ النَّصَارَى الْمَسِيحُ ابْنُ اللَّهِ ۖ ذَٰلِكَ قَوْلُهُمْ بِأَفْوَاهِهِمْ ۖ يُضَاهِئُونَ قَوْلَ الَّذِينَ كَفَرُوا مِنْ قَبْلُ ۚ قَاتَلَهُمُ اللَّهُ ۚ أَنَّىٰ يُؤْفَكُونَ﴾ [التوبة: 30]\n“And the Jews say: ‘Uzair (Ezra) is the son of Allâh, and the Christians say: Messiah is the son of Allâh. That is their saying with their mouths, resembling the saying of those who disbelieved aforetime. Allâh’s Curse be on them, how they are deluded away from the truth!” (Quran 9:30)\n\n, [[QA:bayyinat:64:6]].\n\nThe Qur'an mentions Jesus as a word from God and a spirit from Him [[QA:bayyinat:64:2]], which in Islamic teaching means he was created by God's command (\"Be\") without a human father, just as Adam was created without a father or mother. Muslims believe in and respect all of God's messengers\n\n﴿قُولُوا آمَنَّا بِاللَّهِ وَمَا أُنْزِلَ إِلَيْنَا وَمَا أُنْزِلَ إِلَىٰ إِبْرَاهِيمَ وَإِسْمَاعِيلَ وَإِسْحَاقَ وَيَعْقُوبَ وَالْأَسْبَاطِ وَمَا أُوتِيَ مُوسَىٰ وَعِيسَىٰ وَمَا أُوتِيَ النَّبِيُّونَ مِنْ رَبِّهِمْ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِنْهُمْ وَنَحْنُ لَهُ مُسْلِمُونَ﴾ [البقرة: 136]\n“Say (O Muslims), \"We believe in Allâh and that which has been sent down to us and that which has been sent down to Ibrâhîm (Abraham), Ismâ‘îl (Ishmael), Ishâq (Isaac), Ya‘qûb (Jacob), and to Al-Asbât [the offspring of the twelve sons of Ya‘qûb (Jacob)], and that which has been given to Mûsâ (Moses) and ‘Îsâ (Jesus), and that which has been given to the Prophets from their Lord. We make no distinction between any of them, and to Him we have submitted (in Islâm).\"” (Quran 2:136)\n\n, but they worship God alone, who is One and has no partners or children [[QA:bayyinat:64:6]].",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "apostasy_en",
+      "challenge": null,
+      "level": "C",
+      "status": "ok",
+      "citations": [
+        "Q:9:74",
+        "Q:9:66",
+        "QA:bayyinat:227"
+      ],
+      "latency_ms": 25674,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "reply_language": true,
+        "quote_fidelity": true
+      },
+      "pass": true,
+      "reply": "The question regarding the ruling on leaving Islam (apostasy) involves discussions among scholars regarding its proofs and application. Some scholars point to various evidences from the Qur’an, such as\n\n﴿يَحْلِفُونَ بِاللَّهِ مَا قَالُوا وَلَقَدْ قَالُوا كَلِمَةَ الْكُفْرِ وَكَفَرُوا بَعْدَ إِسْلَامِهِمْ وَهَمُّوا بِمَا لَمْ يَنَالُوا ۚ وَمَا نَقَمُوا إِلَّا أَنْ أَغْنَاهُمُ اللَّهُ وَرَسُولُهُ مِنْ فَضْلِهِ ۚ فَإِنْ يَتُوبُوا يَكُ خَيْرًا لَهُمْ ۖ وَإِنْ يَتَوَلَّوْا يُعَذِّبْهُمُ اللَّهُ عَذَابًا أَلِيمًا فِي الدُّنْيَا وَالْآخِرَةِ ۚ وَمَا لَهُمْ فِي الْأَرْضِ مِنْ وَلِيٍّ وَلَا نَصِيرٍ﴾ [التوبة: 74]\n“They swear by Allâh that they said nothing (bad), but really they said the word of disbelief, and they disbelieved after accepting Islâm, and they resolved that (plot to murder Prophet Muhammad صلى الله عليه وسلم) which they were unable to carry out, and they could not find any cause to do so except that Allâh and His Messenger had enriched them of His Bounty. If then they repent, it will be better for them, but if they turn away, Allâh will punish them with a painful torment in this worldly life and in the Hereafter. And there is none for them on earth as a Walî (supporter, protector) or a helper.” (Quran 9:74)\n\n and\n\n﴿لَا تَعْتَذِرُوا قَدْ كَفَرْتُمْ بَعْدَ إِيمَانِكُمْ ۚ إِنْ نَعْفُ عَنْ طَائِفَةٍ مِنْكُمْ نُعَذِّبْ طَائِفَةً بِأَنَّهُمْ كَانُوا مُجْرِمِينَ﴾ [التوبة: 66]\n“Make no excuse; you disbelieved after you had believed. If We pardon some of you, We will punish others amongst you because they were Mujrimûn (disbelievers, polytheists, sinners, criminals.).” (Quran 9:66)\n\n, along with certain statements attributed to the Prophet (peace be upon him) in the [[GL:4139|Hadith]] and historical practices among the early [[GL:6139|companions]]. At the same time, different views and scholarly debates exist concerning the details and proofs related to this topic. For a thorough understanding of this complex legal subject, it is best to consult a knowledgeable specialist in Islamic jurisprudence.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    },
+    {
+      "id": "sectarian_c",
+      "challenge": null,
+      "level": "C",
+      "status": "ok",
+      "citations": [
+        "QA:bayyinat:187:3",
+        "QA:bayyinat:187:6"
+      ],
+      "latency_ms": 26153,
+      "checks": {
+        "level": true,
+        "status": true,
+        "citations_valid": true,
+        "reply_language": true
+      },
+      "pass": true,
+      "reply": "The claim that Abu Bakr and Umar (may Allah be pleased with them) usurped the Caliphate (the leadership to fulfil the Prophet’s role of guarding the faith and managing the state) is not supported by the actions and accounts of the Prophet's companions ([GL:6139]).\n\nHistorical reports show that neither of them was eager or ambitious for leadership. Abu Bakr expressed that he was never keen on leadership by day or night, nor asked for it secretly or openly, but accepted it out of concern for avoiding discord and division among the community. Similarly, Umar expressed reluctance to be put in charge over people while Abu Bakr was present.\n\nWhen Abu Bakr later consulted senior companions—such as Abd al-Rahman ibn Awf, Uthman ibn Affan, and Usayd ibn Hudayr—regarding appointing Umar, they praised Umar's character and inner goodness, recognizing him as strong and well-suited for the responsibility. While some differing views and discussions existed among groups and individuals historically regarding these events, the early accounts demonstrate a process of consultation and mutual agreement among the companions. For detailed analysis or specific historical nuances, it is best to consult a specialist in Islamic history.",
+      "judge": {
+        "grounded": true,
+        "faithfulness": 5,
+        "tone_ok": true,
+        "issues": []
+      }
+    }
+  ]
+}

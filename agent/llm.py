@@ -40,10 +40,9 @@ def _api_key(model: str) -> str:
     raise LLMNotConfigured(f"AI_API_KEY is not set and model '{model}' needs one (see .env.example)")
 
 
-def _default_factory(stage: str):
+def _client(model: str, stage: str):
     from langchain_openai import ChatOpenAI
 
-    model = _MODELS.get(stage, lambda: settings.AI_MODEL)()
     return ChatOpenAI(
         base_url=settings.AI_BASE_URL,
         api_key=_api_key(model),
@@ -52,6 +51,50 @@ def _default_factory(stage: str):
         timeout=settings.LLM_TIMEOUT,
         max_retries=settings.LLM_MAX_RETRIES,
     )
+
+
+def _is_overload(exc: Exception) -> bool:
+    status = getattr(exc, "status_code", None) or getattr(getattr(exc, "response", None), "status_code", None)
+    return status in (429, 500, 502, 503, 504) or "high demand" in str(exc).lower()
+
+
+def _default_factory(stage: str):
+    """The stage's model, falling back to AI_MODEL_FALLBACK models when it is overloaded."""
+    primary = _MODELS.get(stage, lambda: settings.AI_MODEL)()
+    models = [primary, *[m for m in settings.FALLBACK_MODELS if m != primary]]
+    clients = [_client(m, stage) for m in models]
+    if len(clients) == 1:
+        return clients[0]
+    return _FallbackClient(clients)
+
+
+class _FallbackClient:
+    """Minimal wrapper: same interface as the parts of ChatOpenAI the agent uses."""
+
+    def __init__(self, clients):
+        self.clients = clients
+
+    def _run(self, call):
+        last = None
+        for c in self.clients:
+            try:
+                return call(c)
+            except Exception as exc:  # noqa: BLE001
+                if not _is_overload(exc):
+                    raise
+                last = exc
+        raise last
+
+    def invoke(self, messages):
+        return self._run(lambda c: c.invoke(messages))
+
+    def with_structured_output(self, schema, **kw):
+        outer = self
+
+        class _Bound:
+            def invoke(self, messages):
+                return outer._run(lambda c: c.with_structured_output(schema, **kw).invoke(messages))
+        return _Bound()
 
 
 _factory: Callable[[str], Any] = _default_factory
