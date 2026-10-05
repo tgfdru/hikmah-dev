@@ -56,3 +56,11 @@ Needs on the server: ≈ 6 GB free RAM and ≈ 20 GB disk for this stack.
 Ownership note: on a server someone else administers, the owner's control is the model keys
 (revoking `AI_API_KEY`/`AI_JUDGE_API_KEY` stops the service), `MUEEN_SERVICE_UNTIL`, and the
 site key — not the server itself. Keep the keys in the owner's accounts.
+
+## Privacy note on the model provider (D35)
+
+The default configuration uses Gemini's **free tier**, whose terms allow Google to use the
+content to improve its products. Use it only for the demo and test questions. Before real
+seekers' conversations reach the service, switch `AI_*` to a provider/plan that does not use
+or retain the data (a paid plan, or a self-hosted model) and update DISCLOSURE.md.
+
