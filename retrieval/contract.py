@@ -14,11 +14,12 @@ from typing import Literal, Protocol
 
 from pydantic import BaseModel
 
-SourceType = Literal["quran", "hadith", "tafsir", "qa", "dawah"]
+# "book": a passage from an approved book (e.g. al-Shamela), agreed by both owners on 2026-10-06.
+SourceType = Literal["quran", "hadith", "tafsir", "qa", "dawah", "book"]
 
 
 class Evidence(BaseModel):
-    id: str  # "Q:2:255" | "Q:112:1-4" | "H:dorar:<n>" | "QA:bayyinat:41"
+    id: str  # "Q:2:255" | "Q:112:1-4" | "H:bukhari:<n>" | "QA:bayyinat:41" | "BK:shamela:<book_id>:<page>"
     type: SourceType
     text_ar: str  # original Arabic text, with diacritics, exactly as the source
     translation: str | None  # in the seeker's language when available

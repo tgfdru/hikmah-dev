@@ -155,3 +155,18 @@ def test_garbled_output_is_detected(text, lang):
 ])
 def test_normal_replies_are_not_flagged(text, lang, allowed):
     assert rules.garbled(text, lang, allowed) is None
+
+
+def test_book_passage_is_citable_and_its_quoted_verses_allowed():
+    """Shamela book passages (type "book", ids BK:...) behave like Bayyinat: citable,
+    and verses they quote as "[البقرة: 144]" may be used as placeholders."""
+    from agent import nodes
+    from agent.state import Draft
+
+    book = Evidence(id="BK:shamela:123:45", type="book", text_ar="شرح ... [البقرة: 144]", translation=None,
+                    source="هداية الحيارى", ref="ص 45", grade=None, source_url="https://shamela.ws/book/123/45",
+                    score=0.9)
+    assert "Q:2:144" in nodes._allowed_ids([book])
+    d = Draft(reply="As the book explains, Muslims face the Kaaba by command: [[Q:2:144]]",
+              reply_ar="كما يشرح الكتاب: [[Q:2:144]]", cited_ids=["BK:shamela:123:45"], note_for_dai="ok")
+    assert nodes.check_draft(d, [book], "en", "B") == []

@@ -247,12 +247,17 @@ _STYLE = {
 }
 
 
+# Explanatory sources (not scripture): explained in the model's words, never quoted as scripture;
+# verses they quote as "[البقرة: 144]" may be cited with placeholders.
+EXPLANATION_TYPES = {"qa", "tafsir", "dawah", "book"}
+
+
 def _evidence_block(evidence: list[Evidence]) -> tuple[str, list[str]]:
     docs, embedded = [], []
     for e in evidence:
         body = e.text_ar + (f"\n[translation] {e.translation}" if e.translation else "")
         docs.append(f'<doc id="{e.id}" type="{e.type}" source="{e.source}" ref="{e.ref}">\n{body}\n</doc>')
-        if e.type == "qa":
+        if e.type in EXPLANATION_TYPES:
             embedded += [r for r in _quran_refs_in(e.text_ar) if r not in embedded]
     return "\n".join(docs), embedded
 
@@ -298,8 +303,8 @@ def generate(state: AgentState) -> dict:
 def _allowed_ids(evidence: list[Evidence]) -> set[str]:
     allowed = {e.id for e in evidence}
     for e in evidence:
-        if e.type == "qa":
-            allowed.update(_quran_refs_in(e.text_ar))  # verses quoted inside a cited Bayyinat passage
+        if e.type in EXPLANATION_TYPES:
+            allowed.update(_quran_refs_in(e.text_ar))  # verses quoted inside a cited Bayyinat/book passage
     return allowed
 
 
