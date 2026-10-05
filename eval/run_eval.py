@@ -257,7 +257,7 @@ def eval_agent(api: str, judge: bool, only: set[str] | None, api_key: str | None
         exp = c.get("expect", {})
         t0 = time.time()
         try:
-            r = httpx.post(f"{api.rstrip('/')}/suggest", timeout=180, headers=headers,
+            r = httpx.post(f"{api.rstrip('/')}/suggest", timeout=300, headers=headers,
                            json={"conversation_id": f"eval_{c['id']}", "messages": c["messages"]})
             r.raise_for_status()
             res = r.json()

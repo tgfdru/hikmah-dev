@@ -20,10 +20,14 @@ MODEL_ANALYZE = kb._env("AI_MODEL_ANALYZE", AI_MODEL)
 MODEL_ROUTE = kb._env("AI_MODEL_ROUTE", AI_MODEL)
 MODEL_GENERATE = kb._env("AI_MODEL_GENERATE", AI_MODEL)
 MODEL_JUDGE = kb._env("AI_MODEL_JUDGE", AI_MODEL)
+# The judge may live on another endpoint, so it is independent of the drafting model
+# (a model judging its own drafts is lenient — EVALUATION §4.2). Default: same endpoint.
+JUDGE_BASE_URL = kb._env("AI_JUDGE_BASE_URL", "") or AI_BASE_URL
+JUDGE_API_KEY = kb._env("AI_JUDGE_API_KEY", "") or AI_API_KEY
 # Wire protocol: auto (default; OpenCode Zen: gpt-* → /responses, claude-* → /messages),
 # or force chat | responses | anthropic.
 AI_PROTOCOL = kb._env("AI_PROTOCOL", "auto").strip().lower()
-LLM_TIMEOUT =float(kb._env("AI_TIMEOUT", "60"))
+LLM_TIMEOUT = float(kb._env("AI_TIMEOUT", "60"))
 LLM_MAX_RETRIES = int(kb._env("AI_MAX_RETRIES", "2"))
 # Fallback models (same endpoint), tried in order when the stage's model is overloaded or
 # unavailable (HTTP 429 / 5xx), e.g. free tiers under load. Empty = no fallback.

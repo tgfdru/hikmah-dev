@@ -43,6 +43,8 @@
 | D28 | 2026-10-05 | نماذج احتياطية تلقائية `AI_MODEL_FALLBACK` عند الضغط (429/5xx) | الخطة المجانية لـ Gemini ترجع 503 أحيانًا |
 | D29 | 2026-10-05 | اختيار بروتوكول الاتصال لكل نموذج تلقائيًا (`AI_PROTOCOL=auto`): على OpenCode Zen نماذج `gpt-*` عبر `/responses` و`claude-*` عبر `/messages` | النماذج المدفوعة ترفض `/chat/completions` بخطأ `ModelProtocolUnsupported` |
 | D30 | 2026-10-05 | مقارنة الإعدادات بمُحكِّم واحد مستقل (`deepseek-v4.1-flash`) عبر `eval/rejudge.py` | المحكّم الافتراضي هو نموذج الكتابة نفسه، فيرفع الدرجة (Gemini 97% ذاتيًا مقابل ~60% بمحكّم مستقل) |
+| D31 | 2026-10-05 | المحكّم (الطبقة الثانية من التحقق) على نقطة اتصال مستقلة: `AI_JUDGE_BASE_URL`/`AI_JUDGE_API_KEY`، والنموذج `gpt-5.4-nano` | استقلال المحكّم عن نموذج الكتابة، وهو الأسرع (~5 ث) بين المرشحين |
+| D32 | 2026-10-05 | مخالفة الأدلة تحجب المسودة (إعادة ثم `unverified`)، والتفصيل غير الموجود في الأدلة يظهر للداعية كنقطة مراجعة في `issues`؛ تعطّل المحكّم لا يوقف الخدمة لكن يُبلَّغ الداعية | الحجب الكامل جعل أغلب المسودات `unverified`؛ الإنسان في الحلقة هو من يحسم |
 
 ---
 
@@ -197,3 +199,10 @@ docker compose up -d api        # على 127.0.0.1:8000؛ ضع أمامه revers
 - **الأوامر:** `AI_MODEL_ANALYZE=gpt-5.4-nano AI_MODEL_ROUTE=gpt-5.4-nano AI_MODEL=claude-haiku-4-5 uvicorn api.main:app` ثم `AI_MODEL=deepseek-v4.1-flash python -m eval.run_eval agent --api http://localhost:8000 --judge` ثم `AI_MODEL=deepseek-v4.1-flash python -m eval.rejudge <ملفات النتائج>`
 - **النتيجة:** **37/41** بلا أخطاء؛ الأسرع (متوسط 20.8 ث، p90 31.7 ث). بمحكّم مستقل واحد: Gemini أمانة 4.3 وإسناد ~60%، وZen 4.0 وإسناد ~38%. **القرار:** Gemini يبقى الإعداد الرئيسي، وZen احتياطي مدفوع سريع.
 - **للمراجع الشرعي:** المحكّم رصد ادعاءات تخالف الأدلة في `apostasy_en` و`all_muslims_agree_*` — تُعرض في المراجعة.
+
+### 2026-10-05 — S11: التحقق الثاني بمحكّم مستقل + ملفات النشر
+- **ما تم:** نقطة اتصال مستقلة للمحكّم؛ قياس المرشحين على 6 مسودات حقيقية؛ فصل نتائج المحكّم إلى حاجبة/استشارية؛ إظهار تعطّل المحكّم في `trace` والملاحظة. ملفات النشر على Hetzner: `deploy/setup.sh`، `update.sh`، `stop.sh`، `docker-compose.prod.yml` (Caddy + HTTPS)، `docs/DEPLOY.md`. مهلة الانتظار في وثيقة التكامل 180 ث، ومهلة أداة التقييم 300 ث.
+- **ملفات:** `agent/{settings,llm,nodes,state}.py`، `agent/prompts/judge.md`، `tests/` (+5 اختبارات، 88 ناجحة)، `deploy/`، `docs/{DEPLOY,API_INTEGRATION,EVALUATION,DISCLOSURE}.md`، `.env.example`، `eval/run_eval.py`.
+- **الأوامر:** `VERIFY_LLM_JUDGE=1 AI_JUDGE_BASE_URL=https://opencode.ai/zen/v1 AI_MODEL_JUDGE=gpt-5.4-nano` مع `.env.gemini` ثم `eval.run_eval agent` ثم `eval.rejudge`.
+- **النتيجة:** 39/41؛ المستوى 100%؛ المخالفات للأدلة (بمحكّم مشترك) من 3 إلى 1؛ الأمانة 4.32 والإسناد 61%؛ متوسط الزمن 29.7 ث. **القرار:** النشر بـ Gemini + المحكّم `gpt-5.4-nano`.
+- **ملاحظة:** طلب فواز (تثبيت Claude GitHub App وإضافته متعاونًا بصلاحية Write) يُنفذه نادر بنفسه — الإضافة من الجلسة محجوبة (403).

@@ -19,6 +19,8 @@ class _Bound:
             i = self.fake.counters.get(self.stage, 0)
             self.fake.counters[self.stage] = i + 1
             answer = answer[min(i, len(answer) - 1)]
+        if isinstance(answer, Exception):   # simulate an endpoint error
+            raise answer
         if not self.raw:
             return answer
         if isinstance(answer, dict) and "raw_args" in answer:   # simulate a malformed tool call

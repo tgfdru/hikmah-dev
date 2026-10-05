@@ -1,0 +1,7 @@
+# HTTPS in front of the API (certificate from Let's Encrypt, renewed automatically).
+# DOMAIN comes from deploy/.env.deploy (default: <server-ip>.sslip.io until a real sub-domain exists).
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy api:8000
+	header -Server
+}

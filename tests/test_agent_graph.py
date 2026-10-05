@@ -189,3 +189,40 @@ def test_exact_verse_request_without_evidence_abstains(monkeypatch):
     out, fake = run({"analyze": analysis(asks_for_verse=True), "route": routing("C")},
                     messages=[{"role": "seeker", "text": "Which verse mentions smartphones? Give me the exact verse."}])
     assert out["status"] == "abstain" and "retrieve:no_verse" in out["trace"]
+
+
+# ---- second verification layer (independent LLM judge, VERIFY_LLM_JUDGE=1) ----
+def test_judge_rejection_is_retried_with_its_issues(monkeypatch):
+    from agent.state import Judgement
+    monkeypatch.setattr(settings, "VERIFY_LLM_JUDGE", True)
+    bad = Judgement(grounded=False, contradicts=True, issues=["Remove the claim X — the evidence says the opposite"])
+    out, fake = run({"analyze": analysis(), "route": routing("A"), "generate": draft(),
+                     "judge": [bad, Judgement(grounded=True)]})
+    assert out["status"] == "ok" and out["attempts"] == 2
+    second_prompt = str([m for s, m in fake.calls if s == "generate"][1])
+    assert "Remove the claim X" in second_prompt
+
+
+def test_judge_rejecting_twice_gives_unverified(monkeypatch):
+    from agent.state import Judgement
+    monkeypatch.setattr(settings, "VERIFY_LLM_JUDGE", True)
+    out, _ = run({"analyze": analysis(), "route": routing("A"), "generate": draft(),
+                  "judge": Judgement(grounded=False, contradicts=True, issues=["contradicts the evidence"])})
+    assert out["status"] == "unverified" and out["note_for_dai"].startswith("⚠")
+
+
+def test_judge_down_is_fail_open_but_visible(monkeypatch):
+    monkeypatch.setattr(settings, "VERIFY_LLM_JUDGE", True)
+    out, _ = run({"analyze": analysis(), "route": routing("A"), "generate": draft(),
+                  "judge": RuntimeError("endpoint down")})
+    assert out["status"] == "ok"
+    assert "verify:judge_unavailable" in out["trace"] and out["note_for_dai"].startswith("ℹ️")
+
+
+def test_unsupported_detail_is_advisory_not_blocking(monkeypatch):
+    from agent.state import Judgement
+    monkeypatch.setattr(settings, "VERIFY_LLM_JUDGE", True)
+    out, fake = run({"analyze": analysis(), "route": routing("A"), "generate": draft(),
+                     "judge": Judgement(grounded=False, issues=["the date is not in the evidence"])})
+    assert out["status"] == "ok" and out["attempts"] == 1          # no retry, not hidden
+    assert any("not in the evidence" in i for i in out["issues"]) and out["note_for_dai"].startswith("🔎")

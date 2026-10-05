@@ -31,16 +31,24 @@ class LLMNotConfigured(RuntimeError):
     """Raised when AI_API_KEY is missing."""
 
 
-def _api_key(model: str) -> str:
+def _endpoint(stage: str) -> tuple[str, str]:
+    """(base_url, api_key) for a stage; only the judge can have its own endpoint."""
+    if stage == "judge":
+        return settings.JUDGE_BASE_URL, settings.JUDGE_API_KEY
+    return settings.AI_BASE_URL, settings.AI_API_KEY
+
+
+def _api_key(model: str, key: str | None = None) -> str:
     """OpenCode Zen's free test models (`*-free`) answer without an account key."""
-    if settings.AI_API_KEY:
-        return settings.AI_API_KEY
+    key = settings.AI_API_KEY if key is None else key
+    if key:
+        return key
     if model.endswith("-free"):
         return "public"
     raise LLMNotConfigured(f"AI_API_KEY is not set and model '{model}' needs one (see .env.example)")
 
 
-def _protocol(model: str) -> str:
+def _protocol(model: str, base_url: str | None = None) -> str:
     """Which wire protocol the endpoint expects for this model.
 
     OpenCode Zen serves GPT models only on /responses and Claude models only on
@@ -49,7 +57,7 @@ def _protocol(model: str) -> str:
     """
     if settings.AI_PROTOCOL in ("chat", "responses", "anthropic"):
         return settings.AI_PROTOCOL
-    if "opencode.ai/zen" in settings.AI_BASE_URL:
+    if "opencode.ai/zen" in (base_url or settings.AI_BASE_URL):
         if model.startswith("gpt-"):
             return "responses"
         if model.startswith("claude-"):
@@ -58,14 +66,15 @@ def _protocol(model: str) -> str:
 
 
 def _client(model: str, stage: str):
+    base_url, key = _endpoint(stage)
     common = dict(model=model, timeout=settings.LLM_TIMEOUT, max_retries=settings.LLM_MAX_RETRIES)
-    protocol = _protocol(model)
+    protocol = _protocol(model, base_url)
     if protocol == "anthropic":
         from langchain_anthropic import ChatAnthropic
 
         # The Anthropic SDK appends /v1/messages itself.
-        base = settings.AI_BASE_URL.rstrip("/").removesuffix("/v1")
-        return ChatAnthropic(base_url=base, api_key=_api_key(model), max_tokens=4096,
+        base = base_url.rstrip("/").removesuffix("/v1")
+        return ChatAnthropic(base_url=base, api_key=_api_key(model, key), max_tokens=4096,
                              temperature=_TEMPERATURE.get(stage, 0.2), **common)
 
     from langchain_openai import ChatOpenAI
@@ -77,7 +86,7 @@ def _client(model: str, stage: str):
             extra["temperature"] = _TEMPERATURE.get(stage, 0.2)
     else:
         extra["temperature"] = _TEMPERATURE.get(stage, 0.2)
-    return ChatOpenAI(base_url=settings.AI_BASE_URL, api_key=_api_key(model), **common, **extra)
+    return ChatOpenAI(base_url=base_url, api_key=_api_key(model, key), **common, **extra)
 
 
 def _is_overload(exc: Exception) -> bool:
@@ -88,7 +97,10 @@ def _is_overload(exc: Exception) -> bool:
 def _default_factory(stage: str):
     """The stage's model, falling back to AI_MODEL_FALLBACK models when it is overloaded."""
     primary = _MODELS.get(stage, lambda: settings.AI_MODEL)()
-    models = [primary, *[m for m in settings.FALLBACK_MODELS if m != primary]]
+    fallbacks = settings.FALLBACK_MODELS
+    if _endpoint(stage)[0] != settings.AI_BASE_URL:
+        fallbacks = []  # fallback models belong to the main endpoint
+    models = [primary, *[m for m in fallbacks if m != primary]]
     clients = [_client(m, stage) for m in models]
     if len(clients) == 1:
         return clients[0]

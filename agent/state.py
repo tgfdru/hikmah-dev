@@ -65,7 +65,8 @@ class Judgement(BaseModel):
     """Stage 5 (optional second layer) — LLM faithfulness check."""
 
     grounded: bool = Field(description="True if every religious claim in the reply is supported by the evidence")
-    issues: list[str] = Field(default_factory=list, description="Unsupported or overstated claims, if any")
+    contradicts: bool = Field(default=False, description="True if any claim CONTRADICTS the evidence (not merely unsupported)")
+    issues: list[str] = Field(default_factory=list, description="Unsupported, overstated or contradicting claims, if any")
 
 
 class Citation(BaseModel):

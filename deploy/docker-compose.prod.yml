@@ -1,0 +1,23 @@
+# Production overlay for the Hetzner server (used by deploy/setup.sh and deploy/update.sh):
+#   docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d
+# Adds Caddy (HTTPS on 443) in front of the API; the API itself stays unpublished.
+services:
+  api:
+    ports: !reset []
+    expose: ["8000"]
+    logging: {driver: json-file, options: {max-size: "10m", max-file: "3"}}
+
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    env_file: deploy/.env.deploy
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [api]
+
+volumes:
+  caddy_data:
+  caddy_config:

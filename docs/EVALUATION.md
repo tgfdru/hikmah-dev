@@ -210,3 +210,39 @@ reviewer must see. Next step: `VERIFY_LLM_JUDGE=1` with an independent judge mod
 Conclusion: Gemini stays the main configuration (best accuracy and grounding, free);
 Zen balanced is the fastest and a paid backup if the free tier is throttled.
 
+### 4.3 Second verification layer: independent judge (`VERIFY_LLM_JUDGE=1`) — 2026-10-05
+
+Gemini configuration (§4.1) plus an independent judge on another endpoint:
+`gpt-5.4-nano` on OpenCode Zen (`AI_JUDGE_BASE_URL`, D31). Results:
+`eval/results/2026-10-05_agent_gemini-judge.md`; common-judge re-score:
+`eval/results/2026-10-05_rejudge_deepseek_gemini-judge.txt`.
+
+Judge candidates measured on six real drafts before the run (seconds per check):
+`gpt-5.4-nano` ≈ 5, `minimax-m3` 8–28, `deepseek-v4.1-flash` 10–62, `glm-5.3-flash` 19–122;
+`qwen3.8-flash` and `kimi-k3` reject forced tool calls. All four working candidates caught the
+seeded contradiction.
+
+A first run that treated every judge finding as blocking returned most drafts as
+`unverified` (a strict judge finds some detail outside the evidence in nearly every draft).
+Final design (D32): a **contradiction** of the evidence blocks (one retry, then `unverified`);
+a detail **not in the evidence** is returned in `issues` as a review point for the da'i.
+
+| Metric | Gemini (§4.1) | Gemini + judge |
+|---|---|---|
+| Cases passing all checks | 40 / 41 | 39 / 41 |
+| Level (A–D) accuracy | 100% | 100% |
+| Routing accuracy | 98% | 98% |
+| Citation accuracy | 100% | 100% |
+| Avoids forbidden claims | 100% | 100% |
+| Common judge (deepseek-v4.1-flash): faithfulness | 4.26–4.29 | 4.32 |
+| Common judge: "grounded" | 58–61% | 61% |
+| Contradictions found by the common judge | 3 (`apostasy_en`, `all_muslims_agree_en`, `all_muslims_agree_ar`) | 1 (`all_muslims_agree_ar`) |
+| Latency mean / p90 | 32.8 s / 55.1 s | 29.7 s / 52.2 s |
+| Verify stage, median | < 0.1 s | 6.4 s |
+
+Reading: the judge removes most contradictions with the evidence and surfaces the remaining
+unsupported details to the da'i (every `ok` draft in this run carried at least one review
+point), but it does not raise overall groundedness by itself. Failures: `hostile_ar`
+(`unverified`, as in §4.1) and `cultural_term_en` (a Quran-like phrase flagged inexact by the
+checker). Latency varies mostly with Google's load, not with the judge.
+

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import re
+from typing import NamedTuple
 
 from agent import llm, rules, settings, templates
 from agent.prompts import load
@@ -353,7 +354,14 @@ def check_draft(d: Draft, evidence: list[Evidence], lang: str, level: str,
     return issues
 
 
-def _judge(d: Draft, evidence: list[Evidence]) -> list[str]:
+class Judged(NamedTuple):
+    blocking: list[str]   # contradictions: retry, then "unverified"
+    advisory: list[str]   # unsupported details: shown to the da'i
+
+
+def _judge(d: Draft, evidence: list[Evidence]) -> Judged | None:
+    """Independent LLM check of every religious claim. None = the judge could not run
+    (fail-open: deterministic checks still apply, and the da'i is told)."""
     docs, _ = _evidence_block(evidence)
     try:
         j: Judgement = llm.structured("judge", Judgement, [
@@ -362,8 +370,15 @@ def _judge(d: Draft, evidence: list[Evidence]) -> list[str]:
         ])
     except Exception as exc:
         log.warning("LLM judge failed (%s); deterministic checks only", exc)
-        return []
-    return [] if j.grounded else [f"unsupported claim: {i}" for i in j.issues] or ["judge: not grounded"]
+        return None
+    if j.grounded:
+        return Judged([], [])
+    issues = j.issues or ["the judge found claims not supported by the evidence"]
+    # Contradicting the evidence blocks the draft (retry, then "unverified"); claims that are merely
+    # not in the evidence are shown to the da'i as review points (human in the loop) — a strict
+    # judge flags some detail in most drafts, and blocking those would hide useful drafts.
+    return Judged([f"contradicts the evidence: {i}" for i in issues], []) if j.contradicts \
+        else Judged([], [f"not in the evidence: {i}" for i in issues])
 
 
 def _render(text: str, lang: str, evidence: dict[str, Evidence]) -> str:
@@ -397,8 +412,12 @@ def verify(state: AgentState) -> dict:
     level = state["routing"].level
     glossary = state.get("glossary", {})
     issues = check_draft(d, evidence, lang, level, set(glossary))
+    judge_down, advisory = False, []
     if not issues and settings.VERIFY_LLM_JUDGE:
-        issues = _judge(d, evidence)
+        judged = _judge(d, evidence)
+        judge_down = judged is None
+        if judged:
+            issues, advisory = judged.blocking, judged.advisory
 
     attempts = state.get("attempts", 1)
     if issues and attempts < settings.MAX_DRAFT_ATTEMPTS:
@@ -409,15 +428,20 @@ def verify(state: AgentState) -> dict:
     note = d.note_for_dai
     if issues:  # second failure: shown to the da'i, clearly marked (DECISIONS: not hidden)
         note = "⚠ لم تجتز المسودة التحقق الآلي — راجع المراجع قبل الإرسال. " + note
+    elif judge_down:
+        note = "ℹ️ تعذّر التحقق الثاني (المحكّم الآلي)؛ اجتازت المسودة الفحص الحتمي فقط. " + note
+    elif advisory:
+        note = (f"🔎 المحكّم الآلي وجد {len(advisory)} نقطة غير موجودة في الأدلة — راجعها في issues قبل الإرسال. "
+                + note)
     return {
         "verdict": "fail" if issues else "pass",
         "status": "unverified" if issues else "ok",
-        "issues": issues,
+        "issues": [*issues, *advisory],
         "final_reply": _render(d.reply, lang, by_id),
         "final_reply_ar": _render(d.reply_ar, "ar", by_id),
         "note_for_dai": note,
         "citations": _citations(d, evidence, lang, glossary),
-        "trace": _trace(state, "verify"),
+        "trace": _trace(state, "verify:judge_unavailable" if judge_down else "verify"),
     }
 
 

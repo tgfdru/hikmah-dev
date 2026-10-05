@@ -125,3 +125,13 @@ def test_protocol_per_model_on_opencode_zen(monkeypatch):
     assert llm._protocol("gpt-5.4-nano") == "chat"   # other endpoints: chat unless forced
     monkeypatch.setattr(settings, "AI_PROTOCOL", "responses")
     assert llm._protocol("anything") == "responses"
+
+
+def test_judge_can_use_its_own_endpoint(monkeypatch):
+    from agent import llm, settings
+
+    monkeypatch.setattr(settings, "AI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
+    monkeypatch.setattr(settings, "JUDGE_BASE_URL", "https://opencode.ai/zen/v1")
+    monkeypatch.setattr(settings, "JUDGE_API_KEY", "judge-key")
+    assert llm._endpoint("judge") == ("https://opencode.ai/zen/v1", "judge-key")
+    assert llm._endpoint("generate")[0].startswith("https://generativelanguage")

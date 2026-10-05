@@ -87,6 +87,9 @@ Also:
 * Always show `disclaimer` near the draft.
 * Show `reply_ar` to the da'i when the seeker writes in another language.
 * Level `C`: suggest the da'i double-check with a specialist.
+* `ok` with non-empty `issues` (entries starting "not in the evidence:"): an independent model found
+  details that the sources do not state. Show them as review points under the draft (🔎) — the
+  draft is still usable after the da'i checks them. `note_for_dai` already mentions them.
 
 ## 4. Errors
 
@@ -98,7 +101,7 @@ Also:
 | 502 | The assistant failed for this request | Let the da'i retry or answer manually |
 | 503 | The service is not configured (LLM key missing) | Contact the service owner |
 
-Timeouts: allow up to 60 s per request; drafting uses several model calls.
+Timeouts: allow up to **180 s** per request (typical 20–60 s; drafting uses several model calls plus an independent check). Show a "preparing a draft…" state; never block the da'i's own typing.
 
 ## 5. Privacy and transparency (for the site's policy page)
 
