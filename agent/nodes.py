@@ -11,6 +11,7 @@ Stage map (docs/DISCLOSURE.md numbering):
 """
 from __future__ import annotations
 
+import json
 import logging
 import re
 from typing import NamedTuple
@@ -325,6 +326,22 @@ def repair_draft(d: Draft, evidence: list[Evidence]) -> Draft:
                                 "reply_ar": _quote_to_placeholder(d.reply_ar, allowed, key)})
 
 
+def _glossary_latin(glossary_ids: set[str] | None) -> set[str]:
+    """Latin words of the approved glossary equivalents in use (e.g. "Tawhid"), allowed in
+    Arabic-script replies."""
+    words: set[str] = set()
+    for gid in glossary_ids or set():
+        words.update(re.findall(r"[A-Za-z][A-Za-z'’-]+", gid))
+    try:
+        from retrieval.glossary import load_glossary  # noqa: WPS433
+        for t in load_glossary():
+            if gl_id(t) in (glossary_ids or set()):
+                words.update(re.findall(r"[A-Za-z][A-Za-z'’-]+", json.dumps(t, ensure_ascii=False)))
+    except Exception:  # noqa: BLE001 — the glossary is a convenience here, never a failure
+        pass
+    return words
+
+
 def check_draft(d: Draft, evidence: list[Evidence], lang: str, level: str,
                 glossary_ids: set[str] | None = None) -> list[str]:
     """Deterministic verification. Returns the list of problems (empty = passes)."""
@@ -348,6 +365,11 @@ def check_draft(d: Draft, evidence: list[Evidence], lang: str, level: str,
     for q in _quotes_in(rules.strip_placeholders(d.reply)):
         issues.append(f"the reply contains Quran-like text ({q.ref_id}) outside a placeholder; "
                       f"use [[{q.ref_id}]] instead")
+    allowed_latin = _glossary_latin(glossary_ids)
+    for field, txt, field_lang in (("reply", d.reply, lang), ("reply_ar", d.reply_ar, "ar")):
+        noise = rules.garbled(txt, field_lang, allowed_latin)
+        if noise:
+            issues.append(f"{field} contains garbled text — {noise}; rewrite it fully in the target language")
     if level == "C":
         for p in rules.certainty_claims(d.reply) + rules.certainty_claims(d.reply_ar):
             issues.append(f'level C: remove the claim of certainty/consensus "{p}"')

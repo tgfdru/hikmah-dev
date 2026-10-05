@@ -226,3 +226,10 @@ def test_unsupported_detail_is_advisory_not_blocking(monkeypatch):
                      "judge": Judgement(grounded=False, issues=["the date is not in the evidence"])})
     assert out["status"] == "ok" and out["attempts"] == 1          # no retry, not hidden
     assert any("not in the evidence" in i for i in out["issues"]) and out["note_for_dai"].startswith("🔎")
+
+
+def test_garbled_draft_is_retried():
+    noisy = draft(reply_ar="المسلمون لا يعبدون الكعبة وقد Exploration… Stem sorry. [[Q:2:144]]")
+    out, fake = run({"analyze": analysis(), "route": routing("A"), "generate": [noisy, draft()]})
+    assert out["status"] == "ok" and out["attempts"] == 2
+    assert any("garbled" in i for i in out["retry_issues"])

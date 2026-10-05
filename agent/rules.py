@@ -131,3 +131,39 @@ def tidy(text: str) -> str:
     text = re.sub(r"[ \t]+\n", "\n", text or "")
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
+
+# ---- garbled output (model noise inside the reply) --------------------------------
+# Seen in evaluation: "وقد Exploration…Stem sorry." in the middle of an Arabic reply.
+_LATIN_WORD = re.compile(r"[A-Za-z][A-Za-z'’-]+")
+_LATIN_RUN = re.compile(r"[A-Za-z][A-Za-z'’-]*(?:[\s.…,;:!?\"'()-]+[A-Za-z][A-Za-z'’-]*)+")
+# Scripts no supported reply language uses (CJK, Cyrillic, Hangul, Thai, Devanagari).
+_FOREIGN_SCRIPT = re.compile(r"[Ѐ-ӿ฀-๿ऀ-ॿ぀-ヿ㐀-鿿가-힯]")
+_IGNORED = re.compile(r"\[\[[^\]]*\]\]|https?://\S+|\b[A-Z]{1,3}:[\w:.-]+")
+# Arabic-script replies: how much Latin is acceptable (an approved term or a name is fine).
+_LATIN_LIMITS = {"ar": (2, 3), "ur": (3, 6), "fa": (3, 6)}  # (longest run, total words)
+
+
+def garbled(text: str, lang: str, allowed_words: set[str] | None = None) -> str | None:
+    """Return a short description if `text` contains output noise, else None.
+
+    Arabic-script replies may contain a few Latin words (approved glossary terms, names);
+    a run of several Latin words or many of them means the model leaked another language.
+    Any reply containing an unexpected script (CJK, Cyrillic, …) is noise.
+    """
+    clean = _IGNORED.sub(" ", text or "")
+    m = _FOREIGN_SCRIPT.search(clean)
+    if m:
+        return f"unexpected characters from another script ({m.group(0)!r})"
+    if lang not in _LATIN_LIMITS:
+        return None
+    allowed = {w.lower() for w in (allowed_words or set())}
+    words = [w for w in _LATIN_WORD.findall(clean) if w.lower() not in allowed]
+    max_run, max_total = _LATIN_LIMITS[lang]
+    runs = [r for r in _LATIN_RUN.findall(clean)
+            if len([w for w in _LATIN_WORD.findall(r) if w.lower() not in allowed]) >= max_run]
+    if runs:
+        return f'Latin text inside the {lang} reply: "{runs[0][:60]}"'
+    if len(words) >= max_total:
+        return f"{len(words)} Latin words inside the {lang} reply (e.g. {', '.join(words[:4])})"
+    return None

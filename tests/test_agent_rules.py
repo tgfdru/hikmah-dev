@@ -135,3 +135,23 @@ def test_judge_can_use_its_own_endpoint(monkeypatch):
     monkeypatch.setattr(settings, "JUDGE_API_KEY", "judge-key")
     assert llm._endpoint("judge") == ("https://opencode.ai/zen/v1", "judge-key")
     assert llm._endpoint("generate")[0].startswith("https://generativelanguage")
+
+
+@pytest.mark.parametrize("text,lang", [
+    ("المسلمون يستقبلون الكعبة وقد Exploration… Stem sorry. في الصلاة", "ar"),
+    ("الجواب واضح 这是 نص", "ar"),
+    ("The answer is простой here", "en"),
+    ("یہ جواب ہے this is clearly leaked English text here", "ur"),
+])
+def test_garbled_output_is_detected(text, lang):
+    assert rules.garbled(text, lang)
+
+
+@pytest.mark.parametrize("text,lang,allowed", [
+    ("التوحيد (Tawhid) هو إفراد الله بالعبادة [[Q:112:1-4]]", "ar", {"Tawhid"}),
+    ("انظر GL:123 و QA:bayyinat:9 والرابط https://quranenc.com/x", "ar", set()),
+    ("اسلام میں Tawhid اور Sharia کا مطلب", "ur", set()),          # a few terms are fine in Urdu
+    ("Muslims face the Kaaba in prayer.", "en", set()),
+])
+def test_normal_replies_are_not_flagged(text, lang, allowed):
+    assert rules.garbled(text, lang, allowed) is None

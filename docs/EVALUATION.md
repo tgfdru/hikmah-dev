@@ -274,3 +274,22 @@ no new model calls):
 Not caught by any check yet: the run-4 reply to `quran_author_ar` contains model garbage
 in the middle of the Arabic text ("وقد Exploration…Stem sorry."). A simple guard (unexpected
 Latin words inside an Arabic/Urdu reply → retry or `unverified`) belongs in the agent's verify step.
+
+### 4.5 Garbled-output guard in the verifier — 2026-10-06
+
+Following §4.4, `agent/rules.py::garbled` now rejects a draft (retry, then `unverified`) when
+the reply or its Arabic copy contains characters of a script no reply language uses (CJK,
+Cyrillic, Hangul, Thai, Devanagari), or, in Arabic/Urdu replies, a run of Latin words or many
+Latin words (approved glossary equivalents such as "Tawhid", ids and links are ignored).
+
+Applied offline to every saved reply of the agent runs (144 `ok`/`unverified` replies):
+
+| Run | Flagged |
+|---|---|
+| space-bunny-free run 1 | 2 (`quran_author_ar`, `misquoted_ayah_ar` — Chinese characters) |
+| space-bunny-free run 4 | 5 (`quran_author_ar` "Exploration…Stem sorry", `sword_ar`; Chinese characters in `kaaba_id`, `tawhid_beginner_ar`, `all_muslims_agree_ar`) |
+| Gemini, Zen balanced, Gemini + judge | 0 |
+
+So the free test model leaked other languages in 7 replies that no earlier check caught, and
+the guard raised no false alarm on the configurations we deploy.
+
