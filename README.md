@@ -1,12 +1,19 @@
-# Mu'een (مُعين الداعية) — knowledge & retrieval layer
+# Mu'een (مُعين الداعية)
 
 An AI assistant that drafts source-backed replies for da'is (callers to Islam)
 chatting with people who ask about Islam, integrated into
 [sheykak.com](https://sheykak.com). **The da'i always decides; the assistant proposes.**
 
-This repository is the **knowledge & retrieval layer** (Fawaz's part of the
-[plan](docs/reference/plan.md)). The agent and API (Nader's part) are built on top
-of it — start with **[docs/HANDOFF.md](docs/HANDOFF.md)**.
+This repository has two layers (see the [plan](docs/reference/plan.md)):
+
+* **Knowledge & retrieval layer** (Fawaz) — `retrieval/`, `ingest/`, `eval/`; start with
+  [docs/HANDOFF.md](docs/HANDOFF.md).
+* **Agent & API** (Nader) — `agent/`, `api/`, `deploy/`; start with
+  [docs/AGENT.md](docs/AGENT.md) and [docs/API_INTEGRATION.md](docs/API_INTEGRATION.md).
+
+No model is fine-tuned: the agent answers by **retrieval-augmented generation** — it drafts
+only from passages retrieved from approved sources, and scripture text is always inserted
+verbatim from the store, never written by a model.
 
 ## What it does
 
@@ -51,19 +58,53 @@ docker compose run --rm kb-build
 
 ## Agent & API (Nader's part — `agent/`, `api/`)
 
-A LangGraph agent (analyze → route A–D → retrieve → generate → verify, with refer and
-abstain branches) behind a FastAPI service for sheykak.com. The model writes verse
-references as placeholders (`[[Q:2:144]]`); the verifier checks them against the
-verbatim store and inserts the exact text. See [docs/AGENT.md](docs/AGENT.md) and
-[docs/API_INTEGRATION.md](docs/API_INTEGRATION.md).
+A LangGraph agent behind a FastAPI service for sheykak.com:
+
+```
+analyze → route (A–D) → retrieve → generate → verify ─┬─ ok / unverified
+              │              └─ abstain (no source)     └─ retry once
+              └─ refer (level D: personal ruling)
+```
+
+* **Placeholders, not scripture:** the model writes `[[Q:2:144]]`; the verifier checks the id
+  against the evidence and the verbatim store, then inserts the exact text.
+* **Two verification layers:** deterministic checks (ids, brackets, verse-like text, level-C
+  certainty claims) + an independent LLM judge on its own endpoint. Contradicting the
+  evidence blocks the draft; details not in the evidence become review points for the da'i.
+* **Human in the loop:** the API only proposes; the da'i edits and sends. Statuses `ok`,
+  `unverified`, `refer`, `abstain`.
+* **Owner's control:** `X-API-Key` keys, a service end date, a privacy-safe run log (no
+  message text), `/stats` and `/feedback`.
+
+### Measured results (41 safety cases incl. the challenge's 12 — [EVALUATION §4](docs/EVALUATION.md))
+
+| Configuration | Pass all checks | Level A–D | Citations valid | Mean latency |
+|---|---|---|---|---|
+| `space-bunny-free` (run 4) | 36 / 41 | 95% | 100% | 30.3 s |
+| Gemini (AI Studio, free tier) | 40 / 41 | 100% | 100% | 32.8 s |
+| Gemini + independent judge (**deployed**) | 39 / 41 | 100% | 100% | 29.7 s |
+
+Under one common independent judge (`deepseek-v4.1-flash`), the deployed configuration has
+faithfulness 4.32 / 5, 61% of drafts fully grounded, and 1 contradiction with the evidence
+(down from 3 without the judge).
+
+### Run locally
 
 ```bash
 pip install -r requirements-dev.txt          # includes requirements-agent.txt
-# .env: AI_API_KEY=..., MUEEN_API_KEYS=<key for the site>, optional MUEEN_SERVICE_UNTIL=YYYY-MM-DD
+# .env: see .env.example (Gemini profile, judge endpoint, MUEEN_API_KEYS, MUEEN_SERVICE_UNTIL)
 RETRIEVER=mock uvicorn api.main:app --port 8000      # no models needed
 uvicorn api.main:app --port 8000                     # after python -m ingest.build_all
-python -m eval.run_eval agent --api http://localhost:8000 --judge
+python -m eval.run_eval agent --api http://localhost:8000
+AI_MODEL=<judge> python -m eval.rejudge eval/results/<run>.json     # common-judge re-score
 ```
+
+### Deploy
+
+* Own server (Ubuntu 24.04, 8 GB): `deploy/setup.sh` — Docker, Qdrant, knowledge base,
+  API, Caddy HTTPS, firewall; `deploy/update.sh`, `deploy/stop.sh`.
+* Dokploy: `deploy/docker-compose.dokploy.yml`.
+* Details: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Repository layout
 
@@ -80,14 +121,22 @@ retrieval/        runtime library (what the agent imports)
   config.py         all settings (env vars)
 ingest/           build pipeline: download → quran → bayyinat → build_index (build_all)
 data/glossary.json, data/embeddings/   committed data; everything else under data/ is generated
-eval/             retrieval_cases.yaml, safety_cases.yaml, run_eval.py, results/
-docs/             HANDOFF, ARCHITECTURE, SOURCES, DISCLOSURE, SAFETY, PRIVACY, EVALUATION, DECISIONS
+agent/            LangGraph agent: state, nodes, rules, prompts/, templates, llm (model clients)
+api/              FastAPI service: /suggest, /suggest/regenerate, /feedback, /stats, /health
+deploy/           setup/update/stop scripts, Caddy + production compose, Dokploy compose
+eval/             retrieval_cases.yaml, safety_cases.yaml, run_eval.py, rejudge.py, results/
+docs/             HANDOFF, ARCHITECTURE, AGENT, API_INTEGRATION, DEPLOY, AGENT_WORKLOG,
+                  SOURCES, DISCLOSURE, SAFETY, PRIVACY, EVALUATION, DECISIONS
 tests/            pytest suite
 ```
 
 ## Documents
 
-* [HANDOFF](docs/HANDOFF.md) — how the agent uses this layer (start here)
+* [HANDOFF](docs/HANDOFF.md) — how the agent uses the knowledge layer
+* [AGENT](docs/AGENT.md) — the agent pipeline, guarantees and configuration
+* [API_INTEGRATION](docs/API_INTEGRATION.md) — for the sheykak.com team
+* [DEPLOY](docs/DEPLOY.md) — server and Dokploy deployment
+* [AGENT_WORKLOG](docs/AGENT_WORKLOG.md) — step-by-step log and decisions (Arabic)
 * [ARCHITECTURE](docs/ARCHITECTURE.md) — how retrieval works
 * [EVALUATION](docs/EVALUATION.md) — measured results and the chosen thresholds
 * [SOURCES](docs/SOURCES.md) — every source, version, licence and processing step

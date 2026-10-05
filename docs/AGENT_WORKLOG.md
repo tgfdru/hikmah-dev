@@ -206,3 +206,7 @@ docker compose up -d api        # على 127.0.0.1:8000؛ ضع أمامه revers
 - **الأوامر:** `VERIFY_LLM_JUDGE=1 AI_JUDGE_BASE_URL=https://opencode.ai/zen/v1 AI_MODEL_JUDGE=gpt-5.4-nano` مع `.env.gemini` ثم `eval.run_eval agent` ثم `eval.rejudge`.
 - **النتيجة:** 39/41؛ المستوى 100%؛ المخالفات للأدلة (بمحكّم مشترك) من 3 إلى 1؛ الأمانة 4.32 والإسناد 61%؛ متوسط الزمن 29.7 ث. **القرار:** النشر بـ Gemini + المحكّم `gpt-5.4-nano`.
 - **ملاحظة:** طلب فواز (تثبيت Claude GitHub App وإضافته متعاونًا بصلاحية Write) يُنفذه نادر بنفسه — الإضافة من الجلسة محجوبة (403).
+
+### 2026-10-06 — التوثيق ونشر Dokploy
+- **ما تم:** ملف `deploy/docker-compose.dokploy.yml` (Qdrant + بناء المعرفة مرة واحدة + الـ API خلف Traefik)؛ تحديث `README.md` (الطبقتان، النتائج المقاسة، النشر، توضيح أن النظام استرجاع معزّز RAG بلا تدريب للنماذج) و`docs/AGENT.md` (المحكّم المستقل، المتغيرات الجديدة، الحدود المقاسة) و`docs/DEPLOY.md`.
+- **حالة النشر:** حساب Hetzner قيد التحقق اليدوي؛ البدائل: GitHub Student Pack (رصيد DigitalOcean) أو Azure for Students أو خادم Dokploy لدى أحد أعضاء الفريق.

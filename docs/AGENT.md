@@ -21,7 +21,7 @@ analyze ─► route ──(D)────────────────�
 | 2 | Safety Router | `nodes.py:route` | Level A–D from the challenge pack. The keyword rule (`rules.level_d_hint`: first person **and** ruling word **and** personal circumstance) is only a hint; when the analyzer **and** the rule both see a personal case the level is raised to D (pack: "choose the more cautious level") | yes (`Routing`) |
 | 3 | Hybrid Retriever | `nodes.py:retrieve` | `retrieve([seeker words, Arabic query, core question], lang)`; keeps evidence ≥ `ABSTAIN_THRESHOLD`; hadith requests use `types=["hadith"]` only; adds the correct verse of a misquote from `get_verbatim` | no |
 | 4 | Draft Generator | `nodes.py:generate` | Draft in the seeker's language + Arabic copy + note for the da'i; level-specific rules; relevant glossary terms (`glossary_for`); Quran/hadith **only as placeholders** `[[Q:2:144]]` | yes (`Draft`) |
-| 5 | Citation Verifier | `nodes.py:verify` / `check_draft` | Deterministic checks (below), optional LLM judge (`VERIFY_LLM_JUDGE=1`); replaces placeholders with the exact text from the store | optional (`Judgement`) |
+| 5 | Citation Verifier | `nodes.py:verify` / `check_draft` | Deterministic checks (below), then an **independent LLM judge** (`VERIFY_LLM_JUDGE=1`, its own endpoint): a claim that contradicts the evidence blocks the draft (retry, then `unverified`); a detail not in the evidence is returned in `issues` as a review point for the da'i; judge outage is fail-open but marked. Replaces placeholders with the exact text from the store | optional (`Judgement`) |
 | – | Refer | `nodes.py:refer` | Level D: fixed personal-case template; Level C with no evidence: fixed "ask a specialist" template (`agent/templates.py`). No ruling, no generation | only to translate a template into a language without one |
 | – | Abstain | `nodes.py:abstain` | No evidence above the threshold, or a hadith request with no authentic hadith in the sources | same |
 
@@ -79,12 +79,15 @@ the request with a clear error.
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL` | OpenCode Zen, –, `space-bunny-free` | LLM endpoint (OpenAI-compatible) |
+| `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL` | OpenCode Zen, –, `space-bunny-free` | LLM endpoint (OpenAI-compatible). Deployed configuration: Gemini via AI Studio (`.env.example` profile) |
 | `AI_MODEL_ANALYZE` / `_ROUTE` / `_GENERATE` / `_JUDGE` | `AI_MODEL` | Per-stage model override |
+| `AI_MODEL_FALLBACK` | empty | Models tried in order on HTTP 429/5xx (same endpoint) |
+| `AI_PROTOCOL` | `auto` | Wire protocol; on OpenCode Zen `gpt-*` → Responses, `claude-*` → Anthropic Messages |
+| `AI_JUDGE_BASE_URL`, `AI_JUDGE_API_KEY` | main endpoint | Separate endpoint for the independent judge (deployed: `gpt-5.4-nano` on OpenCode Zen) |
 | `RETRIEVER` | `hybrid` | `mock` = 3 fixed items, no models (development, tests) |
 | `ABSTAIN_THRESHOLD` | per reranker (0.35 for `minilm`) | Below this best score → abstain |
 | `MAX_DRAFT_ATTEMPTS` | `2` | Drafts before "unverified" |
-| `VERIFY_LLM_JUDGE` | `0` | Second verification layer (one more LLM call) |
+| `VERIFY_LLM_JUDGE` | `0` (deployed: `1`) | Second verification layer (one more LLM call, ≈5 s with `gpt-5.4-nano`) |
 | `MUEEN_API_KEYS` | empty | Accepted `X-API-Key` values; empty = no check (dev only) |
 | `MUEEN_SERVICE_UNTIL` | empty | Last day the service answers (YYYY-MM-DD) |
 | `MUEEN_RUN_LOG` | `1` | Privacy-safe JSONL log in `WORK_DIR/logs/runs.jsonl` |
@@ -119,13 +122,18 @@ The graph tests run fully offline with `RETRIEVER=mock` and a scripted LLM
 (`tests/agent_fakes.py`): happy path, fabricated reference → retry, double failure →
 unverified, model-written brackets, Level C consensus claim, Level D referral,
 hadith request → abstain, low confidence → abstain, template translation,
-regenerate style, API key, service end date, privacy of the run log.
+regenerate style, API key, service end date, privacy of the run log, model fallback,
+wire-protocol selection, judge endpoint, judge contradiction → retry/unverified, judge
+advisory issues, judge outage. 88 tests pass.
 
 ## 8. Known limits
 
 * Latency: 3 sequential LLM calls + retrieval (retrieval measured by the knowledge
-  layer at ≈1.7 s on CPU with `minilm`). Measured end to end with `space-bunny-free`:
-  mean 30 s, p90 57 s (EVALUATION.md §4); drafting is the slowest stage. A faster model per
+  layer at ≈1.7 s on CPU with `minilm`) + the judge. Measured end to end: mean 30 s, p90 57 s
+  with `space-bunny-free` (EVALUATION.md §4); mean 29.7 s, p90 52.2 s with Gemini + judge
+  (§4.3); drafting is the slowest stage and varies with the provider's load.
+* Groundedness: an independent judge finds details outside the evidence in most drafts
+  (≈61% fully grounded, §4.2–4.3); they are shown to the da'i as review points. A faster model per
   stage can be set with `AI_MODEL_*`. The response includes `timings_ms` per stage (logged too).
 * Hadith: none in the store while Dorar is off (see DECISIONS); hadith requests abstain.
 * Translations of verses exist for `en`/`ur`; other languages get English.
