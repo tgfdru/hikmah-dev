@@ -35,7 +35,8 @@ RETRIEVER=mock ...                        # 3 fixed evidence items, no models
 ## Map
 
 * `retrieval/` runtime library — see docs/ARCHITECTURE.md
-* `ingest/` build pipeline — download → quran → bayyinat → build_index
+* `ingest/` build pipeline — download → quran → bayyinat → (shamela, opt-in) → build_index;
+  Shamela book list in `ingest/shamela_books.yaml` (only the content team changes it)
 * `eval/` cases + runner; results in `eval/results/`, summary in docs/EVALUATION.md
 * `docs/HANDOFF.md` how the agent uses this layer; `docs/DECISIONS.md` scope decisions
 * `agent/` LangGraph agent, `api/` FastAPI service — docs/AGENT.md, docs/API_INTEGRATION.md, docs/AGENT_WORKLOG.md

@@ -13,7 +13,7 @@
 
 | Standard (المعيار العلمي الملزم) | Mechanism in this repo |
 |---|---|
-| Reliability & attribution: every quote traceable; never attribute text to a source that does not contain it | `get_verbatim()` is the only source of Quran text; every `Evidence` has `source`, `ref` and `source_url` (Bayyinat links to the exact PDF page). Unknown ids return `None`. |
+| Reliability & attribution: every quote traceable; never attribute text to a source that does not contain it | `get_verbatim()` is the only source of Quran text; every `Evidence` has `source`, `ref` and `source_url` (Bayyinat links to the exact PDF page). Unknown ids return `None`. Shamela passages cite the book, printed volume/page and the shamela.ws page. |
 | Distinguish scripture from generated explanation | Evidence carries `type`; Quran text comes from the store, never from the model (placeholders `[[Q:…]]` are resolved by the agent). |
 | Do not present disputed matters as certain | Level C handling is in the agent; Bayyinat evidence is labelled with its question so the da'i sees the context. |
 | No independent fatwa | Level D routing is in the agent; this layer has no fatwa content (Quranpedia fatwa files were deliberately not ingested). |
@@ -31,10 +31,23 @@ optional Dorar tool (off by default) keeps only authentic grades and resolves
 through the same verbatim path. With it off, the correct behaviour for any hadith
 request is to say that no matching hadith was found in the approved sources.
 
+## Shamela books
+
+* Only a reviewed list (`ingest/shamela_books.yaml`): books answering other religions
+  and modern ideologies, and creed works from the first three centuries. Inner-Muslim
+  sectarian polemics and works aimed at named persons are excluded, because the pack
+  puts "judging persons and groups" out of scope. Content-team review still pending.
+* Some early creed works are collections of hadith and reports with chains but no
+  grade. They are searchable as explanation only: the drafting prompt forbids quoting
+  a hadith from a passage, and a `[[H:…]]` placeholder can only point at graded
+  hadith evidence. Verses cited in a passage are shown from the verbatim store.
+* Editors' footnotes are not indexed; only the author's text is.
+
 ## Known limits (be honest in the demo)
 
 * Bayyinat covers 263 frequent questions; anything else falls back to Quran verses
   only, where the evidence is thinner and abstaining is more likely.
-* Tafsir, fiqh encyclopedias and the Dorar aqeeda/history sections are not included.
+* Tafsir, fiqh encyclopedias and the Dorar aqeeda/history sections are not included;
+  Shamela is limited to 33 selected books.
 * The Jamhara glossary entries are copied verbatim but have not yet been reviewed
   by the team's content member.
