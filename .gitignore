@@ -25,3 +25,6 @@ data/models/
 
 # Agent run log (privacy-safe, but local only)
 data/logs/
+
+# Compiled Java helpers
+ingest/java/*.class

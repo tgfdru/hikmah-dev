@@ -1,0 +1,140 @@
+{
+  "accuracy": 1.0,
+  "cases": [
+    {
+      "text": "قل هو الله واحد",
+      "expected": "Q:112:1",
+      "expected_exact": false,
+      "got": "Q:112:1",
+      "similarity": 0.966,
+      "exact": false,
+      "pass": true
+    },
+    {
+      "text": "قُلْ هُوَ اللَّهُ أَحَدٌ",
+      "expected": "Q:112:1",
+      "expected_exact": true,
+      "got": "Q:112:1",
+      "similarity": 1.0,
+      "exact": true,
+      "pass": true
+    },
+    {
+      "text": "ان الدين عند الله هو الاسلام",
+      "expected": "Q:3:19",
+      "expected_exact": false,
+      "got": "Q:3:19",
+      "similarity": 0.943,
+      "exact": false,
+      "pass": true
+    },
+    {
+      "text": "إن الدين عند الله الإسلام",
+      "expected": "Q:3:19",
+      "expected_exact": true,
+      "got": "Q:3:19",
+      "similarity": 1.0,
+      "exact": true,
+      "pass": true
+    },
+    {
+      "text": "لا اكراه في الدين قد تبين الرشد من الضلال",
+      "expected": "Q:2:256",
+      "expected_exact": false,
+      "got": "Q:2:256",
+      "similarity": 0.949,
+      "exact": false,
+      "pass": true
+    },
+    {
+      "text": "لا إكراه في الدين قد تبين الرشد من الغي",
+      "expected": "Q:2:256",
+      "expected_exact": true,
+      "got": "Q:2:256",
+      "similarity": 1.0,
+      "exact": true,
+      "pass": true
+    },
+    {
+      "text": "الله لا اله الا هو الحي القيوم لا تاخذه نوم ولا سنه",
+      "expected": "Q:2:255",
+      "expected_exact": false,
+      "got": "Q:2:255",
+      "similarity": 0.94,
+      "exact": false,
+      "pass": true
+    },
+    {
+      "text": "وما خلقت الجن والانس الا ليعبدوني",
+      "expected": "Q:51:56",
+      "expected_exact": false,
+      "got": "Q:51:56",
+      "similarity": 0.985,
+      "exact": false,
+      "pass": true
+    },
+    {
+      "text": "وما خلقت الجن والإنس إلا ليعبدون",
+      "expected": "Q:51:56",
+      "expected_exact": true,
+      "got": "Q:51:56",
+      "similarity": 1.0,
+      "exact": true,
+      "pass": true
+    },
+    {
+      "text": "يا ايها الناس انا خلقناكم من ذكر وانثى وجعلناكم شعوبا وقبائل لتعارفوا",
+      "expected": "Q:49:13",
+      "expected_exact": true,
+      "got": "Q:49:13",
+      "similarity": 1.0,
+      "exact": true,
+      "pass": true
+    },
+    {
+      "text": "يا ايها الناس انا خلقناكم من ذكر وانثى وجعلناكم امما وقبائل لتتعارفوا",
+      "expected": "Q:49:13",
+      "expected_exact": false,
+      "got": "Q:49:13",
+      "similarity": 0.942,
+      "exact": false,
+      "pass": true
+    },
+    {
+      "text": "الحمد لله رب العالمين الرحمن الرحيم",
+      "expected": "Q:1:2-3",
+      "expected_exact": true,
+      "got": "Q:1:2-3",
+      "similarity": 1.0,
+      "exact": true,
+      "pass": true
+    },
+    {
+      "text": "هذه جملة عادية ليست من القرآن الكريم",
+      "expected": null,
+      "expected_exact": null,
+      "got": null,
+      "similarity": null,
+      "exact": null,
+      "pass": true
+    },
+    {
+      "text": "أهلا وسهلا بك يا أخي كيف حالك اليوم",
+      "expected": null,
+      "expected_exact": null,
+      "got": null,
+      "similarity": null,
+      "exact": null,
+      "pass": true
+    },
+    {
+      "text": "إنما الأعمال بالنيات وإنما لكل امرئ ما نوى",
+      "expected": null,
+      "expected_exact": null,
+      "got": null,
+      "similarity": null,
+      "exact": null,
+      "pass": true
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+# Shamela books added to the search index (type "dawah"). Selection rules, from the
+# challenge reference pack (docs/reference/, updated pack 2026-10):
+#   * religions: books answering other religions and modern ideologies (the questions
+#     non-Muslim seekers actually ask); inner-Muslim sectarian polemics and works aimed at
+#     named persons are excluded, because the pack puts "judging persons and groups"
+#     out of scope.
+#   * early_aqeedah: creed works by authors who died within the first three Hijri
+#     centuries (the pack: "any Islamic sources in the first three centuries").
+#     One edition per work.
+# Reviewed by: (pending — content team)
+religions:
+  - {id: 6517, title: "الإعلام بما في دين النصارى من الفساد والأوهام", author: "القرطبي (656هـ)"}
+  - {id: 37541, title: "الحسام الممدود في الرد على اليهود", author: "عبد الحق الإسلامي (750هـ)"}
+  - {id: 5705, title: "هداية الحيارى في أجوبة اليهود والنصارى", author: "ابن القيم (751هـ)"}
+  - {id: 10895, title: "منحة القريب المجيب في الرد على عباد الصليب", author: "آل معمر (1244هـ)"}
+  - {id: 30631, title: "الزبد المليح من كتاب الجواب الصحيح لمن بدل دين المسيح", author: "مختصر لكتاب ابن تيمية"}
+  - {id: 22397, title: "مناظرة بين الإسلام والنصرانية", author: "مجموعة من المؤلفين"}
+  - {id: 38182, title: "تأملات في الأناجيل والعقيدة", author: "بهاء النحال"}
+  - {id: 95583, title: "افتراءات إنجيل متى", author: "بهاء النحال"}
+  - {id: 38188, title: "هل افتدانا المسيح على الصليب", author: "منقذ السقار"}
+  - {id: 38189, title: "هل العهد الجديد كلمة الله", author: "منقذ السقار"}
+  - {id: 38190, title: "هل العهد القديم كلمة الله", author: "منقذ السقار"}
+  - {id: 38191, title: "هل بشر الكتاب المقدس بمحمد صلى الله عليه وسلم", author: "منقذ السقار"}
+  - {id: 95570, title: "الله جل جلاله واحد أم ثلاثة", author: "منقذ السقار"}
+  - {id: 122258, title: "جهود علماء المسلمين في نقد الكتاب المقدس", author: "رمضان الدسوقي"}
+  - {id: 3823, title: "موجز تاريخ اليهود والرد على بعض مزاعمهم الباطلة", author: "محمود قدح"}
+  - {id: 30912, title: "الأديان الوضعية", author: "جامعة المدينة العالمية"}
+  - {id: 69, title: "دراسة علم الأديان", author: "عبد المجيد الوعلان"}
+  - {id: 38726, title: "موسوعة المذاهب الفكرية المعاصرة", author: "مجموعة من المؤلفين"}
+  - {id: 1075, title: "اتجاهات فكرية معاصرة", author: "جامعة المدينة العالمية"}
+  - {id: 96612, title: "العلمانية - نشأتها وتطورها", author: "سفر الحوالي"}
+  - {id: 96931, title: "العلمانية المفهوم والمظاهر والأسباب", author: "مصطفى باحو"}
+  - {id: 1357, title: "حدود حرية الفكر في الشريعة الإسلامية", author: "صالح البقمي"}
+  - {id: 302, title: "حول شبهة الرقيق", author: "محمد الأمين الشنقيطي (1393هـ)"}
+  - {id: 169, title: "مع المشككين في السنة", author: "عبد الرحمن الخميسي"}
+early_aqeedah:
+  - {id: 6418, title: "أصول السنة", author: "أحمد بن حنبل (241هـ)"}
+  - {id: 7623, title: "الرد على الجهمية والزنادقة", author: "أحمد بن حنبل (241هـ)"}
+  - {id: 6484, title: "شرح السنة", author: "المزني (264هـ)"}
+  - {id: 121, title: "إجماع السلف في الاعتقاد كما حكاه حرب الكرماني", author: "حرب الكرماني (280هـ)"}
+  - {id: 1269, title: "الإيمان", author: "أبو عبيد القاسم بن سلام (224هـ)"}
+  - {id: 7767, title: "الإيمان", author: "ابن أبي شيبة (235هـ)"}
+  - {id: 6388, title: "الفقه الأكبر", author: "أبو حنيفة (150هـ)"}
+  - {id: 6387, title: "الفقه الأبسط", author: "أبو حنيفة (150هـ)"}
+  - {id: 6474, title: "رسالة في أن القرآن غير مخلوق", author: "إبراهيم الحربي (285هـ)"}

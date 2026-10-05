@@ -34,3 +34,34 @@ def test_find_quotes_in_message():
     found = find_quran_quotes('He said the Quran says «قل هو الله واحد» and "إن الدين عند الله الإسلام".')
     assert [m.ref_id for m in found] == ["Q:112:1", "Q:3:19"]
     assert [m.is_exact for m in found] == [False, True]
+
+
+@needs_store
+def test_quote_of_three_or_more_ayahs_is_exact():
+    from retrieval.ayah_match import match_ayah
+    from retrieval.verbatim import get_verbatim
+
+    # A range rendered from the store (with ayah markers) must match itself exactly.
+    m = match_ayah(get_verbatim("Q:81:19-21", "ar").text_ar)
+    assert m.ref_id == "Q:81:19-21" and m.is_exact
+    m = match_ayah(get_verbatim("Q:112:1-4", "ar").text_ar)
+    assert m.ref_id == "Q:112:1-4" and m.is_exact
+
+
+@needs_store
+def test_reference_next_to_a_verse_is_not_part_of_the_quote():
+    from retrieval.ayah_match import find_quran_quotes
+    from retrieval.verbatim import get_verbatim
+
+    verse = get_verbatim("Q:87:7", "ar").text_ar
+    msg = f"It reminds us (\n﴿{verse}﴾ [الأعلى: 7]\n“Except what Allah may will.” (Quran 87:7)\n) of His will."
+    found = find_quran_quotes(msg)
+    assert [m.ref_id for m in found] == ["Q:87:7"] and found[0].is_exact
+
+
+@needs_store
+def test_model_written_fragment_is_still_flagged():
+    from retrieval.ayah_match import find_quran_quotes
+
+    found = find_quran_quotes("قال تعالى: ﴿قل هو الله واحد﴾ [الإخلاص: 1]")
+    assert found and found[0].ref_id == "Q:112:1" and not found[0].is_exact
