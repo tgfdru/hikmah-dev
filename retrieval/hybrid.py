@@ -34,7 +34,7 @@ POINT_NS = uuid.UUID("5b0d6f5e-6a64-4bb5-9b0e-2f7a0c1c9e11")
 RRF_K = 60
 PER_QUERY = 20
 MAX_QUERIES = 4
-MAX_PER_QUESTION = 2  # Bayyinat chunks from the same question
+MAX_PER_QUESTION = 2  # passages from the same Bayyinat question or Shamela book
 
 
 def point_id(logical_id: str) -> str:
@@ -185,15 +185,16 @@ class HybridRetriever:
                  k: int = 6) -> list[Evidence]:
         t0 = time.time()
         wanted = list(types) if types else None
-        local_types = [t for t in (wanted or ["quran", "qa"]) if t != "hadith"]
+        local_types = [t for t in (wanted or ["quran", "qa", "dawah"]) if t != "hadith"]
         cands = self.search(queries, local_types or None) if local_types else []
 
         evidence: list[Evidence] = []
         per_question: dict[str, int] = {}
         for c in cands:
             doc = self.docs[c.id]
-            if doc["type"] == "qa":
-                parent = doc.get("parent_id") or doc["id"]
+            if doc["type"] in ("qa", "dawah"):
+                # one Bayyinat question / one Shamela book must not fill every slot
+                parent = doc.get("parent_id") or (f"book:{doc['book_id']}" if doc.get("book_id") else doc["id"])
                 if per_question.get(parent, 0) >= MAX_PER_QUESTION:
                     continue
                 per_question[parent] = per_question.get(parent, 0) + 1

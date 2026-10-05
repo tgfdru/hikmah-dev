@@ -120,7 +120,7 @@ def embed_all(records: list[dict], batch: int = 32) -> np.ndarray:
 
 def payload(r: dict) -> dict:
     keep = ("id", "type", "text_ar", "translations", "source", "ref", "grade", "source_url",
-            "title", "surah", "ayah", "parent_id", "part")
+            "title", "surah", "ayah", "parent_id", "part", "book_id", "group")
     return {k: r[k] for k in keep if k in r}
 
 

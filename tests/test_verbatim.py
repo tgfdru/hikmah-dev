@@ -66,3 +66,11 @@ def test_quran_refs_in_text():
 
     text = "قال تعالى ﴿...﴾ [البقرة: 144] وقال ﴿...﴾ [آل عمران: 96-97] و[النور: 999]"
     assert quran_refs_in(text) == ["Q:2:144", "Q:3:96-97"]
+
+
+@needs_store
+def test_quran_refs_in_shamela_formats():
+    from retrieval.verbatim import quran_refs_in
+
+    text = "قال تعالى ﴿...﴾ [المائدة:٥٠] وقال ﴿...﴾ (الحديد: ٢٧) و(سورة الإخلاص: ١-٤)"
+    assert quran_refs_in(text) == ["Q:5:50", "Q:57:27", "Q:112:1-4"]

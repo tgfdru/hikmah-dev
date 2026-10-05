@@ -128,11 +128,16 @@ class VerbatimStore:
         return None
 
 
-_REF_IN_TEXT = re.compile(r"\[([\u0621-\u064a ]{2,20}):\s*(\d{1,3})(?:-(\d{1,3}))?\]")
+# "[البقرة: 144]", "[المائدة:٥٠]", "(الحديد: ٢٧)", "[آل عمران: 96-97]", optionally "سورة ...".
+_REF_IN_TEXT = re.compile(
+    r"[\[(](?:سورة\s+)?([\u0621-\u064a ]{2,20}?)\s*:\s*([\d\u0660-\u0669]{1,3})"
+    r"(?:\s*[-–]\s*([\d\u0660-\u0669]{1,3}))?\s*[\])]"
+)
+_INDIC = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
 
 
 def quran_refs_in(text: str) -> list[str]:
-    """Quran ids cited in a text as "[البقرة: 144]" or "[آل عمران: 96-97]".
+    """Quran ids cited in a text as "[البقرة: 144]", "(المائدة: ٥٠)" or "[آل عمران: 96-97]".
 
     Bayyinat evidence quotes verses this way; the agent can allow these ids in
     its [[Q:...]] placeholders because the verses are part of that evidence.
@@ -142,6 +147,7 @@ def quran_refs_in(text: str) -> list[str]:
     out = []
     for name, a, b in _REF_IN_TEXT.findall(text or ""):
         s = names.get(name.strip())
+        a, b = a.translate(_INDIC), b.translate(_INDIC)
         if s:
             ref = f"Q:{s}:{a}" if not b else f"Q:{s}:{a}-{b}"
             if store.get_quran(ref, "ar") and ref not in out:
