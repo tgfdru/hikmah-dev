@@ -26,9 +26,12 @@ MIN_CHARS = 12  # shorter snippets are too ambiguous to attribute to one ayah
 DEFAULT_THRESHOLD = 0.80
 
 
+MAX_SPAN = 8  # longest run of consecutive ayahs one quotation is matched against
+
+
 @dataclass
 class AyahMatch:
-    ref_id: str  # "Q:112:1" or "Q:2:255-256" when the quote spans two ayahs
+    ref_id: str  # "Q:112:1", or "Q:81:19-21" when the quote spans several ayahs
     similarity: float  # 0-1, on normalized text
     is_exact: bool  # quote matches the ayah text exactly (ignoring diacritics)
     quoted: str  # the snippet that was matched
@@ -39,19 +42,18 @@ class _AyahIndex:
         rows = list(get_store().iter_ayahs())
         self.refs: list[tuple[int, int]] = [(s, a) for s, a, _, _ in rows]
         self.texts: list[str] = [self._key(t) for _, _, t, _ in rows]
-        # Consecutive ayah pairs, for quotes that run across an ayah boundary.
-        self.pair_refs = [
-            (self.refs[i], self.refs[i + 1])
-            for i in range(len(rows) - 1)
-            if self.refs[i][0] == self.refs[i + 1][0]
-        ]
-        pos = {r: i for i, r in enumerate(self.refs)}
-        self.pair_texts = [self.texts[pos[a]] + " " + self.texts[pos[b]] for a, b in self.pair_refs]
 
     @staticmethod
     def _key(text: str) -> str:
-        # Search key: normalized letters only; ignore punctuation and Quranic stop marks.
-        return re.sub(r"[^ء-ي ]+", "", norm(text)).strip()
+        # Search key: normalized letters only; ignore punctuation, ayah markers and digits.
+        return re.sub(r"\s+", " ", re.sub(r"[^\u0621-\u064a ]+", " ", norm(text))).strip()
+
+    def window(self, start: int, length: int) -> str | None:
+        """Text of `length` consecutive ayahs from `start`, if they are in one surah."""
+        end = start + length - 1
+        if start < 0 or end >= len(self.refs) or self.refs[start][0] != self.refs[end][0]:
+            return None
+        return " ".join(self.texts[start:end + 1])
 
 
 @lru_cache(maxsize=1)
@@ -59,57 +61,68 @@ def _index() -> _AyahIndex:
     return _AyahIndex()
 
 
-def _best(query: str, choices: list[str]) -> tuple[int, float]:
-    # Coarse pass: partial_ratio finds the ayah that contains the quote.
-    cands = process.extract(query, choices, scorer=fuzz.partial_ratio, limit=8)
-    best_i, best_s = -1, 0.0
-    for _, _, i in cands:
-        text = choices[i]
-        # Fine pass: compare against the best-aligned window of the ayah.
-        if len(query) < len(text):
-            align = fuzz.partial_ratio_alignment(query, text)
-            window = text[align.dest_start:align.dest_end] if align else text
-        else:
-            window = text
-        s = fuzz.ratio(query, window) / 100
-        if s > best_s:
-            best_i, best_s = i, s
-    return best_i, best_s
+def _fine_score(query: str, text: str) -> float:
+    """Similarity of the quote to the best-aligned part of `text` (0-1)."""
+    if len(query) < len(text):
+        align = fuzz.partial_ratio_alignment(query, text)
+        if align:
+            text = text[align.dest_start:align.dest_end]
+    return fuzz.ratio(query, text) / 100
 
 
 def match_ayah(text: str, threshold: float = DEFAULT_THRESHOLD) -> AyahMatch | None:
-    """Return the closest ayah to `text`, or None if nothing is similar enough."""
+    """Return the closest ayah (or run of consecutive ayahs) to `text`, or None."""
     idx = _index()
     query = _AyahIndex._key(text)
     if len(query) < MIN_CHARS:
         return None
-    i, s = _best(query, idx.texts)
-    ref = f"Q:{idx.refs[i][0]}:{idx.refs[i][1]}" if i >= 0 else None
-    if s < 0.98:  # maybe the quote runs across two ayahs
-        j, s2 = _best(query, idx.pair_texts)
-        if s2 > s + 0.03:
-            (su, a1), (_, a2) = idx.pair_refs[j]
-            ref, s = f"Q:{su}:{a1}-{a2}", s2
-    if ref is None or s < threshold:
+    # Coarse pass: the ayahs that best contain part of the quote.
+    cands = process.extract(query, idx.texts, scorer=fuzz.partial_ratio, limit=8)
+    best: tuple[float, int, int] | None = None  # (score, start, length)
+    for _, _, i in cands:
+        for length in range(1, MAX_SPAN + 1):
+            # Every window of this length that contains candidate ayah i.
+            for start in range(i - length + 1, i + 1):
+                window = idx.window(start, length)
+                if window is None:
+                    continue
+                score = _fine_score(query, window)
+                # Prefer the higher score; on a tie, the shorter span.
+                if best is None or score > best[0] + 1e-9:
+                    best = (score, start, length)
+            if len(" ".join(idx.texts[i:i + length])) > len(query) * 1.3:
+                break  # longer windows cannot fit the quote better
+    if best is None or best[0] < threshold:
         return None
-    return AyahMatch(ref_id=ref, similarity=round(s, 3), is_exact=s >= 0.995, quoted=text.strip())
+    score, start, length = best
+    s, a1 = idx.refs[start]
+    a2 = idx.refs[start + length - 1][1]
+    ref = f"Q:{s}:{a1}" if length == 1 else f"Q:{s}:{a1}-{a2}"
+    return AyahMatch(ref_id=ref, similarity=round(score, 3), is_exact=score >= 0.995, quoted=text.strip())
 
 
-_QUOTE_SPANS = re.compile(r"﴿([^﴾]+)﴾|«([^»]+)»|\"([^\"]+)\"|“([^”]+)”|\(([^)]{12,})\)")
+_VERSE_BRACKETS = re.compile(r"﴿([^﴾]+)﴾")
+_OTHER_QUOTES = re.compile(r"«([^»]+)»|\"([^\"]+)\"|“([^”]+)”|\(([^)]{12,})\)")
+_REFERENCE = re.compile(r"\[[^\]]{1,40}\]")  # "[البقرة: 144]" next to a quote
 
 
 def find_quran_quotes(message: str, threshold: float = DEFAULT_THRESHOLD) -> list[AyahMatch]:
     """Find ayah-like quotations inside a free-text message.
 
-    Checks explicit quotes first (﴿﴾ «» "" “” and long parentheses); if none,
-    checks each Arabic sentence of the message. Returns matches sorted by position.
+    Quran brackets ﴿﴾ are read first, each on its own; then other quotes (« » "" “”
+    and long parentheses) in the remaining text. References like "[البقرة: 144]" are
+    ignored, so a surah name is never compared as if it were part of a verse. With no
+    quotes at all, each Arabic sentence is checked.
     """
-    spans = [next(g for g in m.groups() if g) for m in _QUOTE_SPANS.finditer(message)]
+    spans = [m.group(1) for m in _VERSE_BRACKETS.finditer(message)]
+    rest = _REFERENCE.sub(" ", _VERSE_BRACKETS.sub(" ", message))
+    spans += [next(g for g in m.groups() if g) for m in _OTHER_QUOTES.finditer(rest)]
     if not spans:
-        spans = [p for p in re.split(r"[.!?؟،,\n:؛]+", message) if p.strip()]
+        spans = [p for p in re.split(r"[.!?؟،,\n:؛]+", rest) if p.strip()]
     found: list[AyahMatch] = []
     for span in spans:
-        if len(re.findall(r"[ء-ي]", strip_diacritics(span))) < MIN_CHARS:
+        span = _REFERENCE.sub(" ", span)
+        if len(re.findall(r"[\u0621-\u064a]", strip_diacritics(span))) < MIN_CHARS:
             continue
         m = match_ayah(span, threshold)
         if m and all(m.ref_id != f.ref_id for f in found):

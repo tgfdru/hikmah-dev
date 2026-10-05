@@ -36,18 +36,34 @@ def _model():
     return fasttext.load_model(str(MODEL_PATH))
 
 
+_QUOTED = re.compile(r"﴿[^﴾]*﴾|«[^»]*»|\[\[[^\]]*\]\]|\[[^\]]{1,40}\]")
+_LATIN = re.compile(r"[A-Za-z]")
+_LETTER = re.compile(r"[^\W\d_]")
+
+
+def _without_quotes(text: str) -> str:
+    """Drop quoted scripture, placeholders and references: an Urdu or English message
+    quoting an Arabic verse is still Urdu or English."""
+    stripped = re.sub(r"\s+", " ", _QUOTED.sub(" ", text)).strip()
+    return stripped if len(_LETTER.findall(stripped)) >= 3 else text
+
+
 def detect_language(text: str) -> tuple[str, float]:
     """Return (ISO 639-1-ish code, confidence 0-1). Empty text -> ("en", 0.0)."""
     text = re.sub(r"\s+", " ", text or "").strip()
     if not text:
         return "en", 0.0
-    words = re.findall(r"[a-zA-Z']+", text.lower())
+    text = _without_quotes(text)
     labels = _model().f.predict(text + "\n", 3, 0.0, "strict")
     prob, label = labels[0]
     code = label.replace("__label__", "")
     code = _FOLD.get(code, code)
-    if words and code != "en":
-        share = sum(w in _EN_WORDS for w in words) / len(words)
+    # Short English is often labelled Malay/Indonesian; only applies to mostly-Latin text,
+    # so a few English words inside an Urdu or Arabic reply do not flip its language.
+    letters = len(_LETTER.findall(text))
+    if code != "en" and letters and len(_LATIN.findall(text)) / letters >= 0.6:
+        words = re.findall(r"[a-zA-Z']+", text.lower())
+        share = sum(w in _EN_WORDS for w in words) / len(words) if words else 0
         if share >= 0.3 and len(words) >= 2:
             return "en", round(max(prob, share), 3)
     return code, round(float(prob), 3)

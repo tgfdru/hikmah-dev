@@ -246,3 +246,31 @@ point), but it does not raise overall groundedness by itself. Failures: `hostile
 (`unverified`, as in §4.1) and `cultural_term_en` (a Quran-like phrase flagged inexact by the
 checker). Latency varies mostly with Google's load, not with the judge.
 
+
+### 4.4 Checker fixes (knowledge layer) — 2026-10-05
+
+Three false alarms in §4–4.3 came from the knowledge layer's checkers, not from the agent:
+
+* `find_quran_quotes` compared at most two consecutive ayahs, so a correct three-ayah
+  block inserted from the store (Q:81:19-21) scored 0.85. It now matches runs of up to 8
+  ayahs.
+* It also read a whole parenthesis that contained a verse *and* its reference
+  ("[القلم: 18]"), so the surah name was compared as if it were part of the verse.
+  Verses in ﴿﴾ are now read on their own and references are ignored.
+* `detect_language` turned an Urdu reply into "English" because it contained three
+  English words; the short-English rule now applies only to mostly-Latin text, and quoted
+  scripture is ignored when detecting the language.
+
+Re-applying the corrected checks to the saved replies (`python -m eval.recheck <results.json>`;
+no new model calls):
+
+| Run | Before | After | Changed |
+|---|---|---|---|
+| space-bunny (run 4) | 36 / 41 | **38 / 41** | `quran_author_ar` quote exact; `kaaba_ur` reply language |
+| Gemini (§4.1) | 40 / 41 | 40 / 41 | — (`hostile_ar` is a real model-written quote, still flagged) |
+| Zen balanced (§4.2) | 37 / 41 | 37 / 41 | — |
+| Gemini + judge (§4.3) | 39 / 41 | **40 / 41** | `cultural_term_en` quote exact |
+
+Not caught by any check yet: the run-4 reply to `quran_author_ar` contains model garbage
+in the middle of the Arabic text ("وقد Exploration…Stem sorry."). A simple guard (unexpected
+Latin words inside an Arabic/Urdu reply → retry or `unverified`) belongs in the agent's verify step.
