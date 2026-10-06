@@ -77,3 +77,8 @@ def test_llm_not_configured_is_503(client, monkeypatch):
     monkeypatch.setattr(settings, "MODEL_ANALYZE", "paid-model")  # *-free models need no key
     r = client.post("/suggest", json=BODY, headers={"X-API-Key": "k-test"})
     assert r.status_code == 503
+
+
+def test_root_is_a_landing_response(client):
+    r = client.get("/")
+    assert r.status_code == 200 and r.json()["status"] == "running"

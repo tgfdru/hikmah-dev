@@ -92,6 +92,13 @@ def _append_log(record: dict) -> None:
 
 
 # ---------------------------------------------------------------- handlers ---
+@app.get("/", include_in_schema=False)
+def root() -> dict:
+    """Landing response, so opening the bare domain does not look like an error."""
+    return {"service": "Mu'een AI — da'i reply assistant", "status": "running",
+            "health": "/health", "docs": "/docs", "usage": "POST /suggest with an X-API-Key header"}
+
+
 @app.get("/health")
 def health() -> dict:
     return {
