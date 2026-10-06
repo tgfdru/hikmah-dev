@@ -50,39 +50,15 @@ Both TypeScript files were type-checked (`tsc --strict` against supabase-js 2 an
 4. Limits to know: Supabase stops a function after 150 s on the free plan; a draft takes
    ~30-60 s, so this fits. The function logs only status codes, never message text.
 
-## 3. App (pull request to Sheykak-Mueen)
+## 3. App — done (Sheykak-Mobile, branch `mu'een`, 2026-10-06)
 
-1. Copy `http-service.ts` and `index.ts` (table above). `EXPO_PUBLIC_MUEEN_MOCK=1` brings
-   the sample answer back for UI work.
-2. **Types** (`types.ts`) — optional fields the API already sends:
-   ```ts
-   export interface MueenSource { /* … */ translation?: string }          // approved translation of the quote
-   export interface MueenDraft {
-     /* … */
-     status?: "ok" | "unverified" | "abstain" | "refer";
-     level?: "A" | "B" | "C" | "D";
-     notice?: string;          // Arabic note for the scholar
-     reviewPoints?: string[];  // claims the checkers asked the scholar to check
-   }
-   ```
-3. **No-draft state** (`MueenDraftBody`): when `paragraphs` is empty, show a message such as
-   "لم يجد معين في المصادر المعتمدة ما يكفي لإعداد مسودة — يمكنك الإجابة بنفسك" plus
-   `draft.notice`, and keep "Send" disabled. This happens when the sources have no answer
-   (`abstain`) or the question asks for a verdict on persons or groups (`refer`).
-4. **Scholar notice:** show `draft.notice` as a small banner above the paragraphs when
-   `status === "unverified"` (the draft failed the automatic checks) or `level === "D"`
-   (a personal case: general evidence only, the ruling is the scholar's). Optional: list
-   `reviewPoints` under it.
-5. **Citations sheet:** show `source.translation` under the quote when present (English/Urdu
-   askers). Hadith from HadeethEnc come as `kind: "other"` with `grade`; a dedicated badge
-   (e.g. `kind: "hadeethenc"`) can be added later if you want one — tell Fawaz.
-6. **Waiting time:** a draft takes ~30-60 s. Update `sheet.loading` (e.g. "قد يستغرق ذلك
-   حتى دقيقة") and set `retry` in `useMueenDraft` to retry only network errors, so a failed
-   one-minute draft is not silently repeated:
-   ```ts
-   retry: (count, err) => count < 1 && err instanceof MueenDraftError && err.code === "network",
-   ```
-7. Run the app's checks: `tsc --noEmit`, `jest`, i18n parity (new strings in `ar` and `en`).
+The app's v2 Mu'een module already had the "not enough approved sources" state, offline /
+failed errors and a retry policy, so only the service changed (commit `26f2b55`):
+`src/features/mueen/api/live-service.ts` (calls the `mueen-draft` function; offline when there
+is no connection, failed otherwise), `api/index.ts` exports it, a test, and
+`supabase/functions/mueen-draft/index.ts`. `/mueen/draft` answers in the app's v2 vocabulary
+(status ok / no_sources; kinds quran · hadith · book · dawah · other). The files under `app/`
+here are the earlier draft for the v1 extract (Sheykak-Mueen) and are kept for reference only.
 
 ## 4. What each paragraph looks like
 
