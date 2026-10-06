@@ -4,6 +4,8 @@ The app (React Native, `src/features/mueen` in Sheykak-Mueen) talks to one inter
 `MueenService.generateDraft(MueenDraftRequest) -> MueenDraft`: a draft made of paragraphs,
 each followed by the sources it rests on. This module adapts the agent to that shape:
 
+* response = the app's v2 `MueenDraft`: `status` ok / no_sources, source kinds quran ·
+  hadith (HadeethEnc) · book (Shamela) · dawah (Bayyinat) · other (glossary).
 * request  -> agent conversation: the question card and the chat's text messages (asker =
   seeker, scholar = da'i); a "selected" scope answers the picked asker messages.
 * draft    -> paragraphs: the verified draft is split at blank lines. A paragraph's Quran and
@@ -37,7 +39,8 @@ log = logging.getLogger("mueen.api")
 MAX_MESSAGES = 50
 MAX_TEXT = 4000
 
-SourceKind = Literal["quran", "dorar", "shamela", "other"]
+# The app's v2 source types (Sheykak-Mobile, src/features/mueen/types.ts).
+SourceKind = Literal["quran", "hadith", "tafsir", "aqeedah", "dawah", "book", "other"]
 Grade = Literal["sahih", "hasan", "daif"]
 
 
@@ -94,8 +97,11 @@ class MueenDraft(_Camel):
     scope: MueenScope
     paragraphs: list[MueenParagraph]
     text_message_count: int
-    # Not in the app's MueenDraft type yet (extra fields are ignored until it uses them):
-    status: Literal["ok", "unverified", "abstain", "refer"]
+    # The app's v2 status: "no_sources" = not enough approved references, so no draft.
+    status: Literal["ok", "no_sources"]
+    # Not in the app's MueenDraft type (extra fields are ignored until it uses them):
+    outcome: Literal["ok", "unverified", "abstain", "refer"] = Field(
+        description="The agent's result: unverified = shown but failed the checks; refer = out of scope")
     level: Literal["A", "B", "C", "D"] | None = None
     language: str | None = None
     notice: str = Field(description="Arabic note for the scholar: approach, warnings, or why there is no draft")
@@ -170,24 +176,37 @@ def _first_line(text: str, limit: int = 140) -> str:
     return line if len(line) <= limit else line[: limit - 1].rstrip() + "…"
 
 
+_KFC = "نص القرآن: مجمع الملك فهد"
+
+
+def _quran_source(e: Evidence, tr: str | None) -> MueenSource:
+    """The app's Quran card: collection "سورة مريم", pill "مريم 30", attribution
+    "سورة مريم · الآية 30 · نص القرآن: مجمع الملك فهد"."""
+    surah = (e.ref or "").split(":", 1)[0].strip()
+    m = re.fullmatch(r"Q:\d+:(\d+)(?:-(\d+))?", e.id)
+    a, b = (int(m.group(1)), int(m.group(2) or m.group(1))) if m else (0, 0)
+    span = f"{a}" if a == b else f"{a}–{b}"
+    label = f"الآية {a}" if a == b else (f"الآيتان {span}" if b - a == 1 else f"الآيات {span}")
+    return MueenSource(id=e.id, kind="quran", collection=f"سورة {surah}", reference=f"{surah} {span}",
+                       quote=f"﴿{e.text_ar}﴾", translation=tr,
+                       attribution=f"سورة {surah} · {label} · {_KFC}", url=e.source_url)
+
+
 def evidence_source(e: Evidence, lang: str) -> MueenSource:
     """One citation chip from a piece of evidence (exact text from the store, never the model)."""
     tr = e.translation if lang != "ar" else None
     if e.type == "quran":
-        return MueenSource(id=e.id, kind="quran", collection="القرآن الكريم", reference=e.ref,
-                           quote=f"﴿{e.text_ar}﴾", translation=tr, attribution=e.source, url=e.source_url)
-    if e.type == "hadith":
-        dorar = e.id.startswith("H:dorar") or "dorar.net" in (e.source_url or "")
-        return MueenSource(id=e.id, kind="dorar" if dorar else "other", collection=e.source, reference=e.ref,
+        return _quran_source(e, tr)
+    if e.type == "hadith":  # HadeethEnc (or Dorar when enabled)
+        return MueenSource(id=e.id, kind="hadith", collection=e.source,
                            quote=e.text_ar if "«" in e.text_ar else f"«{e.text_ar}»", translation=tr,
-                           attribution=e.ref,
-                           grade=_grade(e.grade), url=e.source_url)
+                           attribution=e.ref or None, grade=_grade(e.grade), url=e.source_url)
     if e.type in ("dawah", "book") and e.id.startswith(("SH:", "BK:shamela")):
         book = re.sub(r"\s*\(المكتبة الشاملة\)\s*$", "", e.source or "")
-        return MueenSource(id=e.id, kind="shamela", collection="المكتبة الشاملة", reference=e.ref,
+        return MueenSource(id=e.id, kind="book", collection="المكتبة الشاملة",
                            quote=book, attribution=e.ref, url=e.source_url)
-    # Bayyinat and any other explanatory source: the question it answers, with its locator.
-    return MueenSource(id=e.id, kind="other", collection=e.source, reference=e.ref,
+    # Bayyinat (a Q&A on a doubt about Islam) and other explanatory sources: a da'wah topic card.
+    return MueenSource(id=e.id, kind="dawah", collection=e.source,
                        quote=_first_line(e.text_ar) or None, attribution=e.ref, url=e.source_url or None)
 
 
@@ -278,14 +297,15 @@ def build_paragraphs(out: dict, lang: str) -> list[MueenParagraph]:
 
 def to_app_draft(req: MueenDraftRequest, out: dict, text_count: int) -> MueenDraft:
     lang = (out.get("analysis") or {}).get("language") or "ar"
-    status = out.get("status", "unverified")
-    paragraphs = build_paragraphs(out, lang) if status in ("ok", "unverified") else []
+    outcome = out.get("status", "unverified")
+    paragraphs = build_paragraphs(out, lang) if outcome in ("ok", "unverified") else []
     notice = out.get("note_for_dai", "")
-    if status in ("abstain", "refer"):
+    if outcome in ("abstain", "refer"):
         notice = ("لم يُعدّ معين مسودة لهذا السؤال. " + notice).strip()
     return MueenDraft(
         id=f"mueen_{uuid.uuid4().hex[:12]}", question_id=req.question_id, scope=req.scope,
-        paragraphs=paragraphs, text_message_count=text_count, status=status, level=out.get("level"),
+        paragraphs=paragraphs, text_message_count=text_count,
+        status="ok" if paragraphs else "no_sources", outcome=outcome, level=out.get("level"),
         language=lang, notice=notice, review_points=list(out.get("issues", [])),
         latency_ms=int(out.get("latency_ms", 0)),
     )

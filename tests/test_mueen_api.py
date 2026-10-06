@@ -62,7 +62,9 @@ def test_draft_in_the_app_shape(client):
     # the exact text comes from the store, never from the model
     from agent.nodes import _verbatim
     assert quran[0]["quote"] == f"﴿{_verbatim('Q:2:144', 'en').text_ar}﴾"
-    assert any(s["id"] == "QA:bayyinat:9" and s["kind"] == "other" for s in p["sources"])
+    assert quran[0]["collection"] == "سورة البقرة" and quran[0]["reference"] == "البقرة 144"
+    assert quran[0]["attribution"] == "سورة البقرة · الآية 144 · نص القرآن: مجمع الملك فهد"
+    assert any(s["id"] == "QA:bayyinat:9" and s["kind"] == "dawah" for s in p["sources"])
 
 
 def test_sources_follow_their_paragraph(client):
@@ -95,7 +97,8 @@ def test_no_draft_gives_empty_paragraphs_and_a_notice(client, monkeypatch):
     monkeypatch.setattr(settings, "ABSTAIN_THRESHOLD", 1.01)  # nothing passes: abstain
     llm.set_llm_factory(_script())
     j = client.post("/mueen/draft", json=body(), headers=KEY).json()
-    assert j["status"] == "abstain" and j["paragraphs"] == [] and j["notice"].startswith("لم يُعدّ معين")
+    assert j["status"] == "no_sources" and j["outcome"] == "abstain" and j["paragraphs"] == []
+    assert j["notice"].startswith("لم يُعدّ معين")
 
 
 def test_selected_scope_answers_the_picked_messages():
@@ -159,3 +162,21 @@ def test_question_card_can_be_selected():
                   {"id": "m3", "text": "Unrelated follow-up", "fromAsker": True}]))
     msgs, count = mueen.to_conversation(req)
     assert msgs[-1] == {"role": "seeker", "text": "Why do Muslims worship the Kaaba?"} and count == 1
+
+
+def test_source_cards_use_the_apps_v2_kinds():
+    from retrieval.contract import Evidence
+
+    def ev(**kw):
+        base = dict(text_ar="نص اختباري", translation=None, source="مصدر", ref="مرجع", grade=None,
+                    source_url="https://example.org", score=1.0)
+        return Evidence(**{**base, **kw})
+
+    hadith = mueen.evidence_source(ev(id="H:hadeethenc:7", type="hadith", ref="متفق عليه", grade="صحيح"), "ar")
+    assert (hadith.kind, hadith.grade, hadith.attribution) == ("hadith", "sahih", "متفق عليه")
+    book = mueen.evidence_source(ev(id="SH:5705:12", type="dawah", source="كتاب — مؤلف (المكتبة الشاملة)"), "ar")
+    assert (book.kind, book.collection, book.quote) == ("book", "المكتبة الشاملة", "كتاب — مؤلف")
+    qa = mueen.evidence_source(ev(id="QA:bayyinat:9", type="qa", text_ar="السؤال: عنوان\nنص"), "ar")
+    assert (qa.kind, qa.quote) == ("dawah", "عنوان")
+    rng = mueen.evidence_source(ev(id="Q:4:157-158", type="quran", ref="النساء: 157-158"), "ar")
+    assert rng.reference == "النساء 157–158" and "الآيتان 157–158" in rng.attribution

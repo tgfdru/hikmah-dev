@@ -72,8 +72,9 @@ without major edits" metric (`GET /stats`).
 
 ### `POST /mueen/draft` — the Sheykak app's format (added 2026-10-06)
 
-Same agent, shaped for the app's `MueenService.generateDraft` (Sheykak-Mueen,
-`src/features/mueen/types.ts`): JSON in camelCase, paragraphs with their sources.
+Same agent, shaped for the app's `MueenService.generateDraft` (Sheykak-Mobile, branch
+`mu'een`, v2 types in `src/features/mueen/types.ts`): JSON in camelCase, paragraphs with
+their sources.
 Call it **from the server** (Supabase Edge Function), never from the app: the key must not
 ship in the app.
 
@@ -92,10 +93,12 @@ Response = the app's `MueenDraft` plus a few fields the app can start using:
 { "id": "mueen_…", "questionId": "q_1", "scope": { "kind": "all", "messageIds": [] },
   "textMessageCount": 2,
   "paragraphs": [ { "id": "p1", "text": "… (البقرة: 144)",
-      "sources": [ { "id": "Q:2:144", "kind": "quran", "collection": "القرآن الكريم",
-                     "reference": "البقرة: 144", "quote": "﴿…﴾", "translation": "…",
-                     "attribution": "…", "grade": null, "url": "https://…" } ] } ],
-  "status": "ok",          // ok | unverified | abstain | refer
+      "sources": [ { "id": "Q:2:144", "kind": "quran", "collection": "سورة البقرة",
+                     "reference": "البقرة 144", "quote": "﴿…﴾", "translation": "…",
+                     "attribution": "سورة البقرة · الآية 144 · نص القرآن: مجمع الملك فهد",
+                     "url": "https://…" } ] } ],
+  "status": "ok",          // the app's: ok | no_sources
+  "outcome": "ok",         // the agent's: ok | unverified | abstain | refer
   "level": "B", "language": "en",
   "notice": "…",           // Arabic note for the scholar (approach, warnings, why no draft)
   "reviewPoints": [],      // claims the checkers asked the scholar to review
@@ -104,12 +107,12 @@ Response = the app's `MueenDraft` plus a few fields the app can start using:
 
 * Verse and hadith text is only in `sources[].quote` (exact, from the store). In the
   paragraph a short reference replaces it, e.g. "(البقرة: 144)" or "(Quran 2:144)".
-* `kind`: Quran → `quran`; Shamela books → `shamela`; HadeethEnc hadith, Bayyinat and
-  glossary terms → `other` (Dorar hadith → `dorar`, only if that tool is enabled).
-  `grade` is `sahih` / `hasan` for hadith.
-* `status` `abstain` / `refer`: `paragraphs` is **empty** and `notice` says why (no
-  approved evidence, or a verdict on persons/groups, which is out of scope). Show the
-  notice; the scholar answers in their own words.
+* `kind` (the app's v2 types): Quran → `quran`; HadeethEnc (and Dorar) → `hadith` with
+  `grade` `sahih` / `hasan`; Shamela books → `book`; Bayyinat → `dawah`; glossary → `other`.
+  Null fields are omitted.
+* `status` `no_sources` (`outcome` `abstain` / `refer`): `paragraphs` is **empty** and
+  `notice` says why (no approved evidence, or a verdict on persons/groups, which is out of
+  scope). The app shows its "not enough approved sources" state.
 * Personal cases (level D) are drafted for scholars: general evidence only, no ruling on
   the case, and `notice` starts with "🔴 مستوى D". (`/suggest` still refers them.)
 * `422` when there is no asker text to answer. Other errors as in §4. Typical time ~30 s.
