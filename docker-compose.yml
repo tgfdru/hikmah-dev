@@ -29,6 +29,7 @@ services:
     environment:
       QDRANT_URL: http://qdrant:6333
       DEVICE: ${DEVICE:-cpu}
+      SHAMELA: ${SHAMELA:-1}
     volumes:
       - mueen_kb:/var/lib/mueen
     depends_on:

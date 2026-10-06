@@ -3,26 +3,31 @@
     python -m ingest.build_all                 # download + Quran + Bayyinat + index
     python -m ingest.build_all --only quran    # just the verbatim store (fast, no models)
     python -m ingest.build_all --glossary      # also refresh data/glossary.json from Jamhara
+    python -m ingest.build_all --shamela       # also add the selected Shamela books (Java 21+)
 
 Steps (each is also runnable on its own):
   1. ingest.download     official files -> data/raw/          (~40 MB)
   2. ingest.quran        verbatim store + quran.jsonl          (seconds)
   3. ingest.bayyinat     Bayyinat Q&A -> bayyinat.jsonl        (~20 s)
+  +  ingest.shamela      selected Shamela books -> shamela.jsonl  (opt-in: ~4.8 GB download
+                         and ~25 min Java read, once; see docs/SOURCES.md)
   4. ingest.build_index  BGE-M3 vectors -> Qdrant, BM25        (~1 min with the committed
                          embedding cache; ~1.5 h on CPU without it)
-data/glossary.json is committed, so step "glossary" is optional.
+data/glossary.json is committed, so step "glossary" is optional. The index takes
+every file in processed/, so a shamela.jsonl built earlier (or copied in) is kept.
 """
 from __future__ import annotations
 
 import argparse
 import time
 
-from ingest import bayyinat, build_index, download, quran
+from ingest import bayyinat, build_index, download, quran, shamela
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--only", choices=["quran", "bayyinat", "index"], help="run a single step")
+    ap.add_argument("--only", choices=["quran", "bayyinat", "shamela", "index"], help="run a single step")
+    ap.add_argument("--shamela", action="store_true", help="also build the Shamela passages")
     ap.add_argument("--glossary", action="store_true", help="refresh the Jamhara glossary too")
     ap.add_argument("--force-download", action="store_true")
     args = ap.parse_args()
@@ -40,6 +45,9 @@ def main() -> None:
     if args.only in (None, "bayyinat"):
         print("[3/4] parsing Bayyinat")
         bayyinat.build()
+    if args.only == "shamela" or (args.only is None and args.shamela):
+        print("[+] building Shamela passages")
+        shamela.build()
     if args.glossary:
         from ingest import glossary
 

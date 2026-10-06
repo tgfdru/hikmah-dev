@@ -242,7 +242,8 @@ def _judge(question: str, reply: str, evidence_texts: list[str]) -> dict:
     return {"error": locals().get("err", "no JSON in judge output")}
 
 
-def eval_agent(api: str, judge: bool, only: set[str] | None, api_key: str | None) -> None:
+def eval_agent(api: str, judge: bool, only: set[str] | None, api_key: str | None,
+               available: set[str] | None = None) -> None:
     import httpx
 
     from retrieval.ayah_match import find_quran_quotes
@@ -251,6 +252,13 @@ def eval_agent(api: str, judge: bool, only: set[str] | None, api_key: str | None
     cases = yaml.safe_load((ROOT / "safety_cases.yaml").read_text(encoding="utf-8"))["cases"]
     if only:
         cases = [c for c in cases if c["id"] in only]
+    # Cases that need a source not built yet (e.g. requires: [hadith]) are skipped unless it
+    # is listed in --requires; they are reported as skipped, never as passed.
+    available = available or set()
+    skipped = [c["id"] for c in cases if set(c.get("requires", [])) - available]
+    cases = [c for c in cases if not set(c.get("requires", [])) - available]
+    if skipped:
+        print(f"skipped (missing sources): {', '.join(skipped)}", file=sys.stderr)
     headers = {"X-API-Key": api_key} if api_key else {}
     rows = []
     for c in cases:
@@ -281,6 +289,11 @@ def eval_agent(api: str, judge: bool, only: set[str] | None, api_key: str | None
             checks["citations_valid"] = all(v is not None for v in resolved.values())
         if exp.get("no_hadith"):
             checks["no_hadith"] = not any(x.startswith("H:") for x in cites) and "«" not in reply
+        if exp.get("cite_prefix_any"):
+            checks["cite_prefix_any"] = any(x.startswith(p) for x in cites for p in exp["cite_prefix_any"])
+        if exp.get("hadith_only_from"):
+            hadith = [x for x in cites if x.startswith("H:")]
+            checks["hadith_only_from"] = all(x.split(":")[1] in exp["hadith_only_from"] for x in hadith)
         if exp.get("cite_any"):
             checks["cite_any"] = any(_matches(x, e) for x in cites for e in exp["cite_any"])
         if exp.get("mention_any"):
@@ -367,6 +380,8 @@ def main() -> None:
     a.add_argument("--api-key", default=None, help="sent as X-API-Key (or set MUEEN_API_KEY)")
     a.add_argument("--judge", action="store_true", help="LLM-judge faithfulness via AI_API_KEY")
     a.add_argument("--only", default="", help="comma-separated case ids")
+    a.add_argument("--requires", default="", help="sources available, e.g. shamela,hadith "
+                   "(cases needing others are skipped)")
     args = ap.parse_args()
     if args.cmd == "retrieval":
         cases = Path(args.cases) if args.cases else None
@@ -378,7 +393,8 @@ def main() -> None:
         import os
 
         eval_agent(args.api, args.judge, set(filter(None, args.only.split(","))) or None,
-                   args.api_key or os.getenv("MUEEN_API_KEY"))
+                   args.api_key or os.getenv("MUEEN_API_KEY"),
+                   set(filter(None, args.requires.split(","))))
 
 
 if __name__ == "__main__":

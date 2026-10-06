@@ -17,6 +17,7 @@ from __future__ import annotations
 import atexit
 import json
 import pickle
+import re
 import threading
 import time
 import uuid
@@ -34,7 +35,7 @@ POINT_NS = uuid.UUID("5b0d6f5e-6a64-4bb5-9b0e-2f7a0c1c9e11")
 RRF_K = 60
 PER_QUERY = 20
 MAX_QUERIES = 4
-MAX_PER_QUESTION = 2  # Bayyinat chunks from the same question
+MAX_PER_QUESTION = 2  # passages from the same Bayyinat question or Shamela book
 
 
 def point_id(logical_id: str) -> str:
@@ -70,6 +71,17 @@ class Candidate:
     dense: float = 0.0  # best cosine similarity to any query
     score: float = 0.0  # final 0-1 confidence
     ranks: dict[str, int] = field(default_factory=dict)
+
+
+_AR_LETTER = re.compile(r"[\u0621-\u064a]")
+_NOT_ARABIC = re.compile(r"[پچژگکیےہۃٹڈڑںھ]")  # Urdu / Persian letters
+
+
+def _arabic_queries(queries: list[str]) -> set[str]:
+    """Queries written in Arabic (by script: fastText calls "ما هو رمضان" Persian)."""
+    return {q for q in queries
+            if len(_AR_LETTER.findall(q)) >= 3 and not _NOT_ARABIC.search(q)
+            and len(_AR_LETTER.findall(q)) > len(re.findall(r"[A-Za-z]", q))}
 
 
 class HybridRetriever:
@@ -154,10 +166,18 @@ class HybridRetriever:
 
         if self.reranker in ("bge", "minilm"):
             texts = [self._doc_text(self.docs[c.id]) for c in cands]
+            scored = queries[: max(1, config.RERANK_QUERIES)]
+            arabic = _arabic_queries(scored)
             best = [0.0] * len(cands)
             with self._lock:  # CPU-bound; avoid oversubscription between threads
-                for q in queries[: max(1, config.RERANK_QUERIES)]:
+                for q in scored:
                     for i, s in enumerate(rerank_scores(self.reranker, q, texts)):
+                        # Arabic-only passages (Bayyinat, Shamela) are scored against the
+                        # Arabic query when there is one: across languages the small
+                        # reranker rewards any short definition ("What is Ramadan?" ->
+                        # "الروتاري جمعية ..."). Quran records carry English, so all count.
+                        if arabic and q not in arabic and self.docs[cands[i].id]["type"] != "quran":
+                            continue
                         best[i] = max(best[i], s)
             for c, s in zip(cands, best):
                 c.score = s
@@ -185,15 +205,16 @@ class HybridRetriever:
                  k: int = 6) -> list[Evidence]:
         t0 = time.time()
         wanted = list(types) if types else None
-        local_types = [t for t in (wanted or ["quran", "qa"]) if t != "hadith"]
+        local_types = [t for t in (wanted or ["quran", "qa", "dawah"]) if t != "hadith"]
         cands = self.search(queries, local_types or None) if local_types else []
 
         evidence: list[Evidence] = []
         per_question: dict[str, int] = {}
         for c in cands:
             doc = self.docs[c.id]
-            if doc["type"] == "qa":
-                parent = doc.get("parent_id") or doc["id"]
+            if doc["type"] in ("qa", "dawah"):
+                # one Bayyinat question / one Shamela book must not fill every slot
+                parent = doc.get("parent_id") or (f"book:{doc['book_id']}" if doc.get("book_id") else doc["id"])
                 if per_question.get(parent, 0) >= MAX_PER_QUESTION:
                     continue
                 per_question[parent] = per_question.get(parent, 0) + 1

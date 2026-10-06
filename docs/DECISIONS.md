@@ -43,3 +43,11 @@ Changes from the original plan (`docs/reference/plan.md`), agreed with Fawaz on 
   were excluded (listed in `ingest/glossary.py`).
 - Bayyinat is parsed from the official PDF (with ligature repair); bayenat.net was not needed.
 - Honorific symbols in the Bayyinat PDF are omitted (no reliable Unicode mapping).
+
+## Shamela (2026-10-05, agreed with Nader; books requested by Shaker)
+- Added a curated set of Shamela books (not whole categories): 24 answering other religions
+  and modern ideologies + 9 early creed works (authors died ≤ 300 AH). List and rules in
+  `ingest/shamela_books.yaml`; content-team review pending.
+- Indexed as the existing `dawah` type, so `retrieval/contract.py` is unchanged.
+- Opt-in build step (`--shamela`): it needs Java 21+ and a one-time ~4.8 GB download.
+- At most two passages from the same book in one result, like Bayyinat questions.

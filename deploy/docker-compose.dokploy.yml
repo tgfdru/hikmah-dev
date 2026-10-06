@@ -23,6 +23,7 @@ services:
     environment:
       QDRANT_URL: http://qdrant:6333
       DEVICE: cpu
+      SHAMELA: ${SHAMELA:-1}   # selected Shamela books (first build ~25 min, then cached)
     volumes:
       - mueen_kb:/var/lib/mueen
     depends_on:

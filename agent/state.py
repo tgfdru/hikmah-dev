@@ -57,7 +57,7 @@ class Draft(BaseModel):
     reply: str = Field(description="Draft reply in the seeker's language. Quran/hadith only as placeholders "
                                    "like [[Q:2:144]] or [[H:bukhari:1]]")
     reply_ar: str = Field(description="Arabic translation of the reply for the da'i (same placeholders)")
-    cited_ids: list[str] = Field(description="Every evidence id the reply relies on (Q:..., QA:..., BK:..., H:...)")
+    cited_ids: list[str] = Field(description="Every evidence id the reply relies on (Q:..., QA:..., SH:..., BK:..., H:...)")
     note_for_dai: str = Field(description="Short note in Arabic for the da'i: approach taken and anything to check")
 
 

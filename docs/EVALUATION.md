@@ -293,3 +293,46 @@ Applied offline to every saved reply of the agent runs (144 `ok`/`unverified` re
 So the free test model leaked other languages in 7 replies that no earlier check caught, and
 the guard raised no false alarm on the configurations we deploy.
 
+
+## 5. Retrieval with the Shamela books — 2026-10-06
+
+Index: Quran 6,236 + Bayyinat 1,116 + **Shamela 6,766** passages (33 books, see
+docs/SOURCES.md). Same test sets, default scoring (`minilm`, best of 2 queries, 0.35).
+Results: `eval/results/2026-10-06_retrieval*.md`.
+
+| Set | Queries | Recall@6 | MRR | Answerable but abstained | Unanswerable correctly abstained | Latency mean |
+|---|---|---|---|---|---|---|
+| main (41 + 11), before Shamela | analyzed | 98% | 0.93 | 2% | 100% | 1.7 s |
+| **main, with Shamela** | **analyzed** | **98%** | **0.93** | **2%** | **100%** | **2.5 s** |
+| held-out (10 + 10), before | analyzed | 100% | 1.00 | 0% | 100% | 1.6 s |
+| **held-out, with Shamela** | **analyzed** | **100%** | **0.88** | **0%** | **100%** | **2.5 s** |
+| main, with Shamela | raw (seeker words only) | 90% | 0.78 | 5% | 100% | 1.4 s |
+
+* The held-out MRR drop is two questions where a **relevant** Shamela passage now ranks
+  above the labelled answer ("Is Jesus the son of God?" → «الله جل جلاله واحد أم ثلاثة»;
+  "Is the Quran God's word?" → two early creed works on that exact question). The labels
+  predate Shamela, so these count as rank 2–3, not as errors. Same for `evolution` in
+  raw mode (Shamela passages on Darwinism rank above Bayyinat question 253).
+* Spot checks: Kaaba → Bayyinat 9 first (unchanged); Jesus, crucifixion, Bible
+  prophecy of the Prophet ﷺ, secularism and evolution → directly relevant book passages
+  (scores 0.6–0.99).
+* Latency +0.8 s: Shamela passages are long (~1,400 characters) for the reranker.
+* Margin: the fake-hadith question now peaks at 0.345 (a Bayyinat passage on the
+  authenticity of the two Sahihs), just below 0.35. The agent routes hadith requests to
+  `types=["hadith"]`, which returns nothing, so this cannot produce an answer.
+
+**Scoring change found while testing.** The reranker compared the *English* question
+with *Arabic-only* passages and rewarded any short definition: "What is Ramadan?" put
+an encyclopedia definition of the Rotary Club first (0.73), "What is tawhid?" a
+definition of Westernisation (0.50). Arabic-only passages (Bayyinat, Shamela) are now
+scored against the Arabic query when one is given (`_arabic_queries`, by script —
+fastText labels short Arabic like "ما هو رمضان" as Persian). Quran records carry an
+English translation and still use both queries. Effect: Ramadan → Q:2:185 first; the
+Westernisation passage drops below the threshold; MRR back from 0.92 to 0.93. Without an
+Arabic query (raw mode) the old behaviour remains and is unreliable for Shamela ("Which
+surah mentions dinosaurs?" alone scores 0.76; with the Arabic query 0.20), so **the
+agent must always pass an Arabic query** — it does (`arabic_query`, 2nd query).
+
+Misquote detection (`eval run_eval ayah`): 15/15, unchanged. Tests: 98 pass.
+Not re-measured with Shamela: `RERANKER=none` and `bge` thresholds, and the full agent
+pipeline (Nader).

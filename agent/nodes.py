@@ -304,7 +304,7 @@ def _allowed_ids(evidence: list[Evidence]) -> set[str]:
     allowed = {e.id for e in evidence}
     for e in evidence:
         if e.type in EXPLANATION_TYPES:
-            allowed.update(_quran_refs_in(e.text_ar))  # verses quoted inside a cited Bayyinat/book passage
+            allowed.update(_quran_refs_in(e.text_ar))  # verses quoted inside a cited Bayyinat/Shamela/book passage
     return allowed
 
 

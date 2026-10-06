@@ -141,3 +141,111 @@ header, pass `--api-key` (sent as `X-API-Key`).
   volume; mount that volume in the API container (see `docker-compose.yml`).
 * RAM: ~3.5 GB (BGE-M3 + the MiniLM reranker) on CPU; +2.5 GB if `RERANKER=bge`. First start downloads the
   model (~2.3 GB) into `HF_HOME`.
+
+---
+
+## 🆕 Update — 2026-10-05 (results added 2026-10-06) — read this part first
+
+Everything below is new since the first handoff. Items marked **Action** need a change
+or a decision on your side.
+
+### A. New source: selected Shamela books (type `dawah`)
+
+* 33 books from the official Shamela database, chosen with you and Shaker
+  (`ingest/shamela_books.yaml`, rules at the top): 24 answering other religions and
+  modern ideologies + 9 creed works from the first three centuries. Inner-Muslim
+  polemics and books about named persons are left out (pack: "judging persons and
+  groups" is out of scope). **6,766 passages**, ~1,400 characters each.
+* Ids: `SH:<book>:<page>` (and `SH:<book>:<page>:2`, `:3` … when one page gives several
+  passages). `ref` = `"<title>، ج 2 ص 531"` (printed volume/page; title only for 20
+  passages without a printed page). `source_url` = the page on shamela.ws.
+  `translation` is `None` (Arabic only). `contract.py` is unchanged.
+* `retrieve()` now includes `dawah` by default (`types=None`), at most 2 passages per
+  book per result (same as per Bayyinat question). Pass `types=["quran", "qa"]` to
+  exclude it.
+* Build: `python -m ingest.build_all --shamela` (or `--only shamela`). Needs **Java 21+**
+  and a one-time ~4.8 GB download, ~25 min. The Docker image has no Java, so on the
+  server either install a JDK and run it there, or build `processed/shamela.jsonl` (18 MB)
+  on any machine and copy it into the `mueen_kb` volume under `processed/`, then run
+  `kb-build` with `--only index`. The embedding cache for these passages is committed,
+  so indexing takes minutes. Afterwards `raw/shamela/` (~5 GB) can be deleted.
+* **Changed in your files (small, please check):**
+  - `agent/nodes.py`: `_evidence_block` and `_allowed_ids` treat `dawah` like `qa`, so
+    verses a Shamela passage cites ("[المائدة: ٥٠]") are allowed as `[[Q:..]]`.
+  - `agent/prompts/generate.md` rule 4/5: `SH:` passages are explanations, like `QA:`;
+    a hadith quoted inside a passage has no approved grade and must never be quoted
+    (some early creed books are hadith/report collections without grades).
+* `quran_refs_in` now also reads Arabic-Indic digits and refs in parentheses
+  ("(الحديد: ٢٧)"), which Shamela books use.
+
+### B. Hadith
+
+Still waiting on Fawaz's decision: **HadeethEnc** (organiser's encyclopedia, ~4,000
+authentic hadith with grade, explanation and approved translations — recommended) or
+**Sahih al-Bukhari & Muslim from Shamela** (Arabic only). Either way it will resolve
+through `get_verbatim("H:…")` like the Quran. Until then, hadith requests should keep
+routing to `abstain`.
+
+### C. Fixes on my side after your evaluation
+
+* My checkers caused three false alarms in your runs: 3-ayah quotes, a verse and its
+  reference in one parenthesis, and an Urdu reply detected as English. All fixed
+  (EVALUATION.md §4.4).
+* `python -m eval.recheck eval/results/<run>.json` re-applies the fixed checks to saved
+  results without calling any model: Gemini + judge 39 → **40/41**, free model 36 → 38/41.
+
+### D. Action items for you
+
+1. **Garbage-text guard.** One free-model reply had nonsense inside the Arabic
+   ("وقد Exploration…Stem sorry.") and nothing caught it. Add a check in `verify`:
+   unexpected Latin words inside an Arabic/Urdu reply (outside placeholders and glossary
+   terms) → regenerate once, then `unverified`.
+2. **OpenRouter** (the LLM provider the team chose): in its privacy settings allow only
+   providers that **do not train on or retain** prompts. Then change `AI_BASE_URL` /
+   model names and rerun `python -m eval.run_eval agent --api … --judge`.
+3. **Gemini free tier** may use what is sent to improve Google's products (possibly read
+   by human reviewers). Seekers' messages can be very personal, so don't use it for live
+   traffic.
+4. **Website team:** a draft takes ~30 s. They should show a "preparing draft…" state
+   and not block the page.
+5. **Content review before the demo** (a team member with religious knowledge; record
+   name + notes in `docs/AGENT.md`):
+   - `agent/templates.py` — fixed referral / "not found" replies in all 5 languages
+   - `agent/prompts/` — the rules given to the model
+   - `data/glossary.json` — the 84 terms
+   - `ingest/shamela_books.yaml` — the book list
+   - ~10 real replies, especially apostasy, "do all Muslims agree" and music
+6. **Deployment:** ≥ 8 GB RAM, Qdrant as a server (`QDRANT_URL`), HTTPS, the API key
+   only on the website's server, and a second person with access to the server.
+7. Rerun your agent evaluation once Shamela is in the index (results below are for
+   retrieval only).
+
+### E. Updated sources file (organisers, 2026-10)
+
+It adds the organiser's own platforms with APIs — worth knowing for later:
+QuranEnc (approved Quran translations; the file says translations should come from the
+organiser's platforms), HadeethEnc (hadith, see B), terminologyenc.com (term
+translations in many languages), islamhouse, byenah, and Dorar's JSON API. Not used yet
+except as noted.
+
+### F. Retrieval evaluation with Shamela
+
+Measured 2026-10-06 (details: docs/EVALUATION.md §5):
+
+| | before Shamela | with Shamela |
+|---|---|---|
+| Recall@6 / MRR (main set, both queries) | 98% / 0.93 | 98% / 0.93 |
+| Held-out Recall@6 / MRR | 100% / 1.00 | 100% / 0.88 (relevant Shamela passages now rank first on 2 questions) |
+| Unanswerable correctly abstained (threshold 0.35) | 100% | 100% |
+| Search time per call (CPU) | 1.7 s | **2.5 s** |
+| Misquote detection | 15/15 | 15/15 |
+
+* **Scoring change in `retrieve()`:** Arabic-only passages (Bayyinat, Shamela) are now
+  scored against the **Arabic** query only (when one is given). Without this, "What is
+  Ramadan?" returned an encyclopedia definition of the Rotary Club first.
+* **Keep sending an Arabic query** as one of the first two queries (your analyzer's
+  `arabic_query` already is the 2nd). With the seeker's English words alone, Shamela
+  scores are unreliable ("Which surah mentions dinosaurs?" → 0.76 instead of 0.20).
+* Peak RAM of a searching process measured at 3.4 GB; the ≥ 8 GB server advice stands.
+* **Action:** rerun your agent evaluation with this index, and look at a few replies
+  that cite `SH:` passages (the content reviewer too).

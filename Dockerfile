@@ -20,6 +20,13 @@ COPY eval/ eval/
 COPY data/glossary.json data/glossary.json
 COPY data/embeddings/ data/embeddings/
 
+# Java 21 for the optional Shamela step (ingest/shamela.py compiles a small Lucene reader).
+# Copied from the official Temurin image so it works whatever Debian release the base uses.
+COPY --from=eclipse-temurin:21-jdk /opt/java/openjdk /opt/java/openjdk
+ENV JAVA_HOME=/opt/java/openjdk PATH="/opt/java/openjdk/bin:${PATH}"
+
 VOLUME ["/var/lib/mueen"]
 # Default: build (or refresh) the store and index into the volume, then exit.
-CMD ["python", "-m", "ingest.build_all"]
+# SHAMELA=1: also build the selected Shamela books the first time (~4.8 GB download,
+# ~25 min); later runs reuse processed/shamela.jsonl, and the raw download is deleted.
+CMD ["sh", "-c", "if [ \"$SHAMELA\" = 1 ] && [ ! -s \"$WORK_DIR/processed/shamela.jsonl\" ]; then python -m ingest.build_all --shamela && rm -rf \"$WORK_DIR/raw/shamela\"; else python -m ingest.build_all; fi"]
