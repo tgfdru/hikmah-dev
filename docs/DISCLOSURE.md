@@ -11,7 +11,7 @@ Any tool added later must be added here immediately.
 |---|---|---|---|---|
 | BGE-M3 (`BAAI/bge-m3`) | Multilingual embedding model, open weights (MIT) | huggingface.co/BAAI/bge-m3 | Turns passages and queries (Arabic, English, Urdu, …) into vectors in one space | Indexing, 3 |
 | bge-reranker-v2-m3 (`BAAI/bge-reranker-v2-m3`) | Cross-encoder reranker, open weights (Apache-2.0) | huggingface.co/BAAI | Optional (`RERANKER=bge`): scores evidence relevance 0-1 for the abstain decision | 3 |
-| mMiniLM reranker (`cross-encoder/mmarco-mMiniLMv2-L12-H384-v1`) | Small multilingual cross-encoder (Apache-2.0) | huggingface.co/cross-encoder | Optional (`RERANKER=minilm`): faster reranking on CPU | 3 |
+| mMiniLM reranker (`cross-encoder/mmarco-mMiniLMv2-L12-H384-v1`) | Small multilingual cross-encoder (Apache-2.0) | huggingface.co/cross-encoder | **Deployed default** (`RERANKER=minilm`): reranking on CPU and the 0-1 score for the abstain decision | 3 |
 | fastText lid.176 | Language identification model (CC BY-SA 3.0) | fasttext.cc (Meta) | Detects the seeker's language offline | 1 |
 | Qdrant (server v1.19.1, `qdrant-client`) | Vector database, open source (Apache-2.0) | qdrant.tech | Dense search with source-type filters | 3 |
 | rank_bm25 + our Arabic normalization | Keyword search (Apache-2.0) | PyPI | Exact-term matching (names, terms, surah names) | 3 |
@@ -32,7 +32,7 @@ Any tool added later must be added here immediately.
 | Tool / model | Type | Source | Role | Stage |
 |---|---|---|---|---|
 | `space-bunny-free` (default; any model on the same endpoint via `AI_MODEL` / `AI_MODEL_<STAGE>`) | LLM via OpenAI-compatible API | opencode.ai/zen | Context analysis (`Analysis`), level routing (`Routing`), drafting (`Draft`), optional faithfulness judge (`Judgement`); translates the fixed referral/abstain templates into languages that have no reviewed version | 1, 2, 4, 5 |
-| Gemini (`gemini-3.1-flash-lite`, `gemini-3.8-flash`, fallbacks `gemini-3.5-flash`, `gemini-3.5-flash-lite`) — alternative configuration | LLM via Google AI Studio's OpenAI-compatible API (free tier) | ai.google.dev | Same roles as above when configured (`.env`: `AI_BASE_URL`, `AI_MODEL_*`, `AI_MODEL_FALLBACK`); evaluated in EVALUATION.md §4.1 | 1, 2, 4, 5 |
+| Gemini (`gemini-3.1-flash-lite`, `gemini-3.8-flash`, fallbacks `gemini-3.5-flash`, `gemini-3.5-flash-lite`) — **deployed configuration** | LLM via Google AI Studio's OpenAI-compatible API (free tier) | ai.google.dev | Same roles as above when configured (`.env`: `AI_BASE_URL`, `AI_MODEL_*`, `AI_MODEL_FALLBACK`); evaluated in EVALUATION.md §4.1 | 1, 2, 4, 5 |
 | `gpt-5.4-nano`, `claude-haiku-4-5` via OpenCode Zen (paid) — alternative configuration | LLMs via OpenCode Zen (OpenAI Responses and Anthropic Messages protocols) | opencode.ai/zen | `gpt-5.4-nano`: context analysis and routing, and **the independent judge of the deployed configuration** (second verification layer, EVALUATION.md §4.3); `claude-haiku-4-5`: drafting; evaluated in EVALUATION.md §4.2 | 1, 2, 4, 5 |
 | LangGraph | Agent orchestration library (MIT) | LangChain Inc. / PyPI | State graph of the stages: analyze → route → retrieve → generate → verify, with refer / abstain branches and one retry | 1–5 |
 | langchain-openai / langchain-core | LLM client (MIT) | PyPI | Calls the endpoint; structured output with `method="function_calling"` | 1, 2, 4, 5 |
@@ -44,6 +44,14 @@ Any tool added later must be added here immediately.
 | Verbatim store via `get_verbatim` (knowledge layer) | SQLite lookup | Quranpedia (King Fahd Complex print) | The only source of verse text in replies; deterministic check that every reference exists | 5 |
 | Regular-expression rules (our code, `agent/rules.py`) | Deterministic rules | — | Level-D hint, placeholder parsing, range coverage, consensus-claim check, rendering | 2, 5 |
 | Docker (`Dockerfile.api`, compose service `api`) | Packaging | docker.com | Deployment of the API next to Qdrant | Deployment |
+| Dokploy (Traefik) on an Oracle Cloud ARM server | Self-hosted deployment platform | dokploy.com / oracle.com | Builds and runs Qdrant, the knowledge base and the API at `mueen.fawazabdullah.dev` | Deployment |
+
+## Sheykak app integration
+
+| Tool | Type | Source | Role | Stage |
+|---|---|---|---|---|
+| Sheykak mobile app (React Native / Expo) | The team's app (existed before the challenge; the Mu'een module was built during it) | github.com/MuhannadAldawsari/sheykak-mueen (module) | The scholar's draft sheet: select messages, edit, review checkbox, send with source chips | Human review |
+| Supabase (Auth, Postgres, Edge Functions) | Backend platform | supabase.com | `mueen-draft` function: checks the scholar's session and assignment, holds the API key, forwards the request | API |
 
 ## AI-assisted development
 
@@ -54,4 +62,6 @@ AI-assisted programming tools are disclosed too.
 ## Not used (changed from the original plan)
 
 * ALLaM / any self-hosted "sovereign" model — dropped for time.
-* Telegram bot — the assistant is integrated into the team's website instead.
+* Telegram bot — the assistant is integrated into the team's Sheykak mobile app instead.
+* Next.js web inbox and Ragas (in the original plan) — replaced by the Sheykak app and our own
+  evaluation scripts (`eval/run_eval.py`, `eval/rejudge.py`).

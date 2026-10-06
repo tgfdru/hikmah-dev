@@ -38,8 +38,9 @@ Both TypeScript files were type-checked (`tsc --strict` against supabase-js 2 an
 ## 2. Supabase (Fawaz)
 
 1. Create the function `mueen-draft` with `supabase/functions/mueen-draft/index.ts`
-   (Dashboard → Edge Functions → Deploy a new function, or `supabase functions deploy mueen-draft`).
-   Keep **"Verify JWT" on**.
+   (`supabase functions deploy mueen-draft --no-verify-jwt`). Verify JWT is **off** at the
+   gateway because the project signs sessions with ES256 keys, which the gateway's legacy check
+   rejects; the function verifies the caller's token itself with `supabase.auth.getUser(token)`.
 2. Secrets (Edge Functions → Secrets):
    * `MUEEN_API_URL` = `https://mueen.fawazabdullah.dev`
    * `MUEEN_API_KEY` = the key from step 1.4

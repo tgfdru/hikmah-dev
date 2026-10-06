@@ -25,9 +25,16 @@ a published policy, and never use it to draw unnecessary conclusions about the u
    inheritance). Do not persist their text.
 3. **The inferred `background` / `knowledge_level` is session-only.** Never build a
    profile of a seeker's religion or beliefs across conversations.
-4. **Pseudonymous ids only.** Use the website's conversation id; no names, phone
+4. **Pseudonymous ids only.** Use the app's question / conversation id; no names, phone
    numbers or emails in the AI service.
-5. **LLM provider**: conversation text is sent to the configured LLM API
-   (OpenCode Zen) to draft replies. State this in the site's privacy policy.
+5. **LLM providers**: conversation text is sent to the configured LLM APIs to draft and check
+   replies. Deployed: **Google Gemini (AI Studio, free tier)** for analysis, routing and
+   drafting — on the free tier Google may use prompts to improve its products, so a paid tier
+   (or another provider) is needed before real users — and **OpenCode Zen** (`gpt-5.4-nano`)
+   for the independent judge. State this in the app's privacy policy.
 6. **Transparency**: the seeker talks to a human da'i; the AI only drafts for the
-   da'i. The site should say that the team uses AI tools with human review.
+   da'i, who must tick «راجعتُ المسودة ومراجعها وأعتمد محتواها» before sending. The app
+   should say that scholars use AI tools with human review.
+7. **Sheykak app path**: the Supabase Edge Function `mueen-draft` checks the scholar's session
+   and forwards only the question and the message texts (no user ids, names or emails); it
+   logs status codes only. The API key stays in Supabase secrets, never in the app.

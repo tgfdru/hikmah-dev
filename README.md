@@ -1,8 +1,28 @@
 # Mu'een (مُعين الداعية)
 
-An AI assistant that drafts source-backed replies for da'is (callers to Islam)
-chatting with people who ask about Islam, integrated into
-[sheykak.com](https://sheykak.com). **The da'i always decides; the assistant proposes.**
+An AI assistant that drafts source-backed replies for da'is and scholars (callers to Islam)
+chatting with people who ask about Islam, integrated into the **Sheykak mobile app**
+([sheykak.com](https://sheykak.com)). **The da'i always decides; the assistant proposes.**
+
+## Challenge submission
+
+| | |
+|---|---|
+| Track | 04 — أدوات المعرفة والتحقق لتمكين المعرفين بالإسلام (knowledge and verification tools) |
+| Team | فريق شيخك — فواز الغامدي (knowledge & retrieval), نادر الشهري (agent & API), مهند الدوسري (mobile app), حمزة شاكر (product), عبدالله البطاط (UI/UX) |
+| Try it (Android) | APK: [Google Drive](https://drive.google.com/drive/folders/18HbswyfQeVwPXzEpoZTmq6ILZFTm1T1n?usp=sharing). The test accounts are in the presentation (not in this public repo). Sign in as the user and ask a question; sign in as the scholar, accept it from the pending questions, open the chat and tap «استعن بمعين». |
+| Live API | `https://mueen.fawazabdullah.dev` (`/health` is public; drafting needs an API key, held only by the app's Supabase Edge Function) |
+| Video | [youtu.be/jV01OxZfMTU](https://youtu.be/jV01OxZfMTU) |
+| Presentation | Submitted as PDF on the challenge platform |
+| App code | The Mu'een module of the app: [MuhannadAldawsari/Sheykak-Mueen](https://github.com/MuhannadAldawsari/sheykak-mueen); the Edge Function is also in [`integration/sheykak/`](integration/sheykak/) |
+| Sources | [docs/SOURCES.md](docs/SOURCES.md) — every source, how it is used and verified |
+
+**Starting version (challenge rule on earlier work).** Before the challenge days we prepared the
+knowledge layer and a first agent: commits up to `a4c4083` (2026-10-03). Everything after it was
+built during the challenge (4–6 Oct 2026): the Shamela books, HadeethEnc hadith, the
+independent judge, the reply-language resolver, `/mueen/draft` and the Sheykak app integration,
+deployment, and the evaluation in docs/EVALUATION.md §4.1–6. The Sheykak app itself existed
+before the challenge; only its Mu'een module was built for it.
 
 This repository has two layers (see the [plan](docs/reference/plan.md)):
 
@@ -20,12 +40,13 @@ verbatim from the store, never written by a model.
 | Piece | What it gives the agent |
 |---|---|
 | **Verbatim Quran store** | `get_verbatim("Q:2:255", "en")` → exact Arabic text (King Fahd Complex print, via Quranpedia) + approved English / Urdu translation. The only source of verse text shown to anyone; unknown ids return `None`. |
-| **Hybrid search** | `retrieve(queries, lang)` → the 6 most relevant passages from the Quran and the *Bayyinat* Q&A book (263 answered doubts), each with source, reference, link and a 0–1 confidence score used to abstain. |
+| **Hybrid search** | `retrieve(queries, lang)` → the 6 most relevant passages from the Quran, the *Bayyinat* Q&A book (263 answered doubts), 33 selected Shamela books (6,766 passages) and HadeethEnc hadith, each with source, reference, link and a 0–1 confidence score used to abstain. |
+| **Hadith store** | `get_verbatim("H:hadeethenc:<id>")` → 3,573 hadith graded صحيح / حسن from HadeethEnc (the organiser's encyclopedia) with grade, attribution and approved translations; hadith text is never written by a model. |
 | **Misquote detection** | `find_quran_quotes(message)` spots a verse quoted with mistakes and returns the correct reference (challenge test case 11). |
 | **Language detection** | `detect_language(text)` → `ar`, `en`, `ur`, `id`, `tl`, … offline. |
 | **Glossary** | 84 terms: the challenge's 10 official terms with their usage rules + equivalents from the Jamhara dictionary; `glossary_for()` picks the relevant ones for a prompt. |
-| **Evaluation** | Retrieval quality and abstain threshold, misquote detection, and 41 end-to-end safety cases for the agent API (the challenge's 12 + variants). |
-| **Hadith (optional)** | Live Dorar search, authentic grades only, **off by default** (untested: dorar.net blocks cloud servers). |
+| **Evaluation** | Retrieval quality and abstain threshold, misquote detection, and 66 end-to-end safety cases for the agent API (the challenge's 12 + variants). |
+| **Dorar (optional)** | Live Dorar hadith search, authentic grades only, **off by default** (dorar.net blocks cloud servers). |
 
 ## Quick start
 
@@ -44,9 +65,9 @@ for e in retrieve(["Why do Muslims worship the Kaaba?", "لماذا يعبد ا�
 print(get_verbatim("Q:112:1-4", "ur").translation)
 ```
 
-The build takes about 2 minutes: downloads (~40 MB), Quran store, Bayyinat parsing,
-and the index. Embeddings are cached in `data/embeddings/` (committed), so the
-models do not have to re-embed ~7,300 passages (≈1.5 h on CPU). The first run
+The basic build (Quran + Bayyinat) takes a few minutes; Shamela (`--shamela`, ≈45 min) and
+HadeethEnc (`--hadith`, ≈1 h the first time) are opt-in. Embeddings are cached in
+`data/embeddings/` (committed), so the models do not re-embed the passages. The first run
 downloads BGE-M3 (~2.3 GB) from Hugging Face.
 
 With Docker (Qdrant as a server, needed when the API runs several workers):
@@ -58,7 +79,8 @@ docker compose run --rm kb-build
 
 ## Agent & API (Nader's part — `agent/`, `api/`)
 
-A LangGraph agent behind a FastAPI service for sheykak.com:
+A LangGraph agent behind a FastAPI service, called by the Sheykak app (`POST /mueen/draft`,
+through a Supabase Edge Function) and by any site (`POST /suggest`):
 
 ```
 analyze → route (A–D) → retrieve → generate → verify ─┬─ ok / unverified
@@ -76,17 +98,17 @@ analyze → route (A–D) → retrieve → generate → verify ─┬─ ok / un
 * **Owner's control:** `X-API-Key` keys, a service end date, a privacy-safe run log (no
   message text), `/stats` and `/feedback`.
 
-### Measured results (41 safety cases incl. the challenge's 12 — [EVALUATION §4](docs/EVALUATION.md))
+### Measured results ([docs/EVALUATION.md](docs/EVALUATION.md))
 
-| Configuration | Pass all checks | Level A–D | Citations valid | Mean latency |
-|---|---|---|---|---|
-| `space-bunny-free` (run 4) | 36 / 41 | 95% | 100% | 30.3 s |
-| Gemini (AI Studio, free tier) | 40 / 41 | 100% | 100% | 32.8 s |
-| Gemini + independent judge (**deployed**) | 39 / 41 | 100% | 100% | 29.7 s |
+Latest run (§5.2, 65 end-to-end cases incl. the challenge's 12, deployed configuration:
+Gemini + independent judge `gpt-5.4-nano`):
 
-Under one common independent judge (`deepseek-v4.1-flash`), the deployed configuration has
-faithfulness 4.32 / 5, 61% of drafts fully grounded, and 1 contradiction with the evidence
-(down from 3 without the judge).
+| Passing all checks | Level A–D | Level-D referred | Routing | Quran quotes exact | Grounded (common judge) | Mean latency |
+|---|---|---|---|---|---|---|
+| 64 / 65 (the failure fixed and re-checked) | 100% | 100% | 100% | 100% | 80% | 22.8 s |
+
+Retrieval: Recall@6 98% (held-out 100%), unanswerable questions correctly abstained 100%
+(§1, §5, §6). Misquote detection 15 / 15. On the server a draft takes about 30 s.
 
 ### Run locally
 
@@ -119,10 +141,11 @@ retrieval/        runtime library (what the agent imports)
   dorar.py          optional hadith search (off)
   mock.py           RETRIEVER=mock: 3 fixed items, no models
   config.py         all settings (env vars)
-ingest/           build pipeline: download → quran → bayyinat → build_index (build_all)
+ingest/           build pipeline: download → quran → bayyinat → (shamela, hadith) → build_index (build_all)
 data/glossary.json, data/embeddings/   committed data; everything else under data/ is generated
 agent/            LangGraph agent: state, nodes, rules, prompts/, templates, llm (model clients)
-api/              FastAPI service: /suggest, /suggest/regenerate, /feedback, /stats, /health
+api/              FastAPI service: /mueen/draft (Sheykak app), /suggest, /suggest/regenerate, /feedback, /stats, /health
+integration/      Sheykak app: Supabase Edge Function + integration plan
 deploy/           setup/update/stop scripts, Caddy + production compose, Dokploy compose
 eval/             retrieval_cases.yaml, safety_cases.yaml, run_eval.py, rejudge.py, results/
 docs/             HANDOFF, ARCHITECTURE, AGENT, API_INTEGRATION, DEPLOY, AGENT_WORKLOG,
@@ -134,7 +157,7 @@ tests/            pytest suite
 
 * [HANDOFF](docs/HANDOFF.md) — how the agent uses the knowledge layer
 * [AGENT](docs/AGENT.md) — the agent pipeline, guarantees and configuration
-* [API_INTEGRATION](docs/API_INTEGRATION.md) — for the sheykak.com team
+* [API_INTEGRATION](docs/API_INTEGRATION.md) — for the app and web teams (`/mueen/draft`, `/suggest`)
 * [DEPLOY](docs/DEPLOY.md) — server and Dokploy deployment
 * [AGENT_WORKLOG](docs/AGENT_WORKLOG.md) — step-by-step log and decisions (Arabic)
 * [ARCHITECTURE](docs/ARCHITECTURE.md) — how retrieval works
@@ -146,5 +169,5 @@ tests/            pytest suite
 ## Licence
 
 Code: MIT (see `LICENSE`). Source texts keep their own terms (see `docs/SOURCES.md`);
-the Quran text, translations and the Bayyinat book are downloaded at build time,
-not redistributed in this repository.
+the Quran text, translations, the Bayyinat book, the Shamela books and HadeethEnc are
+downloaded at build time, not redistributed in this repository.

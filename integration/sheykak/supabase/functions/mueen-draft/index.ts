@@ -9,7 +9,9 @@
 //   MUEEN_API_KEY   one of the keys in MUEEN_API_KEYS on the Mu'een server
 // SUPABASE_URL and the project's publishable (anon) key are provided by Supabase automatically.
 //
-// Deploy: `supabase functions deploy mueen-draft` (JWT verification stays ON).
+// Deploy: `supabase functions deploy mueen-draft --no-verify-jwt`.
+// The project signs sessions with asymmetric (ES256) keys, which the gateway's legacy
+// verify_jwt check rejects; the caller's session is verified below with Supabase Auth.
 
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 
@@ -65,11 +67,18 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (!API_URL || !API_KEY) return json({ error: "not_configured" }, 500);
 
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  if (!token) return json({ error: "unauthorized" }, 401);
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, publishableKey(), {
-    global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
+    global: { headers: { Authorization: authHeader } },
   });
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return json({ error: "unauthorized" }, 401);
+  // Ask Supabase Auth about this exact token (works for ES256 and legacy HS256 sessions).
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (!user) {
+    console.error(`mueen auth: ${authError?.message ?? "no user"}`); // reason only, never the token
+    return json({ error: "unauthorized" }, 401);
+  }
 
   const raw = await req.text();
   if (raw.length > MAX_BODY_BYTES) return json({ error: "too_large" }, 413);
@@ -82,9 +91,19 @@ Deno.serve(async (req) => {
   if (typeof body.questionId !== "string" || !Array.isArray(body.messages) || typeof body.scope !== "object") {
     return json({ error: "bad_request" }, 400);
   }
-  if (!(await isScholar(supabase, user.id))) return json({ error: "forbidden" }, 403);
-  if (!(await canAnswer(supabase, body.questionId, user.id))) return json({ error: "forbidden" }, 403);
+  if (!(await isScholar(supabase, user.id))) {
+    console.error("mueen forbidden: not an active scholar");
+    return json({ error: "forbidden" }, 403);
+  }
+  if (!(await canAnswer(supabase, body.questionId, user.id))) {
+    console.error("mueen forbidden: not assigned to this question");
+    return json({ error: "forbidden" }, 403);
+  }
 
+  // One line per stage, never message text or keys: the dashboard log names any failure.
+  const scope = body.scope as { kind?: unknown };
+  console.log(`mueen draft start scope=${String(scope?.kind)} messages=${body.messages.length}`);
+  const started = Date.now();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
   try {
@@ -101,7 +120,16 @@ Deno.serve(async (req) => {
       signal: controller.signal,
     });
     const text = await upstream.text();
+    console.log(`mueen draft upstream status=${upstream.status} ms=${Date.now() - started} bytes=${text.length}`);
     if (upstream.ok) {
+      try {
+        const parsed = JSON.parse(text) as Record<string, unknown>;
+        if (!Array.isArray(parsed?.paragraphs) || typeof parsed?.status !== "string") {
+          console.error(`mueen draft bad body keys=${Object.keys(parsed ?? {}).join(",")}`);
+        }
+      } catch {
+        console.error("mueen draft bad body: not JSON");
+      }
       return new Response(text, { status: 200, headers: { ...CORS, "Content-Type": "application/json" } });
     }
     console.error(`mueen api ${upstream.status}`); // status only: never log message text
@@ -110,6 +138,15 @@ Deno.serve(async (req) => {
     return json({ error: "unavailable" }, 502);
   } catch (err) {
     const timedOut = err instanceof DOMException && err.name === "AbortError";
+    const host = (() => {
+      try {
+        return new URL(API_URL).host;
+      } catch {
+        return "invalid MUEEN_API_URL";
+      }
+    })();
+    const e = err as Error;
+    console.error(`mueen draft fetch failed host=${host} ms=${Date.now() - started} ${e?.name}: ${e?.message}`);
     return json({ error: timedOut ? "timeout" : "unavailable" }, timedOut ? 504 : 502);
   } finally {
     clearTimeout(timer);
