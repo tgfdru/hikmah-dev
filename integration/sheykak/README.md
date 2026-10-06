@@ -43,10 +43,10 @@ Both TypeScript files were type-checked (`tsc --strict` against supabase-js 2 an
 2. Secrets (Edge Functions → Secrets):
    * `MUEEN_API_URL` = `https://mueen.fawazabdullah.dev`
    * `MUEEN_API_KEY` = the key from step 1.4
-3. **Adapt two small functions at the top of the file** (marked "TO ADAPT"): how Sheykak marks
-   a scholar (`isScholar`, placeholder: `profiles.role = 'scholar'`) and that the scholar may
-   answer this question (`canAnswer`, placeholder: the `questions` row is readable with the
-   scholar's own session under RLS). Replace both with Sheykak's real tables before deploying.
+3. Who may draft (already set for Sheykak's schema): an **active scholar**
+   (`profiles.role = 'scholar'`, `profiles.status = 'active'`) who is **assigned** to the
+   question (`question_assignments.question_id` / `scholar_id`). Both checks use the
+   scholar's own session, so Sheykak's Row Level Security rules apply.
 4. Limits to know: Supabase stops a function after 150 s on the free plan; a draft takes
    ~30-60 s, so this fits. The function logs only status codes, never message text.
 

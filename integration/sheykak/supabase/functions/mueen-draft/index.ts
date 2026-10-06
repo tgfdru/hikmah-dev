@@ -41,17 +41,22 @@ function json(body: unknown, status = 200): Response {
 }
 
 // ----------------------------------------------------------------------------------------
-// TO ADAPT: how Sheykak knows a user is a scholar, and that the scholar may answer
-// this question. Both run with the caller's own session, so Row Level Security applies.
-// The table and column names below are placeholders — replace them with the real ones.
+// Who may draft: an active scholar (profiles.role = 'scholar', status = 'active', as in
+// Sheykak's own RLS rules) who is assigned to this question (question_assignments).
+// Both queries run with the caller's own session, so Row Level Security applies.
 async function isScholar(supabase: SupabaseClient, userId: string): Promise<boolean> {
-  const { data, error } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
-  return !error && data?.role === "scholar";
+  const { data, error } = await supabase.from("profiles").select("role, status").eq("id", userId).maybeSingle();
+  return !error && data?.role === "scholar" && data?.status === "active";
 }
 
-async function canAnswer(supabase: SupabaseClient, questionId: string): Promise<boolean> {
-  const { data, error } = await supabase.from("questions").select("id").eq("id", questionId).maybeSingle();
-  return !error && !!data;
+async function canAnswer(supabase: SupabaseClient, questionId: string, userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("question_assignments")
+    .select("question_id")
+    .eq("question_id", questionId)
+    .eq("scholar_id", userId)
+    .limit(1);
+  return !error && (data?.length ?? 0) > 0;
 }
 // ----------------------------------------------------------------------------------------
 
@@ -78,7 +83,7 @@ Deno.serve(async (req) => {
     return json({ error: "bad_request" }, 400);
   }
   if (!(await isScholar(supabase, user.id))) return json({ error: "forbidden" }, 403);
-  if (!(await canAnswer(supabase, body.questionId))) return json({ error: "forbidden" }, 403);
+  if (!(await canAnswer(supabase, body.questionId, user.id))) return json({ error: "forbidden" }, 403);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
