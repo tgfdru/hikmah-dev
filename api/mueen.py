@@ -157,7 +157,7 @@ def _grade(text: str | None) -> Grade | None:
     t = text or ""
     if "ضعيف" in t or "weak" in t.lower():
         return "daif"
-    if "صحيح" in t or "authentic" in t.lower() or "sahih" in t.lower():
+    if "صحيح" in t or "صحح" in t or "authentic" in t.lower() or "sahih" in t.lower():
         return "sahih"
     if "حسن" in t or "hasan" in t.lower() or "good" in t.lower():
         return "hasan"

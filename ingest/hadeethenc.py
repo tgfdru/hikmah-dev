@@ -32,7 +32,7 @@ RAW = config.RAW_DIR / "hadeethenc"
 HEADERS = {"User-Agent": "MueenKnowledgeBuilder/1.0 (+https://sheykak.com; hackathon research use)"}
 WORKERS = 4  # polite: a few requests at a time
 SOURCE_AR = "موسوعة الأحاديث النبوية المترجمة (HadeethEnc)"
-KEEP_GRADES = ("صحيح", "حسن")  # also matches "صحيح لغيره", "حسن صحيح" ...
+KEEP_GRADES = ("صحيح", "حسن", "صحح")  # also "صحيح لغيره", "إسناده حسن", "صححه ابن حجر" ...
 
 
 def _get_json(client: httpx.Client, url: str, params: dict) -> dict | list:

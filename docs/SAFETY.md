@@ -26,10 +26,13 @@
 ## Hadith
 
 The approved sources require "no hadith without a source and an approved grade".
-Hadith could not be downloaded from an approved source, so none are stored. The
-optional Dorar tool (off by default) keeps only authentic grades and resolves
-through the same verbatim path. With it off, the correct behaviour for any hadith
-request is to say that no matching hadith was found in the approved sources.
+Hadith come from HadeethEnc (the organiser's encyclopedia), graded صحيح or حسن, stored
+verbatim with their grade and attribution (`store/hadith.sqlite`). The model writes only
+`[[H:hadeethenc:<id>]]`; the text, grade and approved translation are inserted from the
+store, exactly like Quran verses, and an unknown id is rejected. A hadith request with no
+matching hadith above the threshold still abstains ("no matching hadith in the approved
+sources"). Hadith quoted inside Shamela or Bayyinat passages are never quoted as hadith.
+The optional Dorar tool (off by default) resolves through the same path.
 
 ## Shamela books
 

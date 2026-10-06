@@ -135,7 +135,7 @@ def test_run_log_keeps_no_text(client):
     assert "Kaaba" not in logged and "idol" not in logged and "mueen_draft" in logged
 
 
-@pytest.mark.parametrize("text,grade", [("صحيح", "sahih"), ("متفق عليه — صحيح", "sahih"), ("حسن", "hasan"),
+@pytest.mark.parametrize("text,grade", [("صحيح", "sahih"), ("متفق عليه — صحيح", "sahih"), ("حسن", "hasan"), ("صححه الحافظ ابن حجر", "sahih"), ("إسناده حسن", "hasan"),
                                         ("ضعيف", "daif"), ("Authentic", "sahih"), (None, None)])
 def test_grade_mapping(text, grade):
     assert mueen._grade(text) == grade

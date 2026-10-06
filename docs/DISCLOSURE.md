@@ -24,6 +24,7 @@ Any tool added later must be added here immediately.
 | Pydantic | Data validation | PyPI | `Evidence` contract shared with the agent | 3, 4, 5 |
 | `space-bunny-free` via OpenCode Zen | LLM behind an OpenAI-compatible API | opencode.ai/zen | Evaluation only: LLM-judge of faithfulness and tone | Evaluation |
 | `deepseek-v4.1-flash` via OpenCode Zen | LLM behind an OpenAI-compatible API | opencode.ai/zen | Evaluation only: independent judge for re-scoring saved replies (`eval/rejudge.py`) | Evaluation |
+| HadeethEnc API (hadeethenc.com/api/v1) | Public API of the organiser's hadith encyclopedia | hadeethenc.com | Build time only: downloads graded hadith with approved translations into the hadith store | Ingestion, 3, 5 |
 | Dorar hadith API (optional, off) | Public search API | dorar.net | Live search of graded hadith when enabled | 3 |
 
 ## Agent layer (`agent/`, `api/` — Nader)

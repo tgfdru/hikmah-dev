@@ -7,7 +7,8 @@ da'is, plus the agent/API layer (`agent/`, `api/`, owned by Nader — see docs/A
 
 * Never write, paraphrase or "fix" Quran text or hadith in code, data, prompts or
   tests. Quran text comes only from the verbatim store (`retrieval/verbatim.py`,
-  built from Quranpedia); hadith only from the optional Dorar tool. Tests compare
+  built from Quranpedia); hadith only from the HadeethEnc store (`get_hadith`, built by
+  `ingest/hadeethenc.py`) or the optional Dorar tool. Tests compare
   against the store or use normalized forms.
 * `retrieval/contract.py` is shared with the agent owner: do not change fields or
   signatures without both owners agreeing.
@@ -35,11 +36,12 @@ RETRIEVER=mock ...                        # 3 fixed evidence items, no models
 ## Map
 
 * `retrieval/` runtime library — see docs/ARCHITECTURE.md
-* `ingest/` build pipeline — download → quran → bayyinat → (shamela, opt-in) → build_index;
+* `ingest/` build pipeline — download → quran → bayyinat → (shamela, hadith: opt-in) → build_index;
   Shamela book list in `ingest/shamela_books.yaml` (only the content team changes it)
 * `eval/` cases + runner; results in `eval/results/`, summary in docs/EVALUATION.md
 * `docs/HANDOFF.md` how the agent uses this layer; `docs/DECISIONS.md` scope decisions
 * `agent/` LangGraph agent, `api/` FastAPI service — docs/AGENT.md, docs/API_INTEGRATION.md, docs/AGENT_WORKLOG.md
+* `api/mueen.py` `POST /mueen/draft`: the Sheykak app's format; app + Supabase code in `integration/sheykak/`
 * Agent rule: the model writes `[[Q:..]]`/`[[H:..]]` placeholders only; `agent/rules.py` + `nodes.check_draft` must keep rejecting anything else
 
 ## Conventions

@@ -176,6 +176,27 @@ positive:
     question: Was Muhammad a merciful man?
     ar: رحمة النبي ﷺ
     expect: [Q:21:107, Q:3:159, Q:9:128, Q:68:4]
+  # Hadith (HadeethEnc, added 2026-10-06). Questions name the topic only; ids from the store.
+  - id: hadith_intention
+    question: Is there a hadith about the intention behind our actions?
+    ar: حديث عن النية في الأعمال
+    expect: [H:hadeethenc:66511, H:hadeethenc:4560]
+  - id: hadith_smile
+    question: Is there a hadith about smiling at others?
+    ar: حديث عن التبسم في وجه الناس
+    expect: [H:hadeethenc:66237]
+  - id: hadith_pillars
+    question: What are the pillars of Islam according to the Prophet's hadith?
+    ar: حديث أركان الإسلام
+    expect: [H:hadeethenc:66512, H:hadeethenc:65000]
+  - id: hadith_advice
+    question: What did the Prophet teach about sincere advice?
+    ar: حديث عن النصيحة في الدين
+    expect: [H:hadeethenc:66516, H:hadeethenc:4309]
+  - id: hadith_mercy_people
+    question: Is there a hadith about being merciful to people?
+    ar: حديث عن الرحمة بالناس
+    expect: [H:hadeethenc:8289]
 
 negative:
   - id: fake_hadith_computer
