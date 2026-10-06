@@ -254,9 +254,9 @@ Measured 2026-10-06 (details: docs/EVALUATION.md §5):
 
 ## 🆕 Update — 2026-10-06 (Sheykak app + HadeethEnc) — read this part first
 
-Built on top of `nader/agent` (fast-forwarded, nothing of yours was changed back).
-Everything is on `claude/loving-heisenberg-oekuju`; Dokploy builds `nader/agent`, so
-**fast-forward `nader/agent` to it (or point Dokploy at it) and redeploy**.
+Built on top of `nader/agent` (your commits up to "worklog: service end date" are merged in;
+nothing of yours was changed back). **Dokploy now deploys `claude/loving-heisenberg-oekuju`**
+(Fawaz's decision): push agent changes there too, or merge them in, so they get deployed.
 
 ### A. New: `POST /mueen/draft` (api/mueen.py)
 

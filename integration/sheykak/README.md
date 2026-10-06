@@ -23,9 +23,8 @@ Both TypeScript files were type-checked (`tsc --strict` against supabase-js 2 an
 
 ## 1. Server (Fawaz)
 
-1. **Deploy the new code.** Dokploy builds branch `nader/agent`. The endpoint and HadeethEnc
-   are on `claude/loving-heisenberg-oekuju` (which already contains all of `nader/agent`), so
-   either Nader fast-forwards `nader/agent` to it, or Dokploy's branch is switched to it.
+1. **Deploy the new code:** switch Dokploy's branch to `claude/loving-heisenberg-oekuju` (it
+   contains all of `nader/agent` up to 2026-10-06 12:53) and redeploy.
 2. **Hadith (new):** `kb-build` now fetches HadeethEnc once into the volume (`HADITH=1`, the
    default). The **first** deploy after this takes about an hour longer; later deploys reuse it.
    If the HadeethEnc site is down the build continues without hadith.
@@ -47,11 +46,11 @@ Both TypeScript files were type-checked (`tsc --strict` against supabase-js 2 an
 3. **Adapt two small functions at the top of the file** (marked "TO ADAPT"): how Sheykak marks
    a scholar (`isScholar`, placeholder: `profiles.role = 'scholar'`) and that the scholar may
    answer this question (`canAnswer`, placeholder: the `questions` row is readable with the
-   scholar's own session under RLS). Muhannad knows the real table names.
+   scholar's own session under RLS). Replace both with Sheykak's real tables before deploying.
 4. Limits to know: Supabase stops a function after 150 s on the free plan; a draft takes
    ~30-60 s, so this fits. The function logs only status codes, never message text.
 
-## 3. App (Muhannad)
+## 3. App (pull request to Sheykak-Mueen)
 
 1. Copy `http-service.ts` and `index.ts` (table above). `EXPO_PUBLIC_MUEEN_MOCK=1` brings
    the sample answer back for UI work.

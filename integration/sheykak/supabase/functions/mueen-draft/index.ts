@@ -29,7 +29,7 @@ function json(body: unknown, status = 200): Response {
 }
 
 // ----------------------------------------------------------------------------------------
-// TO ADAPT (Muhannad): how Sheykak knows a user is a scholar, and that the scholar may answer
+// TO ADAPT: how Sheykak knows a user is a scholar, and that the scholar may answer
 // this question. Both run with the caller's own session, so Row Level Security applies.
 // The table and column names below are placeholders — replace them with the real ones.
 async function isScholar(supabase: SupabaseClient, userId: string): Promise<boolean> {
