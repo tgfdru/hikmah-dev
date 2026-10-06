@@ -7,7 +7,7 @@
 // Secrets (Supabase Dashboard -> Edge Functions -> Secrets, or `supabase secrets set`):
 //   MUEEN_API_URL   https://mueen.fawazabdullah.dev
 //   MUEEN_API_KEY   one of the keys in MUEEN_API_KEYS on the Mu'een server
-// SUPABASE_URL and SUPABASE_ANON_KEY are provided by Supabase automatically.
+// SUPABASE_URL and the project's publishable (anon) key are provided by Supabase automatically.
 //
 // Deploy: `supabase functions deploy mueen-draft` (JWT verification stays ON).
 
@@ -23,6 +23,18 @@ const CORS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+/** The project's publishable key: the legacy SUPABASE_ANON_KEY, or the newer SUPABASE_PUBLISHABLE_KEYS. */
+function publishableKey(): string {
+  const legacy = Deno.env.get("SUPABASE_ANON_KEY");
+  if (legacy) return legacy;
+  try {
+    const keys = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}") as Record<string, string>;
+    return Object.values(keys)[0] ?? "";
+  } catch {
+    return "";
+  }
+}
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
@@ -48,7 +60,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (!API_URL || !API_KEY) return json({ error: "not_configured" }, 500);
 
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, publishableKey(), {
     global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
   });
   const { data: { user } } = await supabase.auth.getUser();
