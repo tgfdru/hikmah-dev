@@ -6,16 +6,20 @@
                           |--(only a glossary term)--> generate
                           \\-> generate -> verify --(retry)--> generate
                                               \\-> END (ok | unverified)
+
+The search part of retrieve runs during route (PARALLEL_RETRIEVE): it needs only the
+analysis, and route is a model call that mostly waits on the network.
 """
 from __future__ import annotations
 
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
 from langgraph.graph import END, StateGraph
 
-from agent import nodes
+from agent import nodes, settings
 from agent.language import LanguageDecision, resolve_response_language, target_index
 from agent.state import AgentState
 
@@ -40,17 +44,39 @@ def _timed(name: str, fn):
     def run(state: AgentState) -> dict:
         t0 = time.perf_counter()
         out = fn(state)
-        timings = dict(state.get("timings", {}))
+        timings = dict(out.get("timings", state.get("timings", {})))
         timings[name] = timings.get(name, 0) + int((time.perf_counter() - t0) * 1000)
         return {**out, "timings": timings}
     return run
 
 
+def _timed_search(state: AgentState):
+    t0 = time.perf_counter()
+    return nodes.search(state), int((time.perf_counter() - t0) * 1000)
+
+
+def _route_and_search(state: AgentState) -> dict:
+    """Stage 2, with the search of stage 3 running beside it. Same results as running
+    them one after the other; the draft is ready about one search (~5 s) sooner."""
+    if not settings.PARALLEL_RETRIEVE:
+        return nodes.route(state)
+    pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="search")
+    searching = pool.submit(_timed_search, state)
+    pool.shutdown(wait=False)
+    out = nodes.route(state)
+    if _after_route({**state, **out}) == "refer":
+        return out  # referred: the search is not needed (it finishes in the background)
+    found, ms = searching.result()
+    # "search" overlaps "route"; "retrieve" is then only the decision on what was found.
+    return {**out, "found": found, "timings": {**state.get("timings", {}), "search": ms}}
+
+
 @lru_cache(maxsize=1)
 def build_graph():
     g = StateGraph(AgentState)
-    for name in ("analyze", "route", "retrieve", "generate", "verify", "refer", "abstain"):
+    for name in ("analyze", "retrieve", "generate", "verify", "refer", "abstain"):
         g.add_node(name, _timed(name, getattr(nodes, name)))
+    g.add_node("route", _timed("route", _route_and_search))
     g.set_entry_point("analyze")
     g.add_edge("analyze", "route")
     g.add_conditional_edges("route", _after_route, {"refer": "refer", "retrieve": "retrieve"})

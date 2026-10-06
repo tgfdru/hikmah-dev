@@ -39,6 +39,9 @@ MAX_DRAFT_ATTEMPTS = int(kb._env("MAX_DRAFT_ATTEMPTS", "2"))
 # Second verification layer: an LLM checks that every religious claim is supported
 # by the evidence. Off by default for latency; the deterministic layer always runs.
 VERIFY_LLM_JUDGE = kb._flag("VERIFY_LLM_JUDGE", False)
+# Search the sources while the router waits for the model (the search does not need the
+# level). Same results, ~5 s faster; 0 = run them one after the other as before.
+PARALLEL_RETRIEVE = kb._flag("PARALLEL_RETRIEVE", True)
 # How many recent messages the analyzer and generator see.
 CONTEXT_MESSAGES = int(kb._env("CONTEXT_MESSAGES", "8"))
 

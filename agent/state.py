@@ -105,6 +105,7 @@ class AgentState(TypedDict, total=False):
     terms: list[dict]             # approved glossary entries named in the seeker's message
     level_hint: str | None        # deterministic hint for the router (never final)
     routing: Routing
+    found: list[Evidence]         # search results gathered while route ran (PARALLEL_RETRIEVE)
     evidence: list[Evidence]
     best_score: float
     abstain_reason: str | None

@@ -21,7 +21,7 @@ from agent.language import detect_confident
 from agent.prompts import load
 from agent.state import AgentState, Analysis, Citation, Draft, Judgement, Routing
 from retrieval import get_retriever
-from retrieval.contract import Evidence
+from retrieval.contract import Evidence, SourceType
 
 log = logging.getLogger("mueen.agent")
 
@@ -200,27 +200,31 @@ def route(state: AgentState) -> dict:
 
 
 # ------------------------------------------------------------- 3 retrieve ---
-def retrieve(state: AgentState) -> dict:
+def search(state: AgentState) -> list[Evidence]:
+    """The search half of stage 3. It needs only the analysis, not the level, so the
+    graph runs it while `route` waits for the model (graph.py, PARALLEL_RETRIEVE)."""
     a, lang = state["analysis"], state["language"]
     seeker_text = _last_seeker_text(state["messages"])
     # Seeker's own words + an Arabic reformulation: Recall@6 93% -> 98% (HANDOFF §2).
     queries = [q for q in [seeker_text, a.arabic_query, a.core_question] if q and q.strip()]
-    retriever = get_retriever()
-    threshold = settings.ABSTAIN_THRESHOLD
+    # Hadith requests are answered only from hadith evidence; never fall back to
+    # Quran/Bayyinat for them (HANDOFF §5.7).
+    types: list[SourceType] | None = ["hadith"] if a.asks_for_hadith else None
+    return get_retriever().retrieve(queries, lang, types=types, k=6)
 
-    if a.asks_for_hadith:
-        # Hadith requests are answered only from hadith evidence; never fall back to
-        # Quran/Bayyinat for them (HANDOFF §5.7).
-        found = retriever.retrieve(queries, lang, types=["hadith"], k=6)
-        kept = [e for e in found if e.score >= threshold]
-        best = max((e.score for e in found), default=0.0)
-        if not kept:
-            return {"evidence": [], "best_score": best, "abstain_reason": "hadith_not_found",
-                    "status": "abstain", "trace": _trace(state, "retrieve:no_hadith")}
-    else:
-        found = retriever.retrieve(queries, lang, k=6)
-        kept = [e for e in found if e.score >= threshold]
-        best = max((e.score for e in found), default=0.0)
+
+def retrieve(state: AgentState) -> dict:
+    a, lang = state["analysis"], state["language"]
+    found = state.get("found")
+    if found is None:  # not searched during route
+        found = search(state)
+    threshold = settings.ABSTAIN_THRESHOLD
+    kept = [e for e in found if e.score >= threshold]
+    best = max((e.score for e in found), default=0.0)
+
+    if a.asks_for_hadith and not kept:
+        return {"evidence": [], "best_score": best, "abstain_reason": "hadith_not_found",
+                "status": "abstain", "trace": _trace(state, "retrieve:no_hadith")}
 
     # The correct verse for a misquote must be in the evidence, or the verifier would reject it (HANDOFF §5.2).
     for m in state.get("misquotes", []):

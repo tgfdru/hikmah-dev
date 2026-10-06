@@ -19,7 +19,7 @@ analyze ─► route ──(D)────────────────�
 |---|---|---|---|---|
 | 1 | Context Analyzer | `agent/nodes.py:analyze` | Seeker's language (fastText, LLM fallback), knowledge level, tone, background (session only), real question, Arabic search query, hadith request, personal case; detects (mis)quoted verses with `find_quran_quotes` | yes (`Analysis`) |
 | 2 | Safety Router | `nodes.py:route` | Level A–D from the challenge pack. The keyword rule (`rules.level_d_hint`: first person **and** ruling word **and** personal circumstance) is only a hint; when the analyzer **and** the rule both see a personal case the level is raised to D (pack: "choose the more cautious level") | yes (`Routing`) |
-| 3 | Hybrid Retriever | `nodes.py:retrieve` | `retrieve([seeker words, Arabic query, core question], lang)`; keeps evidence ≥ `ABSTAIN_THRESHOLD`; hadith requests use `types=["hadith"]` only; adds the correct verse of a misquote from `get_verbatim` | no |
+| 3 | Hybrid Retriever | `nodes.py:retrieve` | `retrieve([seeker words, Arabic query, core question], lang)`; keeps evidence ≥ `ABSTAIN_THRESHOLD`; hadith requests use `types=["hadith"]` only; adds the correct verse of a misquote from `get_verbatim`. The search itself (`nodes.py:search`) needs only the analysis, so it runs while stage 2 waits for its model (`PARALLEL_RETRIEVE`) | no |
 | 4 | Draft Generator | `nodes.py:generate` | Draft in the seeker's language + Arabic copy + note for the da'i; level-specific rules; relevant glossary terms (`glossary_for`); Quran/hadith **only as placeholders** `[[Q:2:144]]` | yes (`Draft`) |
 | 5 | Citation Verifier | `nodes.py:verify` / `check_draft` | Deterministic checks (below), then an **independent LLM judge** (`VERIFY_LLM_JUDGE=1`, its own endpoint): a claim that contradicts the evidence blocks the draft (retry, then `unverified`); a detail not in the evidence is returned in `issues` as a review point for the da'i; judge outage is fail-open but marked. Replaces placeholders with the exact text from the store | optional (`Judgement`) |
 | – | Refer | `nodes.py:refer` | Level D: fixed personal-case template; Level C with no evidence: fixed "ask a specialist" template (`agent/templates.py`). No ruling, no generation | only to translate a template into a language without one |
@@ -115,6 +115,7 @@ to say which message the da'i picked (it always answered the last seeker message
 | `RETRIEVER` | `hybrid` | `mock` = 3 fixed items, no models (development, tests) |
 | `ABSTAIN_THRESHOLD` | per reranker (0.35 for `minilm`) | Below this best score → abstain |
 | `MAX_DRAFT_ATTEMPTS` | `2` | Drafts before "unverified" |
+| `PARALLEL_RETRIEVE` | `1` | Search the sources while the router's model call runs (same results, ≈5 s faster); `0` = one after the other |
 | `VERIFY_LLM_JUDGE` | `0` (deployed: `1`) | Second verification layer (one more LLM call, ≈5 s with `gpt-5.4-nano`) |
 | `MUEEN_API_KEYS` | empty | Accepted `X-API-Key` values; empty = no check (dev only) |
 | `MUEEN_SERVICE_UNTIL` | empty | Last day the service answers (YYYY-MM-DD) |

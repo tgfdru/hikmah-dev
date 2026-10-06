@@ -240,3 +240,49 @@ def test_verdict_on_a_group_is_referred_without_generation():
                     messages=[{"role": "seeker", "text": "Are the Sufis going to hell?"}])
     assert out["status"] == "refer" and "generate" not in fake.stages()
     assert "route:judgement" in out["trace"] and out["citations"] == []
+
+
+def test_search_runs_while_the_router_waits(monkeypatch):
+    """PARALLEL_RETRIEVE: the search starts before route returns, and gives the same draft."""
+    import threading
+
+    from agent import nodes
+    started = threading.Event()
+    real_search, real_route = nodes.search, nodes.route
+
+    def search(state):
+        started.set()
+        return real_search(state)
+
+    def route(state):
+        assert started.wait(5), "the search did not start during route"
+        return real_route(state)
+
+    monkeypatch.setattr(nodes, "search", search)
+    monkeypatch.setattr(nodes, "route", route)
+    script = {"analyze": analysis(), "route": routing("A"), "generate": draft()}
+    out, _ = run(script)
+    assert out["status"] == "ok" and "search" in out["timings_ms"]
+    assert out["trace"] == ["analyze", "route", "retrieve", "generate", "verify"]
+
+    monkeypatch.setattr(nodes, "route", real_route)
+    monkeypatch.setattr(settings, "PARALLEL_RETRIEVE", False)
+    one_by_one, _ = run(script)
+    assert "search" not in one_by_one["timings_ms"]
+    for key in ("status", "level", "reply", "citations", "trace", "best_score"):
+        assert one_by_one[key] == out[key]
+
+
+def test_hadith_request_still_searches_hadith_only_in_parallel(monkeypatch):
+    from agent import nodes
+    seen = []
+    real = nodes.get_retriever
+
+    class Spy:
+        def retrieve(self, queries, lang, types=None, k=6):
+            seen.append(types)
+            return real().retrieve(queries, lang, types=types, k=k)
+
+    monkeypatch.setattr(nodes, "get_retriever", lambda: Spy())
+    run({"analyze": analysis(asks_for_hadith=True), "route": routing("A"), "generate": draft()})
+    assert seen == [["hadith"]]
