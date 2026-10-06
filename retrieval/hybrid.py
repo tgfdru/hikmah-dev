@@ -132,7 +132,7 @@ class HybridRetriever:
         return [self.bm25_ids[i] for i in top if scores[i] > 0]
 
     def _doc_text(self, doc: dict, limit: int = 1500) -> str:
-        if doc["type"] == "quran":
+        if doc["type"] in ("quran", "hadith"):
             return strip_diacritics(doc["text_ar"]) + "\n" + doc.get("translations", {}).get("en", "")
         return strip_diacritics(doc["text_ar"])[:limit]
 
@@ -176,7 +176,7 @@ class HybridRetriever:
                         # Arabic query when there is one: across languages the small
                         # reranker rewards any short definition ("What is Ramadan?" ->
                         # "الروتاري جمعية ..."). Quran records carry English, so all count.
-                        if arabic and q not in arabic and self.docs[cands[i].id]["type"] != "quran":
+                        if arabic and q not in arabic and self.docs[cands[i].id]["type"] not in ("quran", "hadith"):
                             continue
                         best[i] = max(best[i], s)
             for c, s in zip(cands, best):
@@ -205,7 +205,7 @@ class HybridRetriever:
                  k: int = 6) -> list[Evidence]:
         t0 = time.time()
         wanted = list(types) if types else None
-        local_types = [t for t in (wanted or ["quran", "qa", "dawah"]) if t != "hadith"]
+        local_types = list(wanted or ["quran", "qa", "dawah", "hadith"])  # hadith: HadeethEnc, if built
         cands = self.search(queries, local_types or None) if local_types else []
 
         evidence: list[Evidence] = []
@@ -249,8 +249,8 @@ class HybridRetriever:
 
     def _to_evidence(self, doc: dict, lang: str, score: float) -> Evidence | None:
         score = round(float(score), 4)
-        if doc["type"] == "quran":
-            ev = get_store().get_quran(doc["id"], lang)
+        if doc["type"] in ("quran", "hadith"):
+            ev = get_store().get(doc["id"], lang)  # exact text + translation for `lang`
             return ev.model_copy(update={"score": score}) if ev else None
         return Evidence(
             id=doc["id"], type=doc["type"], text_ar=doc["text_ar"],

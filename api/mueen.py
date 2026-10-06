@@ -108,36 +108,47 @@ class NoAskerText(ValueError):
 
 
 # ------------------------------------------------------- request -> agent ---
+QUESTION_ITEM_ID = "__question__"  # the app sends the question card as a message with this id too
+
+
 def to_conversation(req: MueenDraftRequest) -> tuple[list[dict], int]:
-    """Agent messages (oldest first, the text to answer last) and the number of asker
-    text messages the draft is based on."""
+    """Agent messages (oldest first, the text to answer last) and the app's
+    `textMessageCount` (computed like the app's mock service)."""
     msgs = [m for m in req.messages if m.text.strip()]
+    card_msg = next((m for m in msgs if m.id == QUESTION_ITEM_ID), None)
+    msgs = [m for m in msgs if m.id != QUESTION_ITEM_ID]
+    if card_msg:
+        card = card_msg.text.strip()
+    elif req.question:
+        card = "\n".join(x for x in (req.question.title.strip(), (req.question.description or "").strip()) if x)
+    else:
+        card = ""
+
     if req.scope.kind == "selected":
         picked = set(req.scope.message_ids)
+        answer_card = QUESTION_ITEM_ID in picked
         answered = [m for m in msgs if m.id in picked and m.from_asker]
-        # Earlier messages stay as context; the picked ones are answered (joined, last).
-        context = [m for m in msgs if m.id not in picked][-(MAX_MESSAGES - 2):]
+        context = [m for m in msgs if m.id not in picked]  # earlier messages stay as context
+        count = len(req.scope.message_ids)
     else:
         # Everything the asker wrote since the scholar last replied is answered together;
         # before the scholar's first reply that includes the question card itself.
         last_scholar = max((i for i, m in enumerate(msgs) if not m.from_asker), default=-1)
+        answer_card = last_scholar == -1
         answered = [m for m in msgs[last_scholar + 1:] if m.from_asker]
-        context = msgs[: last_scholar + 1][-(MAX_MESSAGES - 2):]
+        context = msgs[: last_scholar + 1]
+        count = sum(1 for m in req.messages if m.from_asker and m.text.strip())
 
-    card = ""
-    if req.question:
-        card = "\n".join(x for x in (req.question.title.strip(), (req.question.description or "").strip()) if x)
-    card_answered = req.scope.kind == "all" and not any(not m.from_asker for m in msgs)
     out: list[dict] = []
-    if card and not card_answered:
+    if card and not answer_card:
         out.append({"role": "seeker", "text": card[:MAX_TEXT]})
-    out += [{"role": "seeker" if m.from_asker else "dai", "text": m.text.strip()[:MAX_TEXT]} for m in context]
-    to_answer = ([card] if card and card_answered else []) + [m.text.strip() for m in answered]
+    out += [{"role": "seeker" if m.from_asker else "dai", "text": m.text.strip()[:MAX_TEXT]}
+            for m in context[-(MAX_MESSAGES - 2):]]
+    to_answer = ([card] if card and answer_card else []) + [m.text.strip() for m in answered]
     if to_answer:
         out.append({"role": "seeker", "text": "\n\n".join(to_answer)[:MAX_TEXT]})
     if not any(m["role"] == "seeker" for m in out):
         raise NoAskerText("no text from the asker to answer")
-    count = len(answered) if req.scope.kind == "selected" else sum(1 for m in msgs if m.from_asker)
     return out, count
 
 

@@ -30,8 +30,9 @@ EMBED_CACHE_DIR = config.DATA_DIR / "embeddings"
 
 def embed_text(r: dict) -> str:
     """Text that is embedded for dense search (never shown to users)."""
-    if r["type"] == "quran":
-        parts = [strip_diacritics(r["text_ar"]), r["translations"].get("en", "")]
+    if r["type"] in ("quran", "hadith"):
+        parts = [r.get("title", "") if r["type"] == "hadith" else "",
+                 strip_diacritics(r["text_ar"]), r["translations"].get("en", "")]
         if r.get("topics"):
             parts.append("، ".join(r["topics"]))
         return "\n".join(p for p in parts if p)
@@ -40,6 +41,8 @@ def embed_text(r: dict) -> str:
 
 
 def bm25_text(r: dict) -> str:
+    if r["type"] == "hadith":
+        return " ".join([r.get("title", ""), r["text_ar"], r["translations"].get("en", "")])
     if r["type"] == "quran":
         return " ".join([r["text_ar"], r["translations"].get("en", ""), " ".join(r.get("topics", []))])
     return " ".join([r.get("title", ""), r["text_ar"]])

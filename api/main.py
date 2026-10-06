@@ -139,7 +139,7 @@ def regenerate(req: RegenerateRequest) -> SuggestResponse:
     return _run(req, req.style)
 
 
-@app.post("/mueen/draft", response_model=mueen.MueenDraft, response_model_by_alias=True,
+@app.post("/mueen/draft", response_model=mueen.MueenDraft, response_model_by_alias=True, response_model_exclude_none=True,
           dependencies=[Depends(require_access)])
 def mueen_draft(req: mueen.MueenDraftRequest) -> mueen.MueenDraft:
     """A draft for a scholar in the Sheykak app (MueenService.generateDraft)."""

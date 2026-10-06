@@ -139,3 +139,23 @@ def test_run_log_keeps_no_text(client):
                                         ("ضعيف", "daif"), ("Authentic", "sahih"), (None, None)])
 def test_grade_mapping(text, grade):
     assert mueen._grade(text) == grade
+
+
+def test_question_card_sent_as_a_message_is_used_once():
+    """The app sends the card as `question` and as the first message (id "__question__")."""
+    card = {"id": "__question__", "text": "Why do Muslims worship the Kaaba?", "fromAsker": True}
+    req = mueen.MueenDraftRequest.model_validate(body(messages=[
+        card, {"id": "m1", "text": "And was he crucified?", "fromAsker": True}]))
+    msgs, count = mueen.to_conversation(req)
+    assert len(msgs) == 1 and msgs[0]["text"].count("Kaaba") == 1 and "crucified" in msgs[0]["text"]
+    assert count == 2  # like the app's mock: asker text messages, card included
+
+
+def test_question_card_can_be_selected():
+    card = {"id": "__question__", "text": "Why do Muslims worship the Kaaba?", "fromAsker": True}
+    req = mueen.MueenDraftRequest.model_validate(body(
+        scope={"kind": "selected", "messageIds": ["__question__"]},
+        messages=[card, {"id": "m2", "text": "Welcome.", "fromAsker": False},
+                  {"id": "m3", "text": "Unrelated follow-up", "fromAsker": True}]))
+    msgs, count = mueen.to_conversation(req)
+    assert msgs[-1] == {"role": "seeker", "text": "Why do Muslims worship the Kaaba?"} and count == 1
