@@ -179,7 +179,8 @@ def evidence_source(e: Evidence, lang: str) -> MueenSource:
     if e.type == "hadith":
         dorar = e.id.startswith("H:dorar") or "dorar.net" in (e.source_url or "")
         return MueenSource(id=e.id, kind="dorar" if dorar else "other", collection=e.source, reference=e.ref,
-                           quote=f"«{e.text_ar}»", translation=tr, attribution=e.ref,
+                           quote=e.text_ar if "«" in e.text_ar else f"«{e.text_ar}»", translation=tr,
+                           attribution=e.ref,
                            grade=_grade(e.grade), url=e.source_url)
     if e.type in ("dawah", "book") and e.id.startswith(("SH:", "BK:shamela")):
         book = re.sub(r"\s*\(المكتبة الشاملة\)\s*$", "", e.source or "")

@@ -249,3 +249,49 @@ Measured 2026-10-06 (details: docs/EVALUATION.md §5):
 * Peak RAM of a searching process measured at 3.4 GB; the ≥ 8 GB server advice stands.
 * **Action:** rerun your agent evaluation with this index, and look at a few replies
   that cite `SH:` passages (the content reviewer too).
+
+---
+
+## 🆕 Update — 2026-10-06 (Sheykak app + HadeethEnc) — read this part first
+
+Built on top of `nader/agent` (fast-forwarded, nothing of yours was changed back).
+Everything is on `claude/loving-heisenberg-oekuju`; Dokploy builds `nader/agent`, so
+**fast-forward `nader/agent` to it (or point Dokploy at it) and redeploy**.
+
+### A. New: `POST /mueen/draft` (api/mueen.py)
+
+The Sheykak app's format (paragraphs with source chips, camelCase), documented in
+docs/API_INTEGRATION.md. The app reaches it through a Supabase Edge Function; that code, the
+app client and the step-by-step plan are in `integration/sheykak/`.
+
+### B. Changes in your files (small; please review)
+
+* `agent/graph.py` — `suggest(..., audience="seeker")`. With `audience="scholar"` (only
+  `/mueen/draft` uses it) level D is **drafted** from the general evidence instead of the
+  referral: the person using Sheykak is a scholar who decides the ruling (Fawaz's decision).
+  `/suggest` behaves as before. `suggest()` also returns `draft_reply` (placeholders),
+  `draft_cited_ids`, `evidence`, `glossary_used` for the app format.
+* `agent/nodes.py` — `_LEVEL_RULES["D"]` (general evidence, no ruling on the case, closing
+  sentence that the ruling depends on details); level D also gets the certainty check; a
+  "🔴 مستوى D" note; `verify` keeps `final_draft`.
+* `agent/rules.py` — `garbled()` also rejects Latin glued to an Arabic word ("أوshares",
+  "الرواياتReachنا", seen in a free-model draft); hadith already containing «» is not wrapped
+  again.
+* `agent/prompts/generate.md` — rule 9: cite a hadith for a hadith request only if it is
+  about that topic; otherwise say none was found.
+* `ingest/kb_entry.sh`, `deploy/docker-compose.dokploy.yml` — `HADITH=1` (default) fetches
+  HadeethEnc once into the volume (first deploy ~1 h longer; failure does not block the build).
+
+### C. Hadith are live (HadeethEnc)
+
+* 3,573 hadith (صحيح / حسن) with grade, attribution and approved translations
+  (en/ur/id/fr where published). Ids `H:hadeethenc:<id>`; `get_verbatim` returns the exact text,
+  `grade`, `ref` (= attribution, e.g. "متفق عليه") and the translation.
+* `retrieve()` includes hadith by default; your `types=["hadith"]` path for hadith requests
+  now finds real hadith, and still abstains for fake ones (docs/EVALUATION.md §6).
+* The contract is unchanged (type `hadith` already existed).
+
+### D. Please rerun
+
+Your agent evaluation on Gemini with this index (`--judge`), especially the hadith-request
+cases, the Bitcoin-style fake request, and level D cases through `/mueen/draft`.

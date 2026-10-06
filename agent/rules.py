@@ -120,7 +120,8 @@ def render(e: Evidence, lang: str) -> str:
         return f"\n\n{block}\n\n"
     if e.type == "hadith":
         meta = "، ".join(x for x in [e.source, e.ref, e.grade] if x)
-        block = f"«{e.text_ar}» ({meta})"
+        text = e.text_ar if "«" in e.text_ar else f"«{e.text_ar}»"  # HadeethEnc already marks the Prophet's words
+        block = f"{text} ({meta})"
         if lang != "ar" and e.translation:
             block += f"\n“{e.translation}”"
         return f"\n\n{block}\n\n"
