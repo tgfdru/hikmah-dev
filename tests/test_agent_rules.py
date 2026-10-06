@@ -190,3 +190,25 @@ def test_glossary_ids_in_text_become_the_approved_term():
     out = inline_ids_to_text(d, "en", gl)
     assert out.reply == "Following Islam means submission; see ." or "Islam" in out.reply
     assert "GL:" not in out.reply and "الإسلام" in out.reply_ar and out.cited_ids == ["GL:1018"]
+
+
+def test_fallback_on_timeout():
+    from agent.llm import _FallbackClient
+
+    class APITimeoutError(Exception):
+        pass
+
+    class Slow:
+        def invoke(self, m):
+            raise APITimeoutError("Request timed out.")
+
+    class Good:
+        def invoke(self, m):
+            return "ok"
+
+    assert _FallbackClient([Slow(), Good()]).invoke([]) == "ok"
+
+
+def test_several_ids_in_one_bracket_are_cleaned():
+    t = "Scholars studied this [[SH:122258:46, SH:38191:133]]. Also (Quran 2:144)."
+    assert rules.raw_ids(t) and "SH:" not in rules.tidy(t) and "(Quran 2:144)" in rules.tidy(t)

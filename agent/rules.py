@@ -129,8 +129,8 @@ def render(e: Evidence, lang: str) -> str:
 
 # Evidence ids written into the reply text ("[[GL:5744]]", "([SH:69:7], [QA:bayyinat:138])").
 # Only [[Q:..]] / [[H:..]] placeholders belong in the text; other ids go in cited_ids.
-RAW_ID = re.compile(r"\[{1,2}\s*(?:GL|SH|QA|BK|Q|H):[^\]\s]*\s*\]{1,2}")
-_RAW_ID_GROUP = re.compile(r"\s*\(\s*(?:\[{1,2}[^\]]*\]{1,2}[\s,،;]*)+\)|\s*\[{1,2}\s*(?:GL|SH|QA|BK):[^\]\s]*\s*\]{1,2}")
+RAW_ID = re.compile(r"\[{1,2}\s*(?:GL|SH|QA|BK|Q|H):[^\]]*\]{1,2}")
+_RAW_ID_GROUP = re.compile(r"\s*\(\s*(?:\[{1,2}[^\]]*\]{1,2}[\s,،;]*)+\)|\s*\[{1,2}\s*(?:GL|SH|QA|BK):[^\]]*\]{1,2}")
 
 
 def raw_ids(text: str) -> list[str]:

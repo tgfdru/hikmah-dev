@@ -91,7 +91,11 @@ def _client(model: str, stage: str):
 
 def _is_overload(exc: Exception) -> bool:
     status = getattr(exc, "status_code", None) or getattr(getattr(exc, "response", None), "status_code", None)
-    return status in (429, 500, 502, 503, 504) or "high demand" in str(exc).lower()
+    if status in (429, 500, 502, 503, 504):
+        return True
+    text = f"{type(exc).__name__} {exc}".lower()
+    # A provider that times out under load is as unavailable as one that answers 503.
+    return any(k in text for k in ("high demand", "timeout", "timed out", "overloaded"))
 
 
 def _default_factory(stage: str):
