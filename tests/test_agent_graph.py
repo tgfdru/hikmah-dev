@@ -233,3 +233,10 @@ def test_garbled_draft_is_retried():
     out, fake = run({"analyze": analysis(), "route": routing("A"), "generate": [noisy, draft()]})
     assert out["status"] == "ok" and out["attempts"] == 2
     assert any("garbled" in i for i in out["retry_issues"])
+
+
+def test_verdict_on_a_group_is_referred_without_generation():
+    out, fake = run({"analyze": analysis(judges_people=True), "route": routing("C")},
+                    messages=[{"role": "seeker", "text": "Are the Sufis going to hell?"}])
+    assert out["status"] == "refer" and "generate" not in fake.stages()
+    assert "route:judgement" in out["trace"] and out["citations"] == []

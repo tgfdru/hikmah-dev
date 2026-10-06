@@ -170,3 +170,23 @@ def test_book_passage_is_citable_and_its_quoted_verses_allowed():
     d = Draft(reply="As the book explains, Muslims face the Kaaba by command: [[Q:2:144]]",
               reply_ar="كما يشرح الكتاب: [[Q:2:144]]", cited_ids=["BK:shamela:123:45"], note_for_dai="ok")
     assert nodes.check_draft(d, [book], "en", "B") == []
+
+
+def test_raw_ids_in_text_are_detected_and_cleaned():
+    t = "The companions are praised ([SH:69:7], [QA:bayyinat:138]) and [[GL:5744]] matters. See [[Q:2:144]]"
+    assert set(rules.raw_ids(t)) == {"[SH:69:7]", "[QA:bayyinat:138]", "[[GL:5744]]"}
+    cleaned = rules.tidy(t)
+    assert "SH:" not in cleaned and "GL:" not in cleaned and "[[Q:2:144]]" in cleaned
+    assert rules.raw_ids("Muslims face the Kaaba: [[Q:2:144]] (Quran 2:144)") == []
+
+
+def test_glossary_ids_in_text_become_the_approved_term():
+    from agent.nodes import inline_ids_to_text
+    from agent.state import Draft
+
+    gl = {"GL:1018": {"ar": "الإسلام", "en": "Islam"}}
+    d = Draft(reply="Following [[GL:1018]] means submission; see [GL:9999].",
+              reply_ar="اتباع [[GL:1018]] هو الاستسلام لله.", cited_ids=[], note_for_dai="")
+    out = inline_ids_to_text(d, "en", gl)
+    assert out.reply == "Following Islam means submission; see ." or "Islam" in out.reply
+    assert "GL:" not in out.reply and "الإسلام" in out.reply_ar and out.cited_ids == ["GL:1018"]

@@ -41,6 +41,8 @@ class Analysis(BaseModel):
     personal_case: bool = Field(
         description="True if the seeker asks for a ruling on their own specific situation (marriage, money, "
                     "worship validity, family dispute, medical or legal matter)")
+    judges_people: bool = Field(default=False, description="True if the seeker asks for a verdict on a specific "
+                                "person, sect or group of Muslims (out of scope: referred to scholars)")
 
 
 class Routing(BaseModel):

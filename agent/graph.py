@@ -20,7 +20,7 @@ from agent.state import AgentState
 
 
 def _after_route(s: AgentState) -> str:
-    return "refer" if s["routing"].level == "D" else "retrieve"
+    return "refer" if s["routing"].level == "D" or s.get("refer_reason") == "judgement" else "retrieve"
 
 
 def _after_retrieve(s: AgentState) -> str:

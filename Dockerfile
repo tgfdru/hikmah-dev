@@ -27,6 +27,6 @@ ENV JAVA_HOME=/opt/java/openjdk PATH="/opt/java/openjdk/bin:${PATH}"
 
 VOLUME ["/var/lib/mueen"]
 # Default: build (or refresh) the store and index into the volume, then exit.
-# SHAMELA=1: also build the selected Shamela books the first time (~4.8 GB download,
-# ~25 min); later runs reuse processed/shamela.jsonl, and the raw download is deleted.
-CMD ["sh", "-c", "if [ \"$SHAMELA\" = 1 ] && [ ! -s \"$WORK_DIR/processed/shamela.jsonl\" ]; then python -m ingest.build_all --shamela && rm -rf \"$WORK_DIR/raw/shamela\"; else python -m ingest.build_all; fi"]
+# Shamela passages: kept in the volume, or assembled from a seed in /seed, or built when
+# SHAMELA=1 (heavy). See ingest/kb_entry.sh.
+CMD ["sh", "ingest/kb_entry.sh"]

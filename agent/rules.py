@@ -127,8 +127,20 @@ def render(e: Evidence, lang: str) -> str:
     return f"[{e.ref}]"
 
 
+# Evidence ids written into the reply text ("[[GL:5744]]", "([SH:69:7], [QA:bayyinat:138])").
+# Only [[Q:..]] / [[H:..]] placeholders belong in the text; other ids go in cited_ids.
+RAW_ID = re.compile(r"\[{1,2}\s*(?:GL|SH|QA|BK|Q|H):[^\]\s]*\s*\]{1,2}")
+_RAW_ID_GROUP = re.compile(r"\s*\(\s*(?:\[{1,2}[^\]]*\]{1,2}[\s,،;]*)+\)|\s*\[{1,2}\s*(?:GL|SH|QA|BK):[^\]\s]*\s*\]{1,2}")
+
+
+def raw_ids(text: str) -> list[str]:
+    """Evidence ids left in the reply text outside [[Q:..]]/[[H:..]] placeholders."""
+    return RAW_ID.findall(strip_placeholders(text))
+
+
 def tidy(text: str) -> str:
-    text = re.sub(r"[ \t]+\n", "\n", text or "")
+    text = _RAW_ID_GROUP.sub("", text or "")  # last-resort cleanup of stray non-scripture ids
+    text = re.sub(r"[ \t]+\n", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
 

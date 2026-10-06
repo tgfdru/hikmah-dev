@@ -180,6 +180,11 @@ def route(state: AgentState) -> dict:
     # following the pack's rule to pick the more cautious level when in doubt.
     if r.level != "D" and a.personal_case and rules.level_d_hint(seeker_text):
         r = Routing(level="D", reason=r.reason + " (رُفع إلى D: سؤال عن حالة شخصية)")
+    if a.judges_people and r.level != "D":
+        # The pack excludes judging persons and groups: no generated verdict, fixed referral.
+        r = Routing(level="C", reason=r.reason + " (حكم على أشخاص/جماعات: خارج النطاق، يُحال للعلماء)")
+        return {"routing": r, "refer_reason": "judgement", "status": "refer",
+                "trace": _trace(state, "route:judgement")}
     return {"routing": r, "refer_reason": "personal" if r.level == "D" else None,
             "trace": _trace(state, "route")}
 
@@ -331,6 +336,29 @@ def repair_draft(d: Draft, evidence: list[Evidence]) -> Draft:
                                 "reply_ar": _quote_to_placeholder(d.reply_ar, allowed, key)})
 
 
+_GL_INLINE = re.compile(r"\[{1,2}\s*(GL:[^\]\s]+)\s*\]{1,2}")
+
+
+def inline_ids_to_text(d: Draft, lang: str, glossary: dict[str, dict]) -> Draft:
+    """The model often writes ids into the text ("[[GL:5744]]", "([SH:69:7])"). A glossary id
+    becomes the approved term in the reply's language (and is cited); other stray ids are
+    removed from the text by rules.tidy at render time. Deterministic, no retry needed."""
+    cited = list(d.cited_ids)
+
+    def fix(text: str, text_lang: str) -> str:
+        def sub(m):
+            gid = m.group(1)
+            t = glossary.get(gid)
+            if not t:
+                return ""
+            if gid not in cited:
+                cited.append(gid)
+            return t["ar"] if text_lang == "ar" else (t.get(text_lang) or t.get("en") or t["ar"])
+        return _GL_INLINE.sub(sub, text or "")
+    reply, reply_ar = fix(d.reply, lang), fix(d.reply_ar, "ar")
+    return d.model_copy(update={"reply": reply, "reply_ar": reply_ar, "cited_ids": cited})
+
+
 def _glossary_latin(glossary_ids: set[str] | None) -> set[str]:
     """Latin words of the approved glossary equivalents in use (e.g. "Tawhid"), allowed in
     Arabic-script replies."""
@@ -435,9 +463,9 @@ def _citations(d: Draft, evidence: list[Evidence], lang: str,
 
 def verify(state: AgentState) -> dict:
     evidence, lang = state["evidence"], state["language"]
-    d = repair_draft(state["draft"], evidence)
-    level = state["routing"].level
     glossary = state.get("glossary", {})
+    d = inline_ids_to_text(repair_draft(state["draft"], evidence), lang, glossary)
+    level = state["routing"].level
     issues = check_draft(d, evidence, lang, level, set(glossary))
     judge_down, advisory = False, []
     if not issues and settings.VERIFY_LLM_JUDGE:
@@ -475,7 +503,11 @@ def verify(state: AgentState) -> dict:
 # ------------------------------------------------------- refer / abstain ---
 def refer(state: AgentState) -> dict:
     lang, r = state["language"], state["routing"]
-    if state.get("refer_reason") == "specialist":
+    if state.get("refer_reason") == "judgement":
+        table = templates.REFER_SPECIALIST
+        note = ("🟠 السؤال يطلب حكمًا على شخص أو فرقة أو جماعة، وهذا خارج نطاق المساعد بحسب المعيار العلمي: "
+                "أُحيل السائل لأهل العلم دون إصدار حكم. " + r.reason)
+    elif state.get("refer_reason") == "specialist":
         table = templates.REFER_SPECIALIST
         note = (f"🟠 مستوى C بلا أدلة كافية في المصادر المعتمدة (أعلى درجة {state.get('best_score', 0):.2f}): "
                 f"أُحيل السائل لمتخصص. {r.reason}")

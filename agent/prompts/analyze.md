@@ -25,3 +25,6 @@ the real question behind it, and a short Arabic search query for the approved Is
 - personal_case: true only if the seeker asks what they personally should do or whether their own act,
   contract or situation is allowed/valid (marriage, divorce, money, worship, family, medical, legal).
   General questions ("Why is alcohol forbidden?", "Can I ask a question?") are NOT personal cases.
+- judges_people: true if the seeker asks for a verdict on a specific person, sect, school or group of Muslims
+  (whether they are Muslims, misguided, innovators, disbelievers, saved or going to hell, which sect is right).
+  Questions about another religion's beliefs ("Why don't Muslims believe in the Trinity?") are NOT this.

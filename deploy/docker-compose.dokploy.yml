@@ -12,6 +12,7 @@ services:
   qdrant:
     image: qdrant/qdrant:v1.19.1
     restart: unless-stopped
+    mem_limit: 2g
     volumes:
       - qdrant_storage:/qdrant/storage
 
@@ -23,9 +24,11 @@ services:
     environment:
       QDRANT_URL: http://qdrant:6333
       DEVICE: cpu
-      SHAMELA: ${SHAMELA:-1}   # selected Shamela books (first build ~25 min, then cached)
+      SHAMELA: ${SHAMELA:-0}   # 1 = build Shamela here (heavy); default: seed from Dokploy file mounts
     volumes:
       - mueen_kb:/var/lib/mueen
+      - ../../files/shamela:/seed:ro   # Dokploy file mounts (shpart_00…): see ingest/kb_entry.sh
+    mem_limit: 6g
     depends_on:
       - qdrant
 
@@ -34,6 +37,7 @@ services:
       context: ..
       dockerfile: Dockerfile.api
     restart: unless-stopped
+    mem_limit: 6g        # shared server: cap the API (measured peak ~3.4 GB while searching)
     expose:
       - "8000"
     environment:
