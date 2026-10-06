@@ -48,3 +48,26 @@ def test_unrelated_question_scores_below_threshold(retriever):
 
 def test_hadith_only_request_returns_nothing_when_dorar_disabled(retriever):
     assert retriever.retrieve(["حديث عن الحاسوب"], "ar", types=["hadith"]) == []
+
+
+def _has_shamela(r) -> bool:
+    return r.manifest.get("counts", {}).get("dawah", 0) > 0
+
+
+def test_shamela_passages_cite_book_page_and_link(retriever):
+    if not _has_shamela(retriever):
+        pytest.skip("index built without Shamela (python -m ingest.build_all --shamela)")
+    ev = retriever.retrieve(["Is Jesus the son of God?", "هل المسيح ابن الله"], "en", types=["dawah"])
+    assert ev and all(e.id.startswith("SH:") and e.type == "dawah" for e in ev)
+    for e in ev:
+        book = e.id.split(":")[1]
+        assert e.source_url.startswith(f"https://shamela.ws/book/{book}/")
+        assert e.ref and e.translation is None
+
+
+def test_at_most_two_passages_per_shamela_book(retriever):
+    if not _has_shamela(retriever):
+        pytest.skip("index built without Shamela")
+    ev = retriever.retrieve(["Is Jesus the son of God?", "هل المسيح ابن الله"], "en", types=["dawah"], k=8)
+    books = [e.id.split(":")[1] for e in ev]
+    assert max(books.count(b) for b in books) <= 2

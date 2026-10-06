@@ -30,3 +30,10 @@ def test_mock_retriever_contract():
     assert m.get_verbatim(ev[0].id, "en").id == ev[0].id
     assert m.get_verbatim("Q:9:999", "en") is None
     assert [e.type for e in m.retrieve(["x"], "en", types=["qa"])] == ["qa"]
+
+
+def test_arabic_queries_by_script():
+    from retrieval.hybrid import _arabic_queries
+
+    got = _arabic_queries(["What is Ramadan?", "ما هو رمضان", "رمضان کیا ہے", "Apa itu tauhid?"])
+    assert got == {"ما هو رمضان"}  # fastText calls this short query Persian; Urdu stays out

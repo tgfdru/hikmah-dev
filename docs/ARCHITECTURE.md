@@ -47,7 +47,10 @@ Ranges (`Q:112:1-4`) are assembled on demand from the store with ayah markers.
 `RERANKER` chooses how the 0-1 confidence is computed (see `docs/EVALUATION.md`):
 
 * `minilm` (default) — multilingual MiniLM cross-encoder over the top 12 fused
-  candidates, best score against the first 2 queries. Threshold 0.35. ~1.7 s on CPU.
+  candidates, best score against the first 2 queries. Threshold 0.35. ~2.5 s on CPU
+  with Shamela (1.7 s without). Arabic-only passages (Bayyinat, Shamela) count only the
+  Arabic query when one is given; across languages the small reranker over-rewards
+  short definitions (docs/EVALUATION.md §5).
 * `none` — best BGE-M3 cosine to any query. No extra model; 0.4 s. Threshold 0.62 (not reliable for abstaining, see EVALUATION).
 * `bge` — bge-reranker-v2-m3 (~7.5 s per query on a 4-core CPU; for GPU servers).
 
@@ -57,8 +60,9 @@ overridable by env).
 ## Performance (4-core CPU, no GPU)
 
 * First `retrieve()` call: ~25 s (loads BGE-M3). Call once at startup.
-* Then: ~1.7 s per call (`minilm`, default) or ~0.4 s (`none`).
-* RAM: ~3 GB (BGE-M3) + ~0.5 GB (MiniLM) + ~0.2 GB index.
+* Then: ~2.5 s per call (`minilm`, default, with Shamela; 1.7 s without) or ~0.4 s (`none`).
+* RAM: measured peak 3.4 GB for a process that searches with Shamela in the index
+  (BGE-M3 + MiniLM + embedded Qdrant); the index is 0.2 GB on disk.
 * Build from scratch without the embedding cache: ~1.5 h on CPU (minutes on a GPU).
 
 ## Concurrency and deployment

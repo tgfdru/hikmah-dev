@@ -144,7 +144,7 @@ header, pass `--api-key` (sent as `X-API-Key`).
 
 ---
 
-## 🆕 Update — 2026-10-05 (read this part first)
+## 🆕 Update — 2026-10-05 (results added 2026-10-06) — read this part first
 
 Everything below is new since the first handoff. Items marked **Action** need a change
 or a decision on your side.
@@ -230,4 +230,22 @@ except as noted.
 
 ### F. Retrieval evaluation with Shamela
 
-_Pending: the index with Shamela is being built (2026-10-05); results will be added here._
+Measured 2026-10-06 (details: docs/EVALUATION.md §5):
+
+| | before Shamela | with Shamela |
+|---|---|---|
+| Recall@6 / MRR (main set, both queries) | 98% / 0.93 | 98% / 0.93 |
+| Held-out Recall@6 / MRR | 100% / 1.00 | 100% / 0.88 (relevant Shamela passages now rank first on 2 questions) |
+| Unanswerable correctly abstained (threshold 0.35) | 100% | 100% |
+| Search time per call (CPU) | 1.7 s | **2.5 s** |
+| Misquote detection | 15/15 | 15/15 |
+
+* **Scoring change in `retrieve()`:** Arabic-only passages (Bayyinat, Shamela) are now
+  scored against the **Arabic** query only (when one is given). Without this, "What is
+  Ramadan?" returned an encyclopedia definition of the Rotary Club first.
+* **Keep sending an Arabic query** as one of the first two queries (your analyzer's
+  `arabic_query` already is the 2nd). With the seeker's English words alone, Shamela
+  scores are unreliable ("Which surah mentions dinosaurs?" → 0.76 instead of 0.20).
+* Peak RAM of a searching process measured at 3.4 GB; the ≥ 8 GB server advice stands.
+* **Action:** rerun your agent evaluation with this index, and look at a few replies
+  that cite `SH:` passages (the content reviewer too).
