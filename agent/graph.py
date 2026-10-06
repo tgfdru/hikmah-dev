@@ -20,7 +20,10 @@ from agent.state import AgentState
 
 
 def _after_route(s: AgentState) -> str:
-    return "refer" if s["routing"].level == "D" or s.get("refer_reason") == "judgement" else "retrieve"
+    # Level D (personal case): a seeker gets the fixed referral. When the reader is a scholar
+    # (the Sheykak app), the agent drafts the general evidence and leaves the ruling to them.
+    personal = s["routing"].level == "D" and s.get("audience") != "scholar"
+    return "refer" if personal or s.get("refer_reason") == "judgement" else "retrieve"
 
 
 def _after_retrieve(s: AgentState) -> str:
@@ -59,13 +62,17 @@ def build_graph():
     return g.compile()
 
 
-def suggest(messages: list[dict], style: str | None = None) -> dict:
-    """Run the agent on a conversation and return the API-shaped result (see api/schemas.py)."""
+def suggest(messages: list[dict], style: str | None = None, audience: str = "seeker") -> dict:
+    """Run the agent on a conversation and return the API-shaped result (see api/schemas.py).
+
+    audience="scholar": the draft is read by a qualified scholar before anything is sent
+    (Sheykak app), so level D questions are drafted from the general evidence instead of
+    the fixed referral; the ruling stays with the scholar."""
     if not messages:
         raise ValueError("messages must not be empty")
     t0 = time.time()
-    s: AgentState = build_graph().invoke({"messages": messages, "style": style, "trace": []},
-                                         config={"recursion_limit": 25})
+    s: AgentState = build_graph().invoke({"messages": messages, "style": style, "audience": audience,
+                                          "trace": []}, config={"recursion_limit": 25})
     a, r = s.get("analysis"), s.get("routing")
     return {
         "suggestion_id": f"s_{uuid.uuid4().hex[:12]}",
@@ -82,6 +89,11 @@ def suggest(messages: list[dict], style: str | None = None) -> dict:
             "level_reason": r.reason if r else None,
         },
         "citations": [c.model_dump() for c in s.get("citations", [])],
+        # For /mueen/draft: the draft with placeholders, and what it may cite.
+        "draft_reply": s["final_draft"].reply if s.get("final_draft") else "",
+        "draft_cited_ids": list(s["final_draft"].cited_ids) if s.get("final_draft") else [],
+        "evidence": list(s.get("evidence", []) or []),
+        "glossary_used": dict(s.get("glossary", {}) or {}),
         "issues": s.get("issues", []),
         "retry_issues": s.get("retry_issues", []),
         "attempts": s.get("attempts", 0),

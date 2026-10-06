@@ -212,3 +212,9 @@ def test_fallback_on_timeout():
 def test_several_ids_in_one_bracket_are_cleaned():
     t = "Scholars studied this [[SH:122258:46, SH:38191:133]]. Also (Quran 2:144)."
     assert rules.raw_ids(t) and "SH:" not in rules.tidy(t) and "(Quran 2:144)" in rules.tidy(t)
+
+
+def test_latin_glued_to_arabic_is_garbled():
+    assert rules.garbled("والعقيدة لا تقبل أن يكون أحد ابنًا لله أوshares صفاته", "ar")
+    assert rules.garbled("الرواياتReachنا تختلف", "ar")
+    assert rules.garbled("Muslims say Tawhid (التوحيد) is the core", "en") is None

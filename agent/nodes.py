@@ -244,6 +244,11 @@ _LEVEL_RULES = {
          "certainty where scholars may differ.",
     "C": "Level C (disputed or sensitive): give a restricted answer, say that scholars differ where relevant, "
          "no claims of consensus, and suggest consulting a specialist for detail.",
+    # Reached only when the reader is a scholar (audience="scholar"); a seeker gets the fixed referral.
+    "D": "Level D (a personal case; a qualified scholar reads this draft and decides): present only the general "
+         "evidence and principles found in the evidence. Do NOT give a ruling on this person's specific case and "
+         "do not tell them what they must do. End with one sentence saying that the ruling depends on the details "
+         "of their situation.",
 }
 _STYLE = {
     "simpler": "Make it simpler and shorter, for someone with no background.",
@@ -403,9 +408,9 @@ def check_draft(d: Draft, evidence: list[Evidence], lang: str, level: str,
         noise = rules.garbled(txt, field_lang, allowed_latin)
         if noise:
             issues.append(f"{field} contains garbled text — {noise}; rewrite it fully in the target language")
-    if level == "C":
+    if level in ("C", "D"):
         for p in rules.certainty_claims(d.reply) + rules.certainty_claims(d.reply_ar):
-            issues.append(f'level C: remove the claim of certainty/consensus "{p}"')
+            issues.append(f'level {level}: remove the claim of certainty/consensus "{p}"')
     return issues
 
 
@@ -488,12 +493,16 @@ def verify(state: AgentState) -> dict:
     elif advisory:
         note = (f"🔎 المحكّم الآلي وجد {len(advisory)} نقطة غير موجودة في الأدلة — راجعها في issues قبل الإرسال. "
                 + note)
+    if level == "D":  # only reached for audience="scholar"
+        note = ("🔴 مستوى D (حالة شخصية): المسودة تعرض الأدلة والقواعد العامة فقط دون حكم على حالة السائل؛ "
+                "الحكم لك بعد معرفة التفاصيل. " + note)
     return {
         "verdict": "fail" if issues else "pass",
         "status": "unverified" if issues else "ok",
         "issues": [*issues, *advisory],
         "final_reply": _render(d.reply, lang, by_id),
         "final_reply_ar": _render(d.reply_ar, "ar", by_id),
+        "final_draft": d,
         "note_for_dai": note,
         "citations": _citations(d, evidence, lang, glossary),
         "trace": _trace(state, "verify:judge_unavailable" if judge_down else "verify"),

@@ -152,6 +152,8 @@ _LATIN_RUN = re.compile(r"[A-Za-z][A-Za-z'’-]*(?:[\s.…,;:!?\"'()-]+[A-Za-z][
 # Scripts no supported reply language uses (CJK, Cyrillic, Hangul, Thai, Devanagari).
 _FOREIGN_SCRIPT = re.compile(r"[Ѐ-ӿ฀-๿ऀ-ॿ぀-ヿ㐀-鿿가-힯]")
 _IGNORED = re.compile(r"\[\[[^\]]*\]\]|https?://\S+|\b[A-Z]{1,3}:[\w:.-]+")
+# Latin letters attached to Arabic letters with no space (seen: "أوshares", "يمكنEnhance").
+_GLUED = re.compile(r"[\u0621-\u064a\u0671-\u06d3]+[A-Za-z]+|[A-Za-z]+[\u0621-\u064a\u0671-\u06d3]+")
 # Arabic-script replies: how much Latin is acceptable (an approved term or a name is fine).
 _LATIN_LIMITS = {"ar": (2, 3), "ur": (3, 6), "fa": (3, 6)}  # (longest run, total words)
 
@@ -167,6 +169,9 @@ def garbled(text: str, lang: str, allowed_words: set[str] | None = None) -> str 
     m = _FOREIGN_SCRIPT.search(clean)
     if m:
         return f"unexpected characters from another script ({m.group(0)!r})"
+    glued = _GLUED.search(clean)
+    if glued:  # "أوshares", "الرواياتReachنا": never a term or a name
+        return f'Latin letters glued to an Arabic-script word: "{glued.group(0)}"'
     if lang not in _LATIN_LIMITS:
         return None
     allowed = {w.lower() for w in (allowed_words or set())}
