@@ -179,3 +179,67 @@ def garbled(text: str, lang: str, allowed_words: set[str] | None = None) -> str 
     if len(words) >= max_total:
         return f"{len(words)} Latin words inside the {lang} reply (e.g. {', '.join(words[:4])})"
     return None
+
+
+# ---- copied source wording -----------------------------------------------------------
+# Explanations (Bayyinat, Shamela) must be re-expressed for the seeker, not pasted. A run of
+# COPY_RUN or more identical words (after search normalisation) between the draft and an
+# explanatory passage means the model copied a sentence. Scripture is never in the draft text
+# (placeholders only), so it cannot trigger this.
+COPY_RUN = 8
+_WORD = re.compile(r"[^\W_]+", re.UNICODE)
+
+
+def _tokens(text: str) -> list[str]:
+    try:
+        from retrieval.normalize_ar import norm
+        text = norm(text)
+    except Exception:  # noqa: BLE001
+        text = (text or "").lower()
+    return _WORD.findall(text)
+
+
+def longest_shared_run(a: str, b: str) -> tuple[int, str]:
+    """Longest run of consecutive identical words shared by `a` and `b` (length, the words)."""
+    ta, tb = _tokens(strip_placeholders(a)), _tokens(b)
+    if not ta or not tb:
+        return 0, ""
+    best, end = 0, 0
+    prev = [0] * (len(tb) + 1)
+    for i in range(1, len(ta) + 1):
+        cur = [0] * (len(tb) + 1)
+        wa = ta[i - 1]
+        for j in range(1, len(tb) + 1):
+            if wa == tb[j - 1]:
+                cur[j] = prev[j - 1] + 1
+                if cur[j] > best:
+                    best, end = cur[j], i
+        prev = cur
+    return best, " ".join(ta[end - best:end])
+
+
+# Languages fastText often confuses with each other; either label is accepted for the other.
+_SAME_LANGUAGE = [{"ur", "fa", "pnb"}, {"id", "ms"}, {"ar", "arz", "ary"}]
+
+
+def same_language(a: str, b: str) -> bool:
+    if a == b:
+        return True
+    return any(a in g and b in g for g in _SAME_LANGUAGE)
+
+
+# ---- academic / boilerplate register ----------------------------------------------------
+# The reply is a chat message from the da'i, not a passage from a book. These openers are the
+# sources' register; seen in a real draft ("يثير البعض تساؤلات حول… ويوضح أهل العلم أن…").
+# Style is never a reason to block a draft: it triggers one rewrite, then the draft is accepted.
+BOILERPLATE = [
+    "يثير البعض", "يوضح أهل العلم", "يُوضح أهل العلم", "بين أهل العلم", "ذكر أهل العلم", "قرر أهل العلم",
+    "ومما ينبغي التنبيه عليه", "تجدر الإشارة إلى", "والجواب عن هذه الشبهة", "الجواب عن ذلك من وجوه",
+    "scholars have explained", "scholars explain that", "it should be noted", "it is worth noting",
+    "some people raise questions", "the answer to this doubt", "in conclusion,",
+]
+
+
+def boilerplate(text: str) -> list[str]:
+    low = (text or "").lower()
+    return [p for p in BOILERPLATE if p.lower() in low]

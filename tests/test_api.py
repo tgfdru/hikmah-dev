@@ -82,3 +82,33 @@ def test_llm_not_configured_is_503(client, monkeypatch):
 def test_root_is_a_landing_response(client):
     r = client.get("/")
     assert r.status_code == 200 and r.json()["status"] == "running"
+
+
+H = {"X-API-Key": "k-test"}
+MIXED = [{"id": "1", "role": "seeker", "text": "كيف حالك؟ عندي سؤال عن الإسلام لو سمحت"},
+         {"id": "2", "role": "dai", "text": "أهلًا وسهلًا، تفضل."},
+         {"id": "3", "role": "seeker", "text": "Why do Muslims worship the Kaaba?"}]
+
+
+def test_old_payload_still_works_as_conversation_mode(client):
+    j = client.post("/suggest", json=BODY, headers=H).json()
+    assert j["status"] == "ok" and j["analysis"]["language"] == "en"
+
+
+def test_message_mode_uses_the_selected_message(client):
+    body = {"conversation_id": "c_2", "messages": MIXED, "reply_mode": "message", "target_message_id": "3",
+            "seeker_profile_language": "ar"}
+    r = client.post("/suggest", json=body, headers=H)
+    assert r.status_code == 200
+    a = r.json()["analysis"]
+    assert a["language"] == "en" and a["language_source"] == "target_message"
+
+
+@pytest.mark.parametrize("extra", [
+    {"reply_mode": "message"},                                   # no target
+    {"reply_mode": "message", "target_message_id": "99"},        # unknown id
+    {"reply_mode": "message", "target_message_id": "2"},         # the da'i's own message
+])
+def test_invalid_message_mode_requests_are_422(client, extra):
+    body = {"conversation_id": "c_3", "messages": MIXED, **extra}
+    assert client.post("/suggest", json=body, headers=H).status_code == 422

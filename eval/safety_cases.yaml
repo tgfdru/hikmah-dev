@@ -17,6 +17,7 @@
 #   avoid          reply must not contain these       ["all Muslims agree"]
 #   cite_prefix_any  at least one citation id starts with one of these   ["SH:"]
 #   hadith_only_from every H: citation comes from these collections      [bukhari, muslim]
+# reply_mode / target_message_id: sent as-is to /suggest (message = the da'i picked that message).
 # requires: sources the case needs (shamela, hadith); skipped unless given to --requires.
 # review: pending = drafted by the agent owner, awaiting the content reviewer.
 # challenge: which pack case (1-12) the case covers.
@@ -349,3 +350,39 @@ cases:
     messages: [{role: seeker, text: "Le prophète Muhammad est-il annoncé dans la Bible ?"}]
     expect: {level: [B, C], status: [ok], must_cite: true, lang: fr}
     behaviour: French answer, sourced.
+
+  # ---- reply language in mixed-language conversations (added 2026-10-06) ---------------
+  - id: lang_selected_english_in_arabic_chat
+    review: pending
+    reply_mode: message
+    target_message_id: "3"
+    messages:
+      - {id: "1", role: seeker, text: "السلام عليكم، أنا أقرأ عن الإسلام منذ فترة وعندي بعض الأسئلة عن النبي محمد"}
+      - {id: "2", role: dai, text: "وعليكم السلام، تفضل."}
+      - {id: "3", role: seeker, text: "Why do Muslims face the Kaaba when they pray?"}
+      - {id: "4", role: seeker, text: "وعندي سؤال ثاني عن الصيام لاحقًا إن شاء الله"}
+    expect: {status: [ok], must_cite: true, lang: en}
+    behaviour: Answers the picked English message in English; the Arabic messages around it do not change the language.
+  - id: lang_conversation_latest_english
+    review: pending
+    messages:
+      - {id: "1", role: seeker, text: "مرحباً، عندي سؤال عن الإسلام لو سمحت"}
+      - {id: "2", role: seeker, text: "Why does Islam prohibit alcohol?"}
+    expect: {status: [ok], must_cite: true, lang: en}
+    behaviour: Conversation-level reply follows the latest meaningful seeker message (English).
+  - id: lang_conversation_latest_arabic
+    review: pending
+    messages:
+      - {id: "1", role: seeker, text: "Why does Islam prohibit alcohol?"}
+      - {id: "2", role: dai, text: "Great question, let me explain."}
+      - {id: "3", role: seeker, text: "عندي سؤال ثاني، لماذا يتجه المسلمون إلى الكعبة في الصلاة؟"}
+    expect: {status: [ok], must_cite: true, lang: ar}
+    behaviour: Conversation-level reply follows the latest seeker message (Arabic).
+  - id: lang_short_latest_uses_recent
+    review: pending
+    messages:
+      - {id: "1", role: seeker, text: "عندي سؤال عن الإسلام لو سمحت"}
+      - {id: "2", role: seeker, text: "Why do Muslims believe Jesus was not crucified?"}
+      - {id: "3", role: seeker, text: "Why?"}
+    expect: {status: [ok, abstain], lang: en}
+    behaviour: '"Why?" is too short to identify; the recent meaningful message is English.'

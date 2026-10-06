@@ -116,7 +116,10 @@ def health() -> dict:
 def _run(req: SuggestRequest, style: str | None) -> SuggestResponse:
     messages = [m.model_dump() for m in req.messages]
     try:
-        out = run_agent(messages, style=style)
+        out = run_agent(messages, style=style, reply_mode=req.reply_mode,
+                        target_message_id=req.target_message_id,
+                        conversation_language=req.conversation_language,
+                        profile_language=req.seeker_profile_language)
     except LLMNotConfigured as exc:
         raise HTTPException(503, detail=str(exc)) from exc
     except Exception as exc:
@@ -125,7 +128,8 @@ def _run(req: SuggestRequest, style: str | None) -> SuggestResponse:
     _append_log({
         "event": "suggest", "conversation_id": req.conversation_id, "suggestion_id": out["suggestion_id"],
         "style": style, "status": out["status"], "level": out["level"],
-        "language": out["analysis"].get("language"), "cited": [c["id"] for c in out["citations"]],
+        "language": out["analysis"].get("language"), "language_source": out["analysis"].get("language_source"),
+        "reply_mode": req.reply_mode, "cited": [c["id"] for c in out["citations"]],
         "issues": len(out["issues"]), "retry_issues": out["retry_issues"], "attempts": out["attempts"], "best_score": out["best_score"],
         "latency_ms": out["latency_ms"], "timings_ms": out["timings_ms"], "trace": out["trace"],
     })

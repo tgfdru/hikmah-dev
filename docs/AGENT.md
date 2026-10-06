@@ -66,6 +66,34 @@ field) or none at all. `agent/llm.py:structured` lifts nested fields back to the
 level when that makes the output valid, otherwise retries (up to 3 calls) before failing
 the request with a clear error.
 
+## 2b. Meaning vs. wording (what is fixed, what is personalised)
+
+| Layer | Who decides | How it is enforced |
+|---|---|---|
+| **Scripture** (Quran, hadith) — immutable | the verbatim store only | the model writes placeholders `[[Q:s:a]]`; text inserted by `_render`; verse-like text, ﴿﴾ or unknown ids in a draft are rejected (`check_draft`) |
+| **Religious meaning** — what the reply establishes | the retrieved sources only | `Draft.points`: each idea with the ids that state it; a point without a source or with an id outside the evidence is rejected; the independent judge flags new content, contradictions and overstatement |
+| **Scholarly explanations** (Bayyinat `QA:`, Shamela `SH:`) | the sources' meaning, re-expressed | ≥ 8 identical consecutive words with a passage = copied → rewrite (`rules.longest_shared_run`) |
+| **Personalisation** — how it is said | the seeker: their words, level, tone, stated background, language | prompt section "How to write"; textbook register (`rules.BOILERPLATE`) triggers one rewrite but never blocks; the profile is passed as "for HOW you write, never for WHAT is true" |
+| **Language** | the message being answered | `agent/language.py` before the graph; a draft detected in another language is rejected |
+
+Insufficient sources: below the abstain threshold → fixed abstain text, no generation; partially covered
+questions → the prompt requires saying that part needs a fuller answer (and the note to the da'i says which).
+
+## 2c. Which message is answered, in which language
+
+`agent/language.py::resolve_response_language` is the single source of truth, called once in
+`graph.suggest` before the graph runs. `reply_mode=message` answers the picked seeker message
+(`target_message_id`); `conversation` answers the latest seeker message. The context given to the model is
+the conversation up to and including that message. Order: target message (≥ 10 letters and confident) →
+neighbouring seeker messages (message mode) → recent meaningful seeker messages (latest wins in message mode;
+dominant of the last 3, ties to the newest, in conversation mode) → `conversation_language` → computed
+conversation language → `seeker_profile_language` → weak guess → `en`. Not inputs, by design: app UI
+language, the da'i's messages, previous AI replies, the sources' language.
+
+Root cause of the old bug: the analyzer joined the seeker's texts of the last three messages and detected the
+language of the mix, so a short English question after a long Arabic one came out Arabic; and the API had no way
+to say which message the da'i picked (it always answered the last seeker message).
+
 ## 3. Status values returned
 
 | status | Meaning | What the da'i sees |

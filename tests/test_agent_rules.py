@@ -167,7 +167,10 @@ def test_book_passage_is_citable_and_its_quoted_verses_allowed():
                     source="هداية الحيارى", ref="ص 45", grade=None, source_url="https://shamela.ws/book/123/45",
                     score=0.9)
     assert "Q:2:144" in nodes._allowed_ids([book])
-    d = Draft(reply="As the book explains, Muslims face the Kaaba by command: [[Q:2:144]]",
+    from agent.state import GroundedPoint
+    d = Draft(points=[GroundedPoint(meaning="Muslims face the Kaaba by God's command.",
+                                    source_ids=["BK:shamela:123:45", "Q:2:144"])],
+              reply="As the book explains, Muslims face the Kaaba by command: [[Q:2:144]]",
               reply_ar="كما يشرح الكتاب: [[Q:2:144]]", cited_ids=["BK:shamela:123:45"], note_for_dai="ok")
     assert nodes.check_draft(d, [book], "en", "B") == []
 

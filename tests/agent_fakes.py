@@ -5,7 +5,7 @@ either one answer or a list of answers returned in order (for retries).
 """
 from __future__ import annotations
 
-from agent.state import Analysis, Draft, Routing
+from agent.state import Analysis, Draft, GroundedPoint, Routing
 
 
 class _Bound:
@@ -66,5 +66,9 @@ def routing(level="A", reason="سؤال تعريفي مستقر") -> Routing:
 
 def draft(reply="Muslims do not worship the Kaaba; they face it in prayer as Allah commanded: [[Q:2:144]]",
           reply_ar="المسلمون لا يعبدون الكعبة بل يستقبلونها في الصلاة امتثالًا لأمر الله: [[Q:2:144]]",
-          cited_ids=("Q:2:144", "QA:bayyinat:9"), note="بدأت بتصحيح التصور بلطف.") -> Draft:
-    return Draft(reply=reply, reply_ar=reply_ar, cited_ids=list(cited_ids), note_for_dai=note)
+          cited_ids=("Q:2:144", "QA:bayyinat:9"), note="بدأت بتصحيح التصور بلطف.",
+          points=None) -> Draft:
+    if points is None:  # by default the content points are the cited evidence
+        points = [GroundedPoint(meaning="Muslims face the Kaaba in prayer by God's command; worship is for God alone.",
+                                source_ids=[c for c in cited_ids if not c.startswith("GL:")] or list(cited_ids))]
+    return Draft(points=points, reply=reply, reply_ar=reply_ar, cited_ids=list(cited_ids), note_for_dai=note)

@@ -266,7 +266,8 @@ def eval_agent(api: str, judge: bool, only: set[str] | None, api_key: str | None
         t0 = time.time()
         try:
             r = httpx.post(f"{api.rstrip('/')}/suggest", timeout=300, headers=headers,
-                           json={"conversation_id": f"eval_{c['id']}", "messages": c["messages"]})
+                           json={"conversation_id": f"eval_{c['id']}", "messages": c["messages"],
+                                 **{k: c[k] for k in ("reply_mode", "target_message_id") if k in c}})
             r.raise_for_status()
             res = r.json()
         except Exception as exc:

@@ -17,6 +17,7 @@ import re
 from typing import NamedTuple
 
 from agent import llm, rules, settings, templates
+from agent.language import detect_confident
 from agent.prompts import load
 from agent.state import AgentState, Analysis, Citation, Draft, Judgement, Routing
 from retrieval import get_retriever
@@ -151,7 +152,16 @@ def analyze(state: AgentState) -> dict:
     seeker_recent = " ".join(m.get("text", "") for m in messages[-3:]
                              if str(m.get("role", "seeker")).lower() in ("seeker", "user")) or seeker_text
     detected = _detect_language(seeker_recent)
-    language = detected[0] if detected and detected[1] >= 0.5 else (a.language or "en").lower()[:2]
+    # The reply language is decided before the graph (agent.language.resolve_response_language: the
+    # message being answered, with fallbacks). The old guess below is kept only for direct graph use.
+    language = state.get("language") or (
+        detected[0] if detected and detected[1] >= 0.5 else (a.language or "en").lower()[:2])
+    # The resolver had no reliable signal (no confident message, no fallback given): the analyzer,
+    # which read the message being answered, decides.
+    decision = dict(state.get("language_decision") or {})
+    if decision.get("source") in ("default", "target_message_weak") and a.language:
+        language = a.language.lower()[:2]
+        decision.update(language=language, source="analyzer")
 
     # Quotes of the Quran in the seeker's message; inexact ones are misquotes (challenge case 11).
     misquotes = [{"ref_id": m.ref_id, "quoted": m.quoted, "similarity": m.similarity, "is_exact": m.is_exact}
@@ -160,7 +170,7 @@ def analyze(state: AgentState) -> dict:
     hint = "D" if (rules.level_d_hint(seeker_text) or a.personal_case) else None
     # Approved glossary entries for the term the seeker asks about (if any).
     terms = _glossary_terms([a.asked_term], language, limit=3) if a.asked_term.strip() else []
-    return {"analysis": a, "language": language, "misquotes": misquotes, "level_hint": hint, "terms": terms,
+    return {"analysis": a, "language": language, "language_decision": decision, "misquotes": misquotes, "level_hint": hint, "terms": terms,
             "attempts": 0, "issues": [], "trace": _trace(state, "analyze")}
 
 
@@ -288,8 +298,10 @@ def generate(state: AgentState) -> dict:
 
     user = (
         f"Conversation (latest message last):\n{_conversation(state['messages'])}\n\n"
-        f"Seeker profile: language={lang}, knowledge_level={a.knowledge_level}, tone={a.tone}, "
-        f"background={a.background}\nReal question: {a.core_question}\n"
+        f"Message you are answering (the seeker's own words):\n{_last_seeker_text(state['messages'])}\n\n"
+        f"Write the reply in: {lang}\n"
+        f"Seeker profile (for HOW you write, never for WHAT is true): knowledge_level={a.knowledge_level}, "
+        f"tone={a.tone}, background={a.background}\nReal question: {a.core_question}\n"
         f"{_LEVEL_RULES.get(r.level, _LEVEL_RULES['B'])}\n"
         f"{_STYLE.get(state.get('style') or '', '')}{misquote_note}\n\n"
         f"<evidence>\n{docs or 'none — answer only from the glossary entries below'}\n</evidence>\n\n"
@@ -375,6 +387,11 @@ def _glossary_latin(glossary_ids: set[str] | None) -> set[str]:
     return words
 
 
+def _strip_rendered(text: str) -> str:
+    """Draft text without placeholders or quoted scripture, for language detection."""
+    return rules.QUOTE_MARKS.sub(" ", rules.strip_placeholders(text or ""))
+
+
 def check_draft(d: Draft, evidence: list[Evidence], lang: str, level: str,
                 glossary_ids: set[str] | None = None) -> list[str]:
     """Deterministic verification. Returns the list of problems (empty = passes)."""
@@ -403,6 +420,32 @@ def check_draft(d: Draft, evidence: list[Evidence], lang: str, level: str,
         noise = rules.garbled(txt, field_lang, allowed_latin)
         if noise:
             issues.append(f"{field} contains garbled text — {noise}; rewrite it fully in the target language")
+    # Every point must be backed by evidence or glossary ids; a point without a source is a claim
+    # the model made up (rule: content only from the sources).
+    known = ev_ids | set(glossary_ids) | allowed
+    for p in d.points:
+        if not p.source_ids:
+            issues.append(f'point "{p.meaning[:80]}" has no source; drop it or tie it to an evidence id')
+        else:
+            bad = [sid for sid in p.source_ids if sid not in known and not rules.is_covered(sid, allowed)]
+            if bad:
+                issues.append(f'point "{p.meaning[:60]}" cites {", ".join(bad)}, which is not in the evidence')
+    if evidence and not d.points:
+        issues.append("list the religious points of the reply in `points`, each with its evidence ids")
+    # The reply must be in the language of the message being answered (not the sources' language).
+    got = detect_confident(_strip_rendered(d.reply))
+    if got and not rules.same_language(got[0], lang):
+        issues.append(f"the reply is written in '{got[0]}' but must be written in '{lang}' "
+                      "(the language of the seeker's message); translate the meaning, not the sources")
+    # Explanations must be re-expressed, not pasted.
+    for field, txt in (("reply", d.reply), ("reply_ar", d.reply_ar)):
+        for e in evidence:
+            if e.type in EXPLANATION_TYPES:
+                n, words = rules.longest_shared_run(txt, e.text_ar)
+                if n >= rules.COPY_RUN:
+                    issues.append(f'{field} copies {n} words of {e.id} verbatim ("{words[:70]}…"); '
+                                  "re-express the meaning in your own words for this seeker")
+                    break
     if level == "C":
         for p in rules.certainty_claims(d.reply) + rules.certainty_claims(d.reply_ar):
             issues.append(f'level C: remove the claim of certainty/consensus "{p}"')
@@ -465,6 +508,9 @@ def verify(state: AgentState) -> dict:
     evidence, lang = state["evidence"], state["language"]
     glossary = state.get("glossary", {})
     d = inline_ids_to_text(repair_draft(state["draft"], evidence), lang, glossary)
+    # The sources of the points are citations too (the da'i sees where each idea comes from).
+    point_ids = [sid for p in d.points for sid in p.source_ids]
+    d = d.model_copy(update={"cited_ids": list(dict.fromkeys([*d.cited_ids, *point_ids]))})
     level = state["routing"].level
     issues = check_draft(d, evidence, lang, level, set(glossary))
     judge_down, advisory = False, []
@@ -475,6 +521,13 @@ def verify(state: AgentState) -> dict:
             issues, advisory = judged.blocking, judged.advisory
 
     attempts = state.get("attempts", 1)
+    # Register (not content): one rewrite if the draft sounds like a book, never a block.
+    style = [] if issues else rules.boilerplate(d.reply)
+    if style and attempts < settings.MAX_DRAFT_ATTEMPTS:
+        issues = [f'the reply sounds like a textbook ("{style[0]}"); rewrite it as a warm chat message from the '
+                  "da'i to this seeker, same points, your own words"]
+        return {"issues": issues, "verdict": "retry", "retry_issues": [*state.get("retry_issues", []), *issues],
+                "trace": _trace(state, "verify:style")}
     if issues and attempts < settings.MAX_DRAFT_ATTEMPTS:
         return {"issues": issues, "verdict": "retry", "retry_issues": [*state.get("retry_issues", []), *issues],
                 "trace": _trace(state, "verify:retry")}

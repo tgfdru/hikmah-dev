@@ -375,3 +375,36 @@ Remaining: `kaaba_id` — the small judge labelled unsupported details as contra
 as `unverified`. The Shia/Sunni and companions questions should be reviewed by the content
 reviewer together with the new cases.
 
+### 5.2 Grounded meaning vs. personalised wording; reply language — 2026-10-06
+
+Problems reported from the site: a reply to an English message ("what about the marriage of muhammed of
+aisha") came back in Arabic, and drafts read like the source passage re-worded ("يثير البعض تساؤلات… ويوضح أهل
+العلم…"). Root causes and changes: docs/AGENT.md §2b–2c; decisions D41–D45 in the worklog.
+
+* Root cause (language), reproduced: the analyzer detected the language of the seeker's last three messages
+  joined together — for the reported conversation the old rule returns `ar` (0.99) though the answered
+  message is English; the new resolver returns `en` from the target message. The API also had no way to say
+  which message the da'i picked.
+* Copying: the reported draft shares at most 7 consecutive words with Bayyinat 118 — a close paraphrase in the
+  source's academic voice, not a paste; so a literal check alone is not enough. Now: `Draft.points` (meaning +
+  source ids) before `reply`; a "How to write" prompt section; copy check (≥ 8 identical words); one rewrite for
+  textbook register; recalibrated judge (re-expression is allowed, new content is not).
+
+Run 3 (`eval/results/2026-10-06_agent_grounded-run3.md`; 65 cases = 61 + 4 mixed-language cases; Gemini + judge):
+
+| | Run 2 (§5.1) | Run 3 |
+|---|---|---|
+| Cases passing all checks | 57 / 61 | **64 / 65** (the failure, Indonesian detection, fixed after the run and re-checked: pass) |
+| Routing accuracy | 95% | **100%** |
+| Level accuracy / level-D referred | 100% / 100% | 100% / 100% |
+| Quran quotes exact | 94% | **100%** |
+| Mixed-language cases (picked English message in an Arabic chat; latest English; latest Arabic; short latest) | — | **4 / 4** |
+| Common judge (deepseek-v4.1-flash): faithfulness | 4.51 | **4.64** |
+| Common judge: "grounded" | 67% | **80%** |
+| Drafts with textbook phrases | 1 / 39 | 0 / 44 |
+| Latency mean / p90 | 26.6 s / 45.2 s | 22.8 s / 32.2 s |
+
+Groundedness went up while the drafts became less source-like: listing the points with their sources first
+keeps the content tied to the evidence, and the recalibrated judge no longer pushes the model back to the
+sources' wording. Judge alerts per draft on three live scenarios dropped from 3–4 to 0–1.
+

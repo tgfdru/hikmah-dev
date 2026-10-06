@@ -16,6 +16,7 @@ from functools import lru_cache
 from langgraph.graph import END, StateGraph
 
 from agent import nodes
+from agent.language import resolve_response_language
 from agent.state import AgentState
 
 
@@ -59,12 +60,26 @@ def build_graph():
     return g.compile()
 
 
-def suggest(messages: list[dict], style: str | None = None) -> dict:
-    """Run the agent on a conversation and return the API-shaped result (see api/schemas.py)."""
+def suggest(messages: list[dict], style: str | None = None, reply_mode: str = "conversation",
+            target_message_id: str | None = None, conversation_language: str | None = None,
+            profile_language: str | None = None) -> dict:
+    """Run the agent on a conversation and return the API-shaped result (see api/schemas.py).
+
+    reply_mode "message": answer the seeker message whose id is `target_message_id`;
+    "conversation": answer the latest seeker message. The reply language is decided here, once,
+    by agent.language.resolve_response_language — never by the sources' language.
+    """
     if not messages:
         raise ValueError("messages must not be empty")
     t0 = time.time()
-    s: AgentState = build_graph().invoke({"messages": messages, "style": style, "trace": []},
+    decision = resolve_response_language(messages, reply_mode, target_message_id,
+                                         conversation_language, profile_language)
+    # The agent answers the target message: the context is everything up to and including it,
+    # so a later, unrelated message is never mistaken for the question.
+    context = messages[:decision.target_index + 1] if decision.target_index >= 0 else messages
+    s: AgentState = build_graph().invoke({"messages": context, "style": style, "trace": [],
+                                          "language": decision.language,
+                                          "language_decision": decision.as_dict()},
                                          config={"recursion_limit": 25})
     a, r = s.get("analysis"), s.get("routing")
     return {
@@ -76,6 +91,7 @@ def suggest(messages: list[dict], style: str | None = None) -> dict:
         "note_for_dai": s.get("note_for_dai", ""),
         "analysis": {
             "language": s.get("language"),
+            "language_source": (s.get("language_decision") or {}).get("source", decision.source),
             "knowledge_level": a.knowledge_level if a else None,
             "tone": a.tone if a else None,
             "core_question": a.core_question if a else None,

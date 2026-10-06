@@ -13,23 +13,49 @@ a seeker automatically.
 
 ## 2. Endpoints
 
-### `POST /suggest` — draft a reply for the latest seeker message
+### `POST /suggest` — draft a reply
 
-Request:
+Two modes, matching the two buttons in the da'i's chat:
+
+| UI action | Send | What is answered | Reply language |
+|---|---|---|---|
+| **AI reply to a message** (the da'i picked a seeker message) | `"reply_mode": "message"`, `"target_message_id": "<that message's id>"` | exactly that message (later messages are ignored) | the language of that message |
+| **AI reply for the conversation** (nothing picked) | `"reply_mode": "conversation"` (default) | the latest seeker message | the language of the latest meaningful seeker message |
+
+Request (message mode):
 
 ```json
 {
   "conversation_id": "site-conv-8841",
+  "reply_mode": "message",
+  "target_message_id": "m-1093",
   "messages": [
-    {"role": "seeker", "text": "Why do Muslims worship the Kaaba?"}
-  ]
+    {"id": "m-1090", "role": "seeker", "text": "السلام عليكم، عندي سؤال"},
+    {"id": "m-1091", "role": "dai",    "text": "وعليكم السلام، تفضل"},
+    {"id": "m-1093", "role": "seeker", "text": "What about the marriage of Muhammad to Aisha?"}
+  ],
+  "conversation_language": null,
+  "seeker_profile_language": "en"
 }
 ```
 
-* `role`: `seeker` (the person asking) or `dai` (the da'i). Oldest first; the last
-  seeker message is the one answered. Send the recent part of the conversation (up to 50
-  messages; the assistant reads the last 8).
+* `messages`: oldest first, up to 50, **each with the site's message `id`**. `role`: `seeker` (the person
+  asking) or `dai`. Send the conversation **as it is** — do not translate it, and send the picked message in
+  its original text.
+* `reply_mode` / `target_message_id`: `target_message_id` is required in message mode and must be the id of a
+  **seeker** message present in `messages` (otherwise 422).
+* `conversation_language`, `seeker_profile_language` (optional, ISO 639-1): fallbacks only, used when no
+  message has enough text to identify its language (e.g. "Why?", "نعم"). **Never send the app UI language or the
+  da'i's language** in these fields.
+* Old requests without `reply_mode` / `id` keep working (conversation mode).
 * `conversation_id`: the site's own id (pseudonymous; no names, emails or phones).
+
+How the language is chosen (one function, `agent/language.py`): the answered message → its neighbouring seeker
+messages (message mode) → the recent meaningful seeker messages → `conversation_language` → profile language.
+A message counts only if it has ≥ 10 letters and a confident detection. The language of the religious sources
+never decides the reply language: an English question answered from an Arabic source gets an English reply.
+`analysis.language_source` in the response says which rule decided (`target_message`, `nearby_message`,
+`recent_messages`, `conversation`, `profile`, `default`).
 
 Response (fields the UI needs):
 
@@ -42,7 +68,7 @@ Response (fields the UI needs):
   "reply": "…draft in the seeker's language, with the verse text inserted…",
   "reply_ar": "…Arabic version for the da'i…",
   "note_for_dai": "…short note in Arabic for the da'i…",
-  "analysis": {"language": "en", "knowledge_level": "beginner", "tone": "curious",
+  "analysis": {"language": "en", "language_source": "target_message", "knowledge_level": "beginner", "tone": "curious",
                "core_question": "…", "level_reason": "…"},
   "citations": [
     {"id": "Q:2:144", "type": "quran", "source": "القرآن الكريم", "ref": "البقرة: 144",

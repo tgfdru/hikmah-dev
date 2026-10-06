@@ -53,11 +53,23 @@ class Routing(BaseModel):
     reason: str = Field(description="One short sentence explaining the level, in Arabic")
 
 
-class Draft(BaseModel):
-    """Stage 4 — Draft Generator."""
+class GroundedPoint(BaseModel):
+    """One religious idea the reply conveys — WHAT is said, separate from HOW it is worded."""
 
-    reply: str = Field(description="Draft reply in the seeker's language. Quran/hadith only as placeholders "
-                                   "like [[Q:2:144]] or [[H:bukhari:1]]")
+    meaning: str = Field(description="The idea in one short plain sentence (English), as the cited evidence "
+                                     "establishes it — a summary of its meaning, not a quotation")
+    source_ids: list[str] = Field(description="Ids of the evidence or glossary entries that state this idea "
+                                              "(Q:..., QA:..., SH:..., GL:..., H:...)")
+
+
+class Draft(BaseModel):
+    """Stage 4 — Draft Generator. `points` fix the content; `reply` only re-expresses them."""
+
+    points: list[GroundedPoint] = Field(default_factory=list, description=(
+        "FIRST: the religious points the reply will make (1-5), each tied to the evidence ids that state it. "
+        "A religious claim that no evidence states is not a point and must not appear in the reply."))
+    reply: str = Field(description="The message to the seeker, in the target language, built only from `points`, "
+                                   "in your own conversational words. Quran/hadith only as placeholders [[Q:s:a]]")
     reply_ar: str = Field(description="Arabic translation of the reply for the da'i (same placeholders)")
     cited_ids: list[str] = Field(description="Every evidence id the reply relies on (Q:..., QA:..., SH:..., BK:..., H:...)")
     note_for_dai: str = Field(description="Short note in Arabic for the da'i: approach taken and anything to check")
@@ -85,7 +97,8 @@ class AgentState(TypedDict, total=False):
     messages: list[dict]          # [{"role": "seeker" | "dai", "text": "..."}]
     style: str | None             # regenerate: "simpler" | "deeper" | "shorter"
     # stage outputs
-    language: str
+    language: str                 # reply language, decided by agent.language before the graph runs
+    language_decision: dict       # {"language", "source", "confidence"} — why that language
     analysis: Analysis
     misquotes: list[dict]         # [{"ref_id", "quoted", "similarity"}]
     terms: list[dict]             # approved glossary entries named in the seeker's message
