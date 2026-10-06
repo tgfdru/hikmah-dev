@@ -15,6 +15,7 @@ nothing is scraped from mirrors.
 | Classical & dawah books | Shamela full database — shamela.ws/page/download (named in the updated pack, 2026-10) | 33 selected books (`ingest/shamela_books.yaml`): 24 answering other religions and modern ideologies + 9 early creed works (authors died ≤ 300 AH) | Search index (6,766 passages, type `dawah`) | Database version 1448, read 2026-10-05 |
 | Terminology | Jamhara dictionary — islamic-content.com/dictionary | English (and Urdu when published) equivalents + definitions for key terms, each with its URL | `data/glossary.json` | 2026-09-28 |
 | Terminology (official) | The pack's own "نماذج لقاموس المصطلحات الأساسية" (page 8) | The 10 terms with their usage rules | `data/glossary.json` (`status: official_challenge`) | — |
+| Hadith | HadeethEnc — hadeethenc.com, the organiser's Encyclopedia of Translated Prophetic Hadiths (named in the updated pack, 2026-10) | 3,573 hadith graded صحيح / حسن (1 weak one left out), each with grade, attribution, official explanation and approved translations (en 2,326 · id 2,260 · ur 2,219 · fr 1,789) | Hadith store (`store/hadith.sqlite`) + search index | API v1, 2026-10-06 |
 | Hadith (optional) | dorar.net/hadith | Live search, **off by default**, authentic grades only | Not stored (a cache of returned results only) | Not tested: dorar.net blocks cloud IPs |
 
 ## Licences and terms
@@ -36,6 +37,9 @@ nothing is scraped from mirrors.
   their authors'/editors' rights, so — as with every source — the text is **not**
   committed: `python -m ingest.shamela` downloads it from shamela.ws. Each passage links
   to its page on shamela.ws and cites the printed volume and page.
+* **HadeethEnc**: published free by the organiser ("providing them for free through all
+  available means"). Fetched through its public API (4 requests at a time, cached), never
+  committed to git; every hadith links to its page on hadeethenc.com.
 * **Dorar**: only its public search API, only when enabled; results are shown as
   returned with a link back; nothing is stored beyond a local cache.
 
@@ -77,3 +81,7 @@ nothing is scraped from mirrors.
 * **Verses inside Shamela passages**: kept exactly as the book prints them (not
   replaced). When a passage cites "[سورة: n]", `quran_refs_in` turns that into a
   verse id, so the agent shows the verse from the verbatim store, never from the book.
+* **HadeethEnc**: text, grade and attribution kept exactly as published. Only grades containing
+  صحيح / حسن / صحّح are kept (e.g. "صحيح", "حسن لغيره", "صححه الحافظ ابن حجر"); one hadith graded
+  ضعيف is left out. A translation is used only where HadeethEnc publishes one for that language;
+  otherwise the hadith is shown in Arabic only.

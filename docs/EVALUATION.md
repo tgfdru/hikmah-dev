@@ -408,3 +408,30 @@ Groundedness went up while the drafts became less source-like: listing the point
 keeps the content tied to the evidence, and the recalibrated judge no longer pushes the model back to the
 sources' wording. Judge alerts per draft on three live scenarios dropped from 3–4 to 0–1.
 
+
+
+## 6. Retrieval with HadeethEnc hadith — 2026-10-06
+
+Index: Quran 6,236 + Bayyinat 1,116 + Shamela 6,766 + **HadeethEnc 3,573** hadith.
+Five hadith questions (topic only, e.g. "Is there a hadith about intentions?") joined the main
+set. Results: `eval/results/2026-10-06_retrieval*_with-hadith.md`.
+
+| Set | Queries | Recall@6 | MRR | Answerable but abstained | Unanswerable correctly abstained |
+|---|---|---|---|---|---|
+| main (46 + 11) | analyzed | **98%** | 0.90 | 2% | **100%** |
+| held-out (10 + 10) | analyzed | **100%** | 0.88 | 0% | **100%** |
+| main | raw (seeker words only) | 85% | 0.72 | 9% | 100% |
+| held-out | raw | 60% | 0.50 | 10% | 90% |
+
+* All five hadith questions find the expected hadith (e.g. intentions → the متفق عليه hadith,
+  score 0.80). The agent's mode (with an Arabic query) is unchanged in recall; searching
+  with the seeker's words alone gets worse, which the agent never does.
+* **Fake-hadith requests** (the agent searches `types=["hadith"]` only): computers 0.34,
+  internet 0.31, coffee 0.18, phones 0.03 — below 0.35, so the agent abstains. One weakness:
+  "What did the Prophet say about Bitcoin?" matches an unrelated hadith about wealth at 0.55
+  with the eval's queries. With the agent's own queries the full pipeline abstained ("no
+  authentic hadith matching this"), and generate.md rule 9 now forbids presenting a hadith on
+  another topic as the answer; the judge also flags a placeholder that does not support the
+  point. Keep this case in the content review.
+* Display: HadeethEnc text already marks the Prophet's words with «», so they are not wrapped
+  again.

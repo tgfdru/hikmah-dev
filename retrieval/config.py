@@ -41,6 +41,7 @@ MODELS_DIR = WORK_DIR / "models"
 
 # SQLite file holding the exact Quran text + approved translations.
 VERBATIM_DB = Path(_env("VERBATIM_DB", str(STORE_DIR / "verbatim.sqlite")))
+HADITH_DB = Path(_env("HADITH_DB", str(STORE_DIR / "hadith.sqlite")))  # HadeethEnc, optional
 GLOSSARY_PATH = Path(_env("GLOSSARY_PATH", str(DATA_DIR / "glossary.json")))
 
 # Which retriever `retrieval.get_retriever()` returns: "hybrid" | "mock".

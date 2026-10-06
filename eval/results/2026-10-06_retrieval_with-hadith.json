@@ -1,0 +1,1914 @@
+{
+  "k": 6,
+  "index": {
+    "built_at": "2026-10-06T09:07:04.096952+00:00",
+    "embed_model": "BAAI/bge-m3",
+    "counts": {
+      "qa": 1116,
+      "hadith": 3573,
+      "quran": 6236,
+      "dawah": 6766
+    },
+    "total": 17691
+  },
+  "modes": {
+    "minilm/raw": {
+      "recall_at_k": 0.8478260869565217,
+      "mrr": 0.7155797101449276,
+      "latency_ms_mean": 1823.9795785201222,
+      "latency_ms_p90": 2232.56778717041,
+      "recommended_threshold": 0.2,
+      "sweep": [
+        {
+          "t": 0.1,
+          "false_abstain": 0.06521739130434778,
+          "correct_abstain": 0.9090909090909091,
+          "answered_with_hit": 0.8260869565217391,
+          "balanced": 0.9219367588932806
+        },
+        {
+          "t": 0.15,
+          "false_abstain": 0.06521739130434778,
+          "correct_abstain": 0.9090909090909091,
+          "answered_with_hit": 0.8260869565217391,
+          "balanced": 0.9219367588932806
+        },
+        {
+          "t": 0.2,
+          "false_abstain": 0.08695652173913049,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.8043478260869565,
+          "balanced": 0.9565217391304348
+        },
+        {
+          "t": 0.25,
+          "false_abstain": 0.08695652173913049,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.8043478260869565,
+          "balanced": 0.9565217391304348
+        },
+        {
+          "t": 0.3,
+          "false_abstain": 0.10869565217391308,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.782608695652174,
+          "balanced": 0.9456521739130435
+        },
+        {
+          "t": 0.35,
+          "false_abstain": 0.15217391304347827,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7608695652173914,
+          "balanced": 0.9239130434782609
+        },
+        {
+          "t": 0.4,
+          "false_abstain": 0.15217391304347827,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7608695652173914,
+          "balanced": 0.9239130434782609
+        },
+        {
+          "t": 0.45,
+          "false_abstain": 0.15217391304347827,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7608695652173914,
+          "balanced": 0.9239130434782609
+        },
+        {
+          "t": 0.5,
+          "false_abstain": 0.17391304347826086,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7608695652173914,
+          "balanced": 0.9130434782608696
+        },
+        {
+          "t": 0.55,
+          "false_abstain": 0.26086956521739135,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.6956521739130435,
+          "balanced": 0.8695652173913043
+        },
+        {
+          "t": 0.6,
+          "false_abstain": 0.26086956521739135,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.6956521739130435,
+          "balanced": 0.8695652173913043
+        },
+        {
+          "t": 0.65,
+          "false_abstain": 0.28260869565217395,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.6739130434782609,
+          "balanced": 0.8586956521739131
+        },
+        {
+          "t": 0.7,
+          "false_abstain": 0.32608695652173914,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.6304347826086957,
+          "balanced": 0.8369565217391304
+        },
+        {
+          "t": 0.75,
+          "false_abstain": 0.34782608695652173,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.6304347826086957,
+          "balanced": 0.8260869565217391
+        },
+        {
+          "t": 0.8,
+          "false_abstain": 0.34782608695652173,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.6304347826086957,
+          "balanced": 0.8260869565217391
+        },
+        {
+          "t": 0.85,
+          "false_abstain": 0.3913043478260869,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.6086956521739131,
+          "balanced": 0.8043478260869565
+        },
+        {
+          "t": 0.9,
+          "false_abstain": 0.4130434782608695,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.5869565217391305,
+          "balanced": 0.7934782608695652
+        },
+        {
+          "t": 0.95,
+          "false_abstain": 0.4565217391304348,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.5434782608695652,
+          "balanced": 0.7717391304347826
+        }
+      ],
+      "positive": [
+        {
+          "id": "kaaba_en",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 2256.2108039855957,
+          "got": [
+            "QA:bayyinat:9",
+            "QA:bayyinat:9:2",
+            "Q:27:91",
+            "Q:5:97",
+            "H:hadeethenc:64624",
+            "Q:3:64"
+          ]
+        },
+        {
+          "id": "kaaba_ur",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 1574.720859527588,
+          "got": [
+            "QA:bayyinat:9",
+            "QA:bayyinat:9:2",
+            "Q:5:97",
+            "Q:29:67",
+            "H:hadeethenc:65425",
+            "H:hadeethenc:65679"
+          ]
+        },
+        {
+          "id": "kaaba_id",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9997,
+          "ms": 1736.1125946044922,
+          "got": [
+            "QA:bayyinat:9",
+            "QA:bayyinat:9:2",
+            "Q:22:26",
+            "Q:3:97",
+            "Q:8:35",
+            "Q:2:125"
+          ]
+        },
+        {
+          "id": "black_stone_hostile",
+          "hit": false,
+          "rank": null,
+          "top": 0.0079,
+          "ms": 1314.960241317749,
+          "got": [
+            "Q:9:112",
+            "Q:37:94",
+            "Q:22:77",
+            "Q:37:125",
+            "Q:110:2",
+            "Q:53:62"
+          ]
+        },
+        {
+          "id": "quran_author",
+          "hit": false,
+          "rank": null,
+          "top": 0.8424,
+          "ms": 1681.286096572876,
+          "got": [
+            "Q:39:41",
+            "QA:bayyinat:42",
+            "QA:bayyinat:42:2",
+            "Q:5:83",
+            "Q:4:174",
+            "SH:6474:1"
+          ]
+        },
+        {
+          "id": "quran_author_ar",
+          "hit": true,
+          "rank": 2,
+          "top": 0.5159,
+          "ms": 1996.0951805114746,
+          "got": [
+            "QA:bayyinat:26",
+            "QA:bayyinat:27:2",
+            "QA:bayyinat:42:2",
+            "QA:bayyinat:27",
+            "QA:bayyinat:42",
+            "QA:bayyinat:30"
+          ]
+        },
+        {
+          "id": "sword",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9935,
+          "ms": 2598.579168319702,
+          "got": [
+            "QA:bayyinat:229",
+            "QA:bayyinat:229:8",
+            "H:hadeethenc:10855",
+            "Q:54:29",
+            "Q:74:52",
+            "Q:88:16"
+          ]
+        },
+        {
+          "id": "violence_hostile",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9936,
+          "ms": 1905.1153659820557,
+          "got": [
+            "QA:bayyinat:230",
+            "QA:bayyinat:230:3",
+            "Q:9:29",
+            "Q:100:8",
+            "Q:2:191",
+            "H:hadeethenc:3594"
+          ]
+        },
+        {
+          "id": "scholars_disagree",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9962,
+          "ms": 2232.56778717041,
+          "got": [
+            "QA:bayyinat:241",
+            "QA:bayyinat:241:4",
+            "SH:69:19",
+            "H:hadeethenc:5933",
+            "Q:2:25",
+            "H:hadeethenc:10911"
+          ]
+        },
+        {
+          "id": "tawhid_beginner",
+          "hit": true,
+          "rank": 2,
+          "top": 0.0678,
+          "ms": 1823.4765529632568,
+          "got": [
+            "Q:53:51",
+            "Q:112:2",
+            "Q:11:95",
+            "Q:11:68",
+            "Q:41:13",
+            "H:hadeethenc:5775"
+          ]
+        },
+        {
+          "id": "who_created_god",
+          "hit": true,
+          "rank": 1,
+          "top": 0.998,
+          "ms": 1415.3077602386475,
+          "got": [
+            "QA:bayyinat:4:2",
+            "Q:87:2",
+            "QA:bayyinat:4:3",
+            "Q:40:62",
+            "Q:32:7",
+            "SH:95570:77"
+          ]
+        },
+        {
+          "id": "god_exists",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9709,
+          "ms": 1944.4122314453125,
+          "got": [
+            "QA:bayyinat:1",
+            "SH:38726:725",
+            "SH:1075:173",
+            "SH:38726:728",
+            "Q:3:81",
+            "Q:10:100"
+          ]
+        },
+        {
+          "id": "jesus_divine",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9986,
+          "ms": 2061.7659091949463,
+          "got": [
+            "QA:bayyinat:64:2",
+            "QA:bayyinat:64",
+            "SH:95570:9",
+            "SH:95570:138",
+            "Q:4:171",
+            "Q:43:58"
+          ]
+        },
+        {
+          "id": "jesus_tl",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9544,
+          "ms": 1613.4066581726074,
+          "got": [
+            "QA:bayyinat:64:2",
+            "QA:bayyinat:64",
+            "SH:95570:9",
+            "SH:95570:5",
+            "Q:2:255",
+            "H:hadeethenc:8304"
+          ]
+        },
+        {
+          "id": "trinity",
+          "hit": true,
+          "rank": 3,
+          "top": 0.9577,
+          "ms": 2480.3876876831055,
+          "got": [
+            "SH:95570:168",
+            "Q:6:109",
+            "Q:5:73",
+            "Q:2:76",
+            "Q:12:106",
+            "Q:8:73"
+          ]
+        },
+        {
+          "id": "prophet_in_bible",
+          "hit": true,
+          "rank": 2,
+          "top": 0.8699,
+          "ms": 2036.5972518920898,
+          "got": [
+            "Q:17:60",
+            "QA:bayyinat:108:6",
+            "SH:38189:125",
+            "Q:16:118",
+            "SH:22397:258",
+            "SH:38191:40"
+          ]
+        },
+        {
+          "id": "only_arabs",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9996,
+          "ms": 1720.2534675598145,
+          "got": [
+            "QA:bayyinat:100",
+            "QA:bayyinat:100:3",
+            "H:hadeethenc:3069",
+            "H:hadeethenc:65298",
+            "SH:22397:268",
+            "Q:42:13"
+          ]
+        },
+        {
+          "id": "hijab",
+          "hit": true,
+          "rank": 1,
+          "top": 0.907,
+          "ms": 1467.0886993408203,
+          "got": [
+            "QA:bayyinat:220",
+            "QA:bayyinat:220:4",
+            "QA:bayyinat:221:3",
+            "SH:38726:29",
+            "Q:24:31",
+            "QA:bayyinat:221:2"
+          ]
+        },
+        {
+          "id": "polygamy",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9827,
+          "ms": 2044.9855327606201,
+          "got": [
+            "QA:bayyinat:217:2",
+            "SH:22397:345",
+            "QA:bayyinat:217:3",
+            "QA:bayyinat:82:3",
+            "SH:22397:351",
+            "H:hadeethenc:58083"
+          ]
+        },
+        {
+          "id": "testimony",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9997,
+          "ms": 2267.1689987182617,
+          "got": [
+            "QA:bayyinat:210:3",
+            "QA:bayyinat:210",
+            "QA:bayyinat:211:3",
+            "QA:bayyinat:211:4",
+            "H:hadeethenc:10011",
+            "Q:24:6"
+          ]
+        },
+        {
+          "id": "alcohol",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9991,
+          "ms": 2122.1094131469727,
+          "got": [
+            "QA:bayyinat:199:4",
+            "QA:bayyinat:199",
+            "H:hadeethenc:58258",
+            "H:hadeethenc:4556",
+            "H:hadeethenc:2976",
+            "Q:5:3"
+          ]
+        },
+        {
+          "id": "pork",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9741,
+          "ms": 2368.215799331665,
+          "got": [
+            "QA:bayyinat:200:3",
+            "QA:bayyinat:200:2",
+            "SH:22397:415",
+            "Q:6:121",
+            "Q:5:3",
+            "Q:6:145"
+          ]
+        },
+        {
+          "id": "five_prayers",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 1392.1709060668945,
+          "got": [
+            "QA:bayyinat:205",
+            "QA:bayyinat:205:5",
+            "H:hadeethenc:4968",
+            "H:hadeethenc:4542",
+            "Q:30:18",
+            "Q:65:2"
+          ]
+        },
+        {
+          "id": "fasting",
+          "hit": true,
+          "rank": 1,
+          "top": 0.313,
+          "ms": 2042.1462059020996,
+          "got": [
+            "QA:bayyinat:208:4",
+            "Q:2:185",
+            "QA:bayyinat:208:3",
+            "H:hadeethenc:4505",
+            "H:hadeethenc:4196",
+            "H:hadeethenc:4508"
+          ]
+        },
+        {
+          "id": "zakat",
+          "hit": true,
+          "rank": 4,
+          "top": 0.6303,
+          "ms": 1836.9927406311035,
+          "got": [
+            "Q:22:41",
+            "H:hadeethenc:4520",
+            "Q:9:11",
+            "Q:9:60",
+            "Q:98:5",
+            "Q:24:37"
+          ]
+        },
+        {
+          "id": "freedom_of_belief",
+          "hit": true,
+          "rank": 1,
+          "top": 0.991,
+          "ms": 1992.3648834228516,
+          "got": [
+            "QA:bayyinat:69",
+            "QA:bayyinat:69:2",
+            "SH:1357:28",
+            "SH:1357:2",
+            "Q:9:1",
+            "Q:26:17"
+          ]
+        },
+        {
+          "id": "apostasy",
+          "hit": false,
+          "rank": null,
+          "top": 0.4911,
+          "ms": 1474.9419689178467,
+          "got": [
+            "H:hadeethenc:11220",
+            "Q:60:9",
+            "Q:3:85",
+            "Q:6:125",
+            "H:hadeethenc:3885",
+            "H:hadeethenc:11296"
+          ]
+        },
+        {
+          "id": "evil",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9989,
+          "ms": 1955.52659034729,
+          "got": [
+            "QA:bayyinat:174",
+            "QA:bayyinat:174:6",
+            "Q:7:95",
+            "H:hadeethenc:3008",
+            "H:hadeethenc:8956",
+            "Q:90:10"
+          ]
+        },
+        {
+          "id": "eternal_hell",
+          "hit": true,
+          "rank": 1,
+          "top": 0.5094,
+          "ms": 1406.7697525024414,
+          "got": [
+            "QA:bayyinat:171",
+            "QA:bayyinat:170",
+            "QA:bayyinat:171:2",
+            "Q:5:33",
+            "Q:48:16",
+            "Q:19:84"
+          ]
+        },
+        {
+          "id": "purpose_of_life",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9992,
+          "ms": 2009.826421737671,
+          "got": [
+            "QA:bayyinat:178:2",
+            "QA:bayyinat:178",
+            "Q:49:13",
+            "Q:55:3",
+            "Q:30:20",
+            "Q:15:28"
+          ]
+        },
+        {
+          "id": "science",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9995,
+          "ms": 1884.6147060394287,
+          "got": [
+            "QA:bayyinat:255",
+            "QA:bayyinat:255:4",
+            "SH:38726:149",
+            "Q:42:13",
+            "Q:37:37",
+            "Q:23:52"
+          ]
+        },
+        {
+          "id": "evolution",
+          "hit": false,
+          "rank": null,
+          "top": 0.5288,
+          "ms": 2186.007261276245,
+          "got": [
+            "SH:38726:378",
+            "SH:1075:135",
+            "SH:38726:724",
+            "Q:3:83",
+            "Q:28:82",
+            "H:hadeethenc:5802"
+          ]
+        },
+        {
+          "id": "afterlife_ar",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9997,
+          "ms": 2096.6312885284424,
+          "got": [
+            "QA:bayyinat:169",
+            "QA:bayyinat:169:3",
+            "SH:122258:207",
+            "Q:2:8",
+            "Q:3:114",
+            "SH:38188:111"
+          ]
+        },
+        {
+          "id": "quran_preserved",
+          "hit": true,
+          "rank": 2,
+          "top": 0.6967,
+          "ms": 2100.315570831299,
+          "got": [
+            "SH:22397:281",
+            "QA:bayyinat:42:2",
+            "QA:bayyinat:34",
+            "Q:17:77",
+            "Q:25:32",
+            "Q:39:49"
+          ]
+        },
+        {
+          "id": "hadith_reliability",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9845,
+          "ms": 1471.5421199798584,
+          "got": [
+            "QA:bayyinat:130",
+            "Q:36:15",
+            "Q:16:103",
+            "Q:18:13",
+            "Q:30:53",
+            "Q:27:81"
+          ]
+        },
+        {
+          "id": "aisha",
+          "hit": true,
+          "rank": 2,
+          "top": 0.8189,
+          "ms": 2110.2089881896973,
+          "got": [
+            "SH:22397:353",
+            "QA:bayyinat:118",
+            "H:hadeethenc:58070",
+            "QA:bayyinat:118:3",
+            "H:hadeethenc:3119",
+            "H:hadeethenc:58061"
+          ]
+        },
+        {
+          "id": "worship_needless_god",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9811,
+          "ms": 1837.0981216430664,
+          "got": [
+            "QA:bayyinat:12:7",
+            "QA:bayyinat:12:6",
+            "H:hadeethenc:6045",
+            "Q:43:64",
+            "Q:51:51",
+            "Q:42:9"
+          ]
+        },
+        {
+          "id": "qiwama",
+          "hit": true,
+          "rank": 2,
+          "top": 0.9342,
+          "ms": 2318.4587955474854,
+          "got": [
+            "QA:bayyinat:218:4",
+            "QA:bayyinat:263:3",
+            "QA:bayyinat:218:3",
+            "QA:bayyinat:263:2",
+            "SH:1357:40",
+            "H:hadeethenc:3885"
+          ]
+        },
+        {
+          "id": "interest",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9993,
+          "ms": 1435.281753540039,
+          "got": [
+            "QA:bayyinat:223",
+            "QA:bayyinat:223:4",
+            "Q:6:138",
+            "Q:24:37",
+            "Q:3:102",
+            "H:hadeethenc:10101"
+          ]
+        },
+        {
+          "id": "jizya",
+          "hit": true,
+          "rank": 2,
+          "top": 0.6938,
+          "ms": 2212.7485275268555,
+          "got": [
+            "H:hadeethenc:65025",
+            "QA:bayyinat:259",
+            "QA:bayyinat:259:2",
+            "Q:53:22",
+            "Q:9:29",
+            "SH:169:143"
+          ]
+        },
+        {
+          "id": "mercy_prophet",
+          "hit": false,
+          "rank": null,
+          "top": 0.7101,
+          "ms": 1003.4210681915283,
+          "got": [
+            "Q:15:49",
+            "Q:42:48",
+            "Q:46:8",
+            "Q:57:9",
+            "Q:19:51",
+            "Q:17:87"
+          ]
+        },
+        {
+          "id": "hadith_intention",
+          "hit": false,
+          "rank": null,
+          "top": 0.0309,
+          "ms": 1968.5750007629395,
+          "got": [
+            "H:hadeethenc:65037",
+            "Q:47:20",
+            "Q:50:17",
+            "H:hadeethenc:3300",
+            "Q:24:46",
+            "Q:58:16"
+          ]
+        },
+        {
+          "id": "hadith_smile",
+          "hit": true,
+          "rank": 3,
+          "top": 0.1769,
+          "ms": 1805.6888580322266,
+          "got": [
+            "H:hadeethenc:5461",
+            "Q:26:66",
+            "H:hadeethenc:66237",
+            "Q:38:38",
+            "Q:27:19",
+            "H:hadeethenc:3165"
+          ]
+        },
+        {
+          "id": "hadith_pillars",
+          "hit": true,
+          "rank": 1,
+          "top": 0.2801,
+          "ms": 2080.77073097229,
+          "got": [
+            "H:hadeethenc:66512",
+            "H:hadeethenc:65000",
+            "H:hadeethenc:4563",
+            "Q:30:31",
+            "Q:104:9",
+            "Q:3:104"
+          ]
+        },
+        {
+          "id": "hadith_advice",
+          "hit": true,
+          "rank": 2,
+          "top": 0.5471,
+          "ms": 1260.8678340911865,
+          "got": [
+            "H:hadeethenc:3512",
+            "H:hadeethenc:66516",
+            "H:hadeethenc:4309",
+            "H:hadeethenc:10943",
+            "Q:7:79",
+            "Q:7:62"
+          ]
+        },
+        {
+          "id": "hadith_mercy_people",
+          "hit": false,
+          "rank": null,
+          "top": 0.3173,
+          "ms": 2201.7130851745605,
+          "got": [
+            "Q:45:20",
+            "Q:10:57",
+            "Q:2:54",
+            "H:hadeethenc:3716",
+            "H:hadeethenc:4967",
+            "Q:27:46"
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "id": "fake_hadith_computer",
+          "hard": false,
+          "top": 0.0462,
+          "ms": 1927.924633026123,
+          "got": [
+            "H:hadeethenc:4232",
+            "H:hadeethenc:65102",
+            "H:hadeethenc:3096"
+          ]
+        },
+        {
+          "id": "capital_france",
+          "hard": false,
+          "top": 0.0293,
+          "ms": 1246.950387954712,
+          "got": [
+            "SH:96612:161",
+            "SH:22397:218",
+            "Q:12:88"
+          ]
+        },
+        {
+          "id": "cake_recipe",
+          "hard": false,
+          "top": 0.0723,
+          "ms": 1862.6132011413574,
+          "got": [
+            "Q:51:33",
+            "H:hadeethenc:5818",
+            "H:hadeethenc:3324"
+          ]
+        },
+        {
+          "id": "world_cup",
+          "hard": false,
+          "top": 0.1977,
+          "ms": 1085.3583812713623,
+          "got": [
+            "Q:48:1",
+            "Q:33:71",
+            "Q:24:52"
+          ]
+        },
+        {
+          "id": "gaming_laptop",
+          "hard": false,
+          "top": 0.0539,
+          "ms": 1630.5818557739258,
+          "got": [
+            "Q:38:48",
+            "Q:3:133",
+            "Q:96:3"
+          ]
+        },
+        {
+          "id": "quantum",
+          "hard": false,
+          "top": 0.011,
+          "ms": 1289.3257141113281,
+          "got": [
+            "SH:38726:725",
+            "SH:38726:727",
+            "Q:20:115"
+          ]
+        },
+        {
+          "id": "kabsa_ar",
+          "hard": false,
+          "top": 0.0494,
+          "ms": 2098.533868789673,
+          "got": [
+            "Q:88:14",
+            "H:hadeethenc:66022",
+            "Q:26:1"
+          ]
+        },
+        {
+          "id": "stock_price_ar",
+          "hard": false,
+          "top": 0.0102,
+          "ms": 1301.5391826629639,
+          "got": [
+            "H:hadeethenc:66209",
+            "H:hadeethenc:65600",
+            "H:hadeethenc:3743"
+          ]
+        },
+        {
+          "id": "weather_ur",
+          "hard": false,
+          "top": 0.0239,
+          "ms": 1578.8602828979492,
+          "got": [
+            "SH:38726:720",
+            "Q:88:12",
+            "SH:10895:127"
+          ]
+        },
+        {
+          "id": "smartphones_verse",
+          "hard": true,
+          "top": 0.0166,
+          "ms": 1101.0119915008545,
+          "got": [
+            "Q:24:59",
+            "Q:4:114",
+            "Q:4:174"
+          ]
+        },
+        {
+          "id": "bitcoin_hadith",
+          "hard": true,
+          "top": 0.0372,
+          "ms": 2098.6292362213135,
+          "got": [
+            "H:hadeethenc:65418",
+            "H:hadeethenc:3916",
+            "H:hadeethenc:10891"
+          ]
+        }
+      ]
+    },
+    "minilm/analyzed": {
+      "recall_at_k": 0.9782608695652174,
+      "mrr": 0.8967391304347826,
+      "latency_ms_mean": 2831.1001041479276,
+      "latency_ms_p90": 3163.662910461426,
+      "recommended_threshold": 0.35,
+      "sweep": [
+        {
+          "t": 0.1,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.36363636363636365,
+          "answered_with_hit": 0.9782608695652174,
+          "balanced": 0.6818181818181819
+        },
+        {
+          "t": 0.15,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.36363636363636365,
+          "answered_with_hit": 0.9782608695652174,
+          "balanced": 0.6818181818181819
+        },
+        {
+          "t": 0.2,
+          "false_abstain": 0.0,
+          "correct_abstain": 0.5454545454545454,
+          "answered_with_hit": 0.9782608695652174,
+          "balanced": 0.7727272727272727
+        },
+        {
+          "t": 0.25,
+          "false_abstain": 0.021739130434782594,
+          "correct_abstain": 0.7272727272727273,
+          "answered_with_hit": 0.9782608695652174,
+          "balanced": 0.8527667984189724
+        },
+        {
+          "t": 0.3,
+          "false_abstain": 0.021739130434782594,
+          "correct_abstain": 0.8181818181818182,
+          "answered_with_hit": 0.9782608695652174,
+          "balanced": 0.8982213438735178
+        },
+        {
+          "t": 0.35,
+          "false_abstain": 0.021739130434782594,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9782608695652174,
+          "balanced": 0.9891304347826086
+        },
+        {
+          "t": 0.4,
+          "false_abstain": 0.021739130434782594,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9782608695652174,
+          "balanced": 0.9891304347826086
+        },
+        {
+          "t": 0.45,
+          "false_abstain": 0.04347826086956519,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9565217391304348,
+          "balanced": 0.9782608695652174
+        },
+        {
+          "t": 0.5,
+          "false_abstain": 0.06521739130434778,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9347826086956522,
+          "balanced": 0.9673913043478262
+        },
+        {
+          "t": 0.55,
+          "false_abstain": 0.06521739130434778,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9347826086956522,
+          "balanced": 0.9673913043478262
+        },
+        {
+          "t": 0.6,
+          "false_abstain": 0.06521739130434778,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9347826086956522,
+          "balanced": 0.9673913043478262
+        },
+        {
+          "t": 0.65,
+          "false_abstain": 0.06521739130434778,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9347826086956522,
+          "balanced": 0.9673913043478262
+        },
+        {
+          "t": 0.7,
+          "false_abstain": 0.08695652173913049,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9130434782608695,
+          "balanced": 0.9565217391304348
+        },
+        {
+          "t": 0.75,
+          "false_abstain": 0.08695652173913049,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.9130434782608695,
+          "balanced": 0.9565217391304348
+        },
+        {
+          "t": 0.8,
+          "false_abstain": 0.10869565217391308,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.8913043478260869,
+          "balanced": 0.9456521739130435
+        },
+        {
+          "t": 0.85,
+          "false_abstain": 0.17391304347826086,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.8260869565217391,
+          "balanced": 0.9130434782608696
+        },
+        {
+          "t": 0.9,
+          "false_abstain": 0.26086956521739135,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7391304347826086,
+          "balanced": 0.8695652173913043
+        },
+        {
+          "t": 0.95,
+          "false_abstain": 0.26086956521739135,
+          "correct_abstain": 1.0,
+          "answered_with_hit": 0.7391304347826086,
+          "balanced": 0.8695652173913043
+        }
+      ],
+      "positive": [
+        {
+          "id": "kaaba_en",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 3373.9702701568604,
+          "got": [
+            "QA:bayyinat:9",
+            "QA:bayyinat:9:4",
+            "Q:27:91",
+            "Q:5:97",
+            "Q:8:35",
+            "Q:29:67"
+          ]
+        },
+        {
+          "id": "kaaba_ur",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 2560.5835914611816,
+          "got": [
+            "QA:bayyinat:9",
+            "QA:bayyinat:9:5",
+            "Q:5:97",
+            "Q:29:67",
+            "Q:9:18",
+            "H:hadeethenc:65425"
+          ]
+        },
+        {
+          "id": "kaaba_id",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 2585.2816104888916,
+          "got": [
+            "QA:bayyinat:9",
+            "QA:bayyinat:9:5",
+            "Q:5:97",
+            "Q:29:67",
+            "Q:3:97",
+            "Q:8:35"
+          ]
+        },
+        {
+          "id": "black_stone_hostile",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 2725.0638008117676,
+          "got": [
+            "QA:bayyinat:9",
+            "QA:bayyinat:9:4",
+            "SH:5705:240",
+            "Q:37:94",
+            "Q:110:2",
+            "Q:53:62"
+          ]
+        },
+        {
+          "id": "quran_author",
+          "hit": true,
+          "rank": 4,
+          "top": 0.8747,
+          "ms": 2678.8580417633057,
+          "got": [
+            "QA:bayyinat:42:2",
+            "Q:3:3",
+            "QA:bayyinat:42",
+            "Q:29:48",
+            "QA:bayyinat:27",
+            "QA:bayyinat:26"
+          ]
+        },
+        {
+          "id": "quran_author_ar",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 2785.1240634918213,
+          "got": [
+            "QA:bayyinat:27",
+            "QA:bayyinat:27:2",
+            "QA:bayyinat:26:4",
+            "QA:bayyinat:25:4",
+            "QA:bayyinat:26",
+            "QA:bayyinat:30:4"
+          ]
+        },
+        {
+          "id": "sword",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 2676.924467086792,
+          "got": [
+            "QA:bayyinat:229",
+            "QA:bayyinat:229:8",
+            "SH:22397:313",
+            "H:hadeethenc:10855",
+            "SH:22397:343"
+          ]
+        },
+        {
+          "id": "violence_hostile",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9985,
+          "ms": 2954.843759536743,
+          "got": [
+            "QA:bayyinat:66:4",
+            "QA:bayyinat:67",
+            "QA:bayyinat:67:2",
+            "QA:bayyinat:66:2",
+            "QA:bayyinat:230",
+            "QA:bayyinat:230:3"
+          ]
+        },
+        {
+          "id": "scholars_disagree",
+          "hit": true,
+          "rank": 1,
+          "top": 0.8777,
+          "ms": 2822.6001262664795,
+          "got": [
+            "QA:bayyinat:241:4",
+            "SH:38726:48",
+            "QA:bayyinat:241",
+            "SH:69:19",
+            "SH:38726:162",
+            "SH:122258:123"
+          ]
+        },
+        {
+          "id": "tawhid_beginner",
+          "hit": false,
+          "rank": null,
+          "top": 0.2117,
+          "ms": 3076.478958129883,
+          "got": [
+            "SH:95570:174",
+            "SH:38726:372",
+            "SH:95570:163",
+            "Q:53:51",
+            "Q:11:95",
+            "Q:20:129"
+          ]
+        },
+        {
+          "id": "who_created_god",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9778,
+          "ms": 2624.2599487304688,
+          "got": [
+            "QA:bayyinat:4:4",
+            "QA:bayyinat:4:2",
+            "Q:7:54",
+            "Q:14:19",
+            "Q:6:101",
+            "SH:95570:77"
+          ]
+        },
+        {
+          "id": "god_exists",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 2692.389488220215,
+          "got": [
+            "QA:bayyinat:1",
+            "QA:bayyinat:1:3",
+            "SH:38726:376",
+            "SH:38726:429",
+            "SH:1075:173",
+            "SH:1075:91"
+          ]
+        },
+        {
+          "id": "jesus_divine",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 2702.3816108703613,
+          "got": [
+            "QA:bayyinat:64:2",
+            "QA:bayyinat:64:5",
+            "SH:95570:9",
+            "SH:7623:140",
+            "SH:95570:139",
+            "SH:22397:433"
+          ]
+        },
+        {
+          "id": "jesus_tl",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9881,
+          "ms": 2683.9656829833984,
+          "got": [
+            "QA:bayyinat:64",
+            "QA:bayyinat:64:4",
+            "SH:7623:140",
+            "H:hadeethenc:10993",
+            "SH:95570:9",
+            "SH:95570:5"
+          ]
+        },
+        {
+          "id": "trinity",
+          "hit": true,
+          "rank": 1,
+          "top": 0.8825,
+          "ms": 2910.2001190185547,
+          "got": [
+            "QA:bayyinat:5",
+            "QA:bayyinat:5:2",
+            "SH:95570:152:3",
+            "Q:5:73",
+            "SH:30912:80",
+            "SH:95570:156"
+          ]
+        },
+        {
+          "id": "prophet_in_bible",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9989,
+          "ms": 2934.467077255249,
+          "got": [
+            "QA:bayyinat:108",
+            "QA:bayyinat:108:3",
+            "SH:38191:1",
+            "SH:38191:31",
+            "SH:22397:388",
+            "SH:22397:292"
+          ]
+        },
+        {
+          "id": "only_arabs",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 2876.1136531829834,
+          "got": [
+            "QA:bayyinat:100",
+            "QA:bayyinat:100:2",
+            "SH:38726:286",
+            "SH:38726:185:2",
+            "SH:22397:288",
+            "SH:22397:268"
+          ]
+        },
+        {
+          "id": "hijab",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 2765.634298324585,
+          "got": [
+            "QA:bayyinat:220",
+            "QA:bayyinat:220:2",
+            "QA:bayyinat:221",
+            "Q:24:31",
+            "QA:bayyinat:221:3",
+            "QA:bayyinat:214:2"
+          ]
+        },
+        {
+          "id": "polygamy",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9928,
+          "ms": 2663.6433601379395,
+          "got": [
+            "QA:bayyinat:82",
+            "QA:bayyinat:82:3",
+            "QA:bayyinat:217:2",
+            "QA:bayyinat:217:3",
+            "SH:22397:345",
+            "SH:22397:351"
+          ]
+        },
+        {
+          "id": "testimony",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9973,
+          "ms": 2807.3651790618896,
+          "got": [
+            "QA:bayyinat:210",
+            "QA:bayyinat:210:3",
+            "H:hadeethenc:10011",
+            "QA:bayyinat:211:2",
+            "QA:bayyinat:211:4",
+            "SH:38726:41"
+          ]
+        },
+        {
+          "id": "alcohol",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 3028.599262237549,
+          "got": [
+            "QA:bayyinat:199:5",
+            "QA:bayyinat:199",
+            "H:hadeethenc:4556",
+            "QA:bayyinat:200",
+            "H:hadeethenc:58258",
+            "SH:22397:404"
+          ]
+        },
+        {
+          "id": "pork",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 2639.7016048431396,
+          "got": [
+            "QA:bayyinat:200",
+            "QA:bayyinat:200:2",
+            "SH:22397:413",
+            "SH:22397:415",
+            "Q:5:3",
+            "Q:2:173"
+          ]
+        },
+        {
+          "id": "five_prayers",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 3199.2032527923584,
+          "got": [
+            "QA:bayyinat:205:5",
+            "QA:bayyinat:205",
+            "H:hadeethenc:3706",
+            "H:hadeethenc:4968",
+            "H:hadeethenc:66512",
+            "H:hadeethenc:65000"
+          ]
+        },
+        {
+          "id": "fasting",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9995,
+          "ms": 3334.7842693328857,
+          "got": [
+            "QA:bayyinat:208:3",
+            "QA:bayyinat:208:4",
+            "QA:bayyinat:206:4",
+            "QA:bayyinat:206",
+            "Q:2:185",
+            "H:hadeethenc:4505"
+          ]
+        },
+        {
+          "id": "zakat",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 2666.116952896118,
+          "got": [
+            "QA:bayyinat:206:4",
+            "QA:bayyinat:206",
+            "QA:bayyinat:207:2",
+            "Q:22:41",
+            "QA:bayyinat:207",
+            "QA:bayyinat:208"
+          ]
+        },
+        {
+          "id": "freedom_of_belief",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 2880.7926177978516,
+          "got": [
+            "QA:bayyinat:69",
+            "QA:bayyinat:69:2",
+            "SH:1357:28",
+            "QA:bayyinat:67",
+            "SH:1357:1",
+            "QA:bayyinat:66"
+          ]
+        },
+        {
+          "id": "apostasy",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9908,
+          "ms": 2812.4682903289795,
+          "got": [
+            "QA:bayyinat:227",
+            "QA:bayyinat:227:4",
+            "SH:1357:24",
+            "SH:1357:18",
+            "Q:60:9",
+            "Q:6:137"
+          ]
+        },
+        {
+          "id": "evil",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 2715.7700061798096,
+          "got": [
+            "QA:bayyinat:174:7",
+            "QA:bayyinat:174:6",
+            "Q:113:2",
+            "Q:30:54",
+            "Q:8:37",
+            "SH:95570:127"
+          ]
+        },
+        {
+          "id": "eternal_hell",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9995,
+          "ms": 2930.434226989746,
+          "got": [
+            "QA:bayyinat:171",
+            "QA:bayyinat:171:3",
+            "Q:9:68",
+            "QA:bayyinat:170",
+            "Q:4:151",
+            "Q:48:16"
+          ]
+        },
+        {
+          "id": "purpose_of_life",
+          "hit": true,
+          "rank": 3,
+          "top": 0.8494,
+          "ms": 3053.608179092407,
+          "got": [
+            "QA:bayyinat:176:2",
+            "Q:49:13",
+            "QA:bayyinat:178:2",
+            "Q:55:3",
+            "Q:35:11",
+            "Q:30:20"
+          ]
+        },
+        {
+          "id": "science",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 2897.6850509643555,
+          "got": [
+            "QA:bayyinat:255",
+            "QA:bayyinat:255:5",
+            "SH:96931:25",
+            "SH:96612:138",
+            "SH:96612:323",
+            "SH:38726:149"
+          ]
+        },
+        {
+          "id": "evolution",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9961,
+          "ms": 2983.3643436431885,
+          "got": [
+            "QA:bayyinat:253:2",
+            "QA:bayyinat:253:9",
+            "SH:96612:179",
+            "SH:96612:181",
+            "SH:38726:772:2"
+          ]
+        },
+        {
+          "id": "afterlife_ar",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9997,
+          "ms": 2929.6212196350098,
+          "got": [
+            "QA:bayyinat:169",
+            "QA:bayyinat:169:3",
+            "Q:3:114",
+            "Q:2:4",
+            "Q:2:8",
+            "SH:122258:207"
+          ]
+        },
+        {
+          "id": "quran_preserved",
+          "hit": true,
+          "rank": 2,
+          "top": 0.8518,
+          "ms": 2881.7787170410156,
+          "got": [
+            "SH:22397:281",
+            "QA:bayyinat:50",
+            "QA:bayyinat:50:2",
+            "QA:bayyinat:59:4",
+            "QA:bayyinat:58:3",
+            "QA:bayyinat:59:2"
+          ]
+        },
+        {
+          "id": "hadith_reliability",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 3004.242181777954,
+          "got": [
+            "QA:bayyinat:130",
+            "QA:bayyinat:130:3",
+            "SH:169:236",
+            "Q:30:53",
+            "Q:3:79",
+            "Q:36:15"
+          ]
+        },
+        {
+          "id": "aisha",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9928,
+          "ms": 3118.088960647583,
+          "got": [
+            "QA:bayyinat:118:2",
+            "QA:bayyinat:118:3",
+            "SH:22397:353",
+            "H:hadeethenc:58070",
+            "H:hadeethenc:6032",
+            "H:hadeethenc:58073"
+          ]
+        },
+        {
+          "id": "worship_needless_god",
+          "hit": true,
+          "rank": 1,
+          "top": 1.0,
+          "ms": 2948.923110961914,
+          "got": [
+            "QA:bayyinat:12:7",
+            "QA:bayyinat:12",
+            "Q:57:24",
+            "Q:64:6",
+            "Q:35:15",
+            "Q:43:64"
+          ]
+        },
+        {
+          "id": "qiwama",
+          "hit": true,
+          "rank": 1,
+          "top": 0.8402,
+          "ms": 2862.313985824585,
+          "got": [
+            "QA:bayyinat:263",
+            "QA:bayyinat:263:4",
+            "SH:1357:40",
+            "Q:4:34",
+            "SH:1357:44",
+            "SH:38726:41"
+          ]
+        },
+        {
+          "id": "interest",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9903,
+          "ms": 3073.68803024292,
+          "got": [
+            "QA:bayyinat:223",
+            "QA:bayyinat:223:3",
+            "QA:bayyinat:222",
+            "QA:bayyinat:222:3",
+            "Q:4:161",
+            "Q:2:278"
+          ]
+        },
+        {
+          "id": "jizya",
+          "hit": true,
+          "rank": 1,
+          "top": 0.9999,
+          "ms": 2904.9010276794434,
+          "got": [
+            "QA:bayyinat:259",
+            "QA:bayyinat:259:3",
+            "QA:bayyinat:260:7",
+            "QA:bayyinat:260:2",
+            "SH:10895:474",
+            "H:hadeethenc:5933"
+          ]
+        },
+        {
+          "id": "mercy_prophet",
+          "hit": true,
+          "rank": 3,
+          "top": 0.9883,
+          "ms": 2098.1407165527344,
+          "got": [
+            "H:hadeethenc:8289",
+            "H:hadeethenc:3716",
+            "Q:9:128",
+            "H:hadeethenc:6405",
+            "Q:17:87",
+            "Q:42:48"
+          ]
+        },
+        {
+          "id": "hadith_intention",
+          "hit": true,
+          "rank": 1,
+          "top": 0.8024,
+          "ms": 2672.001838684082,
+          "got": [
+            "H:hadeethenc:4560",
+            "H:hadeethenc:66511",
+            "SH:169:71",
+            "SH:1269:6",
+            "Q:78:30",
+            "SH:69:11:2"
+          ]
+        },
+        {
+          "id": "hadith_smile",
+          "hit": true,
+          "rank": 1,
+          "top": 0.4129,
+          "ms": 3085.750102996826,
+          "got": [
+            "H:hadeethenc:66237",
+            "H:hadeethenc:3165",
+            "H:hadeethenc:5461",
+            "H:hadeethenc:5520",
+            "Q:27:19",
+            "H:hadeethenc:3060"
+          ]
+        },
+        {
+          "id": "hadith_pillars",
+          "hit": true,
+          "rank": 2,
+          "top": 0.4842,
+          "ms": 2949.6984481811523,
+          "got": [
+            "H:hadeethenc:65854",
+            "H:hadeethenc:66512",
+            "H:hadeethenc:65000",
+            "SH:38726:636",
+            "H:hadeethenc:4563",
+            "QA:bayyinat:204"
+          ]
+        },
+        {
+          "id": "hadith_advice",
+          "hit": true,
+          "rank": 1,
+          "top": 0.7541,
+          "ms": 2398.247241973877,
+          "got": [
+            "H:hadeethenc:4309",
+            "H:hadeethenc:66516",
+            "H:hadeethenc:3512",
+            "Q:7:79",
+            "H:hadeethenc:10943",
+            "H:hadeethenc:3628"
+          ]
+        },
+        {
+          "id": "hadith_mercy_people",
+          "hit": true,
+          "rank": 3,
+          "top": 0.6504,
+          "ms": 2861.156225204468,
+          "got": [
+            "H:hadeethenc:66527",
+            "Q:45:20",
+            "H:hadeethenc:8289",
+            "Q:10:57",
+            "Q:2:54",
+            "H:hadeethenc:3716"
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "id": "fake_hadith_computer",
+          "hard": false,
+          "top": 0.3453,
+          "ms": 2817.871570587158,
+          "got": [
+            "QA:bayyinat:143",
+            "H:hadeethenc:10843",
+            "H:hadeethenc:3478"
+          ]
+        },
+        {
+          "id": "capital_france",
+          "hard": false,
+          "top": 0.0073,
+          "ms": 3163.662910461426,
+          "got": [
+            "SH:96612:161",
+            "SH:38726:533",
+            "SH:96612:159"
+          ]
+        },
+        {
+          "id": "cake_recipe",
+          "hard": false,
+          "top": 0.2109,
+          "ms": 2934.9350929260254,
+          "got": [
+            "H:hadeethenc:66022",
+            "H:hadeethenc:5818",
+            "Q:23:51"
+          ]
+        },
+        {
+          "id": "world_cup",
+          "hard": false,
+          "top": 0.1977,
+          "ms": 1888.7362480163574,
+          "got": [
+            "Q:48:1",
+            "Q:3:126",
+            "Q:33:71"
+          ]
+        },
+        {
+          "id": "gaming_laptop",
+          "hard": false,
+          "top": 0.2069,
+          "ms": 1895.003318786621,
+          "got": [
+            "Q:38:48",
+            "H:hadeethenc:2759",
+            "Q:55:76"
+          ]
+        },
+        {
+          "id": "quantum",
+          "hard": false,
+          "top": 0.0327,
+          "ms": 3313.7588500976562,
+          "got": [
+            "Q:20:115",
+            "Q:3:103",
+            "Q:6:46"
+          ]
+        },
+        {
+          "id": "kabsa_ar",
+          "hard": false,
+          "top": 0.1974,
+          "ms": 2269.178628921509,
+          "got": [
+            "Q:88:14",
+            "Q:26:1",
+            "Q:6:18"
+          ]
+        },
+        {
+          "id": "stock_price_ar",
+          "hard": false,
+          "top": 0.0102,
+          "ms": 2752.6776790618896,
+          "got": [
+            "H:hadeethenc:66209",
+            "H:hadeethenc:65600",
+            "H:hadeethenc:3743"
+          ]
+        },
+        {
+          "id": "weather_ur",
+          "hard": false,
+          "top": 0.2653,
+          "ms": 3188.8649463653564,
+          "got": [
+            "Q:69:16",
+            "Q:92:2",
+            "Q:80:40"
+          ]
+        },
+        {
+          "id": "smartphones_verse",
+          "hard": true,
+          "top": 0.0436,
+          "ms": 3531.5933227539062,
+          "got": [
+            "Q:5:114",
+            "SH:38726:640:2",
+            "Q:4:174"
+          ]
+        },
+        {
+          "id": "bitcoin_hadith",
+          "hard": true,
+          "top": 0.3002,
+          "ms": 2785.1943969726562,
+          "got": [
+            "H:hadeethenc:65831",
+            "Q:91:13",
+            "H:hadeethenc:6206"
+          ]
+        }
+      ]
+    }
+  }
+}

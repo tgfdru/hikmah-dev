@@ -4,6 +4,7 @@
     python -m ingest.build_all --only quran    # just the verbatim store (fast, no models)
     python -m ingest.build_all --glossary      # also refresh data/glossary.json from Jamhara
     python -m ingest.build_all --shamela       # also add the selected Shamela books (Java 21+)
+    python -m ingest.build_all --hadith        # also add HadeethEnc hadith (API, cached)
 
 Steps (each is also runnable on its own):
   1. ingest.download     official files -> data/raw/          (~40 MB)
@@ -11,6 +12,8 @@ Steps (each is also runnable on its own):
   3. ingest.bayyinat     Bayyinat Q&A -> bayyinat.jsonl        (~20 s)
   +  ingest.shamela      selected Shamela books -> shamela.jsonl  (opt-in: ~4.8 GB download
                          and ~25 min Java read, once; see docs/SOURCES.md)
+  +  ingest.hadeethenc   HadeethEnc hadith -> store/hadith.sqlite + hadeethenc.jsonl (opt-in:
+                         ~18,000 API pages the first time, ~1 h; cached afterwards)
   4. ingest.build_index  BGE-M3 vectors -> Qdrant, BM25        (~1 min with the committed
                          embedding cache; ~1.5 h on CPU without it)
 data/glossary.json is committed, so step "glossary" is optional. The index takes
@@ -21,13 +24,14 @@ from __future__ import annotations
 import argparse
 import time
 
-from ingest import bayyinat, build_index, download, quran, shamela
+from ingest import bayyinat, build_index, download, hadeethenc, quran, shamela
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--only", choices=["quran", "bayyinat", "shamela", "index"], help="run a single step")
+    ap.add_argument("--only", choices=["quran", "bayyinat", "shamela", "hadith", "index"], help="run a single step")
     ap.add_argument("--shamela", action="store_true", help="also build the Shamela passages")
+    ap.add_argument("--hadith", action="store_true", help="also build the HadeethEnc hadith store")
     ap.add_argument("--glossary", action="store_true", help="refresh the Jamhara glossary too")
     ap.add_argument("--force-download", action="store_true")
     args = ap.parse_args()
@@ -45,6 +49,12 @@ def main() -> None:
     if args.only in (None, "bayyinat"):
         print("[3/4] parsing Bayyinat")
         bayyinat.build()
+    if args.only == "hadith" or (args.only is None and args.hadith):
+        print("[+] building HadeethEnc hadith store")
+        try:
+            hadeethenc.build()
+        except Exception as exc:  # network trouble must not block the rest; cached pages are kept
+            print(f"  warning: HadeethEnc step failed ({exc}); continuing with what is already built")
     if args.only == "shamela" or (args.only is None and args.shamela):
         print("[+] building Shamela passages")
         shamela.build()

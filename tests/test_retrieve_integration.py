@@ -46,8 +46,25 @@ def test_unrelated_question_scores_below_threshold(retriever):
     assert ev[0].score < config.ABSTAIN_THRESHOLDS["none"]
 
 
-def test_hadith_only_request_returns_nothing_when_dorar_disabled(retriever):
-    assert retriever.retrieve(["حديث عن الحاسوب"], "ar", types=["hadith"]) == []
+def test_fake_hadith_request_finds_nothing_above_the_threshold(retriever):
+    """No hadith in the store is about computers: abstain (empty without HadeethEnc)."""
+    from retrieval import config
+
+    ev = retriever.retrieve(["حديث عن الحاسوب"], "ar", types=["hadith"])
+    assert all(e.type == "hadith" for e in ev)
+    assert not ev or ev[0].score < config.ABSTAIN_THRESHOLDS["none"]
+
+
+def test_hadith_evidence_comes_from_the_store_with_grade(retriever):
+    from retrieval.verbatim import get_verbatim
+
+    ev = retriever.retrieve(["Is there a hadith about intentions?", "حديث عن النية في الأعمال"], "en",
+                            types=["hadith"])
+    if not ev:
+        pytest.skip("index built without HadeethEnc (python -m ingest.build_all --hadith)")
+    for e in ev:
+        exact = get_verbatim(e.id, "en")
+        assert e.id.startswith("H:hadeethenc:") and e.text_ar == exact.text_ar and e.grade
 
 
 def _has_shamela(r) -> bool:

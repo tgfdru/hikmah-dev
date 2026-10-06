@@ -16,12 +16,15 @@ from functools import lru_cache
 from langgraph.graph import END, StateGraph
 
 from agent import nodes
-from agent.language import resolve_response_language
+from agent.language import LanguageDecision, resolve_response_language, target_index
 from agent.state import AgentState
 
 
 def _after_route(s: AgentState) -> str:
-    return "refer" if s["routing"].level == "D" or s.get("refer_reason") == "judgement" else "retrieve"
+    # Level D (personal case): a seeker gets the fixed referral. When the reader is a scholar
+    # (the Sheykak app), the agent drafts the general evidence and leaves the ruling to them.
+    personal = s["routing"].level == "D" and s.get("audience") != "scholar"
+    return "refer" if personal or s.get("refer_reason") == "judgement" else "retrieve"
 
 
 def _after_retrieve(s: AgentState) -> str:
@@ -62,23 +65,32 @@ def build_graph():
 
 def suggest(messages: list[dict], style: str | None = None, reply_mode: str = "conversation",
             target_message_id: str | None = None, conversation_language: str | None = None,
-            profile_language: str | None = None) -> dict:
+            profile_language: str | None = None, audience: str = "seeker",
+            language_decision: LanguageDecision | None = None) -> dict:
     """Run the agent on a conversation and return the API-shaped result (see api/schemas.py).
 
     reply_mode "message": answer the seeker message whose id is `target_message_id`;
     "conversation": answer the latest seeker message. The reply language is decided here, once,
     by agent.language.resolve_response_language — never by the sources' language.
-    """
+
+    audience="scholar": the draft is read by a qualified scholar before anything is sent
+    (Sheykak app), so level D questions are drafted from the general evidence instead of
+    the fixed referral; the ruling stays with the scholar."""
     if not messages:
         raise ValueError("messages must not be empty")
     t0 = time.time()
-    decision = resolve_response_language(messages, reply_mode, target_message_id,
-                                         conversation_language, profile_language)
+    if language_decision is not None:   # decided by the caller on the original messages (/mueen/draft)
+        idx = target_index(messages, "conversation")
+        decision = LanguageDecision(language_decision.language, language_decision.source,
+                                    language_decision.confidence, idx)
+    else:
+        decision = resolve_response_language(messages, reply_mode, target_message_id,
+                                             conversation_language, profile_language)
     # The agent answers the target message: the context is everything up to and including it,
     # so a later, unrelated message is never mistaken for the question.
     context = messages[:decision.target_index + 1] if decision.target_index >= 0 else messages
-    s: AgentState = build_graph().invoke({"messages": context, "style": style, "trace": [],
-                                          "language": decision.language,
+    s: AgentState = build_graph().invoke({"messages": context, "style": style, "audience": audience,
+                                          "trace": [], "language": decision.language,
                                           "language_decision": decision.as_dict()},
                                          config={"recursion_limit": 25})
     a, r = s.get("analysis"), s.get("routing")
@@ -98,6 +110,11 @@ def suggest(messages: list[dict], style: str | None = None, reply_mode: str = "c
             "level_reason": r.reason if r else None,
         },
         "citations": [c.model_dump() for c in s.get("citations", [])],
+        # For /mueen/draft: the draft with placeholders, and what it may cite.
+        "draft_reply": s["final_draft"].reply if s.get("final_draft") else "",
+        "draft_cited_ids": list(s["final_draft"].cited_ids) if s.get("final_draft") else [],
+        "evidence": list(s.get("evidence", []) or []),
+        "glossary_used": dict(s.get("glossary", {}) or {}),
         "issues": s.get("issues", []),
         "retry_issues": s.get("retry_issues", []),
         "attempts": s.get("attempts", 0),

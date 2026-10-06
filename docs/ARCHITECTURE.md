@@ -29,6 +29,7 @@ Every indexed record becomes an `Evidence` (see `retrieval/contract.py`):
 | `QA:bayyinat:9` | qa | question + similar phrasings + gist + short answer | None | `بينات، السؤال 9` | Bayyinat PDF `#page=65` |
 | `QA:bayyinat:9:3` | qa | question title + a ~1,400-char part of the detailed answer | None | `بينات، السؤال 9 (الجواب التفصيلي، الجزء 2)` | PDF `#page=67` |
 | `SH:10895:380` | dawah | ~1,400-char passage of a selected Shamela book (`:380:2` … when one page gives several) | None | `منحة القريب المجيب في الرد على عباد الصليب، ج 2 ص 531` | shamela.ws/book/10895/380 |
+| `H:hadeethenc:2962` | hadith | exact text from the HadeethEnc store (grade, attribution) | approved en/ur/id/fr translation, if published | `متفق عليه` (grade `صحيح`) | hadeethenc.com page |
 | `H:bukhari:1` | hadith | as returned by Dorar (optional) | None | `صحيح البخاري - رقم 1` | Dorar search link |
 
 Ranges (`Q:112:1-4`) are assembled on demand from the store with ayah markers.

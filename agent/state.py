@@ -96,6 +96,7 @@ class AgentState(TypedDict, total=False):
     # input
     messages: list[dict]          # [{"role": "seeker" | "dai", "text": "..."}]
     style: str | None             # regenerate: "simpler" | "deeper" | "shorter"
+    audience: str                 # "seeker" (default) | "scholar": who reads the draft first (see graph)
     # stage outputs
     language: str                 # reply language, decided by agent.language before the graph runs
     language_decision: dict       # {"language", "source", "confidence"} — why that language
@@ -118,6 +119,7 @@ class AgentState(TypedDict, total=False):
     status: Status
     final_reply: str
     final_reply_ar: str
+    final_draft: Draft            # the verified draft with its [[Q:..]]/[[H:..]] placeholders
     note_for_dai: str
     citations: list[Citation]
     trace: list[str]              # stage names, for logs and debugging

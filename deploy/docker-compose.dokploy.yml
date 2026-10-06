@@ -25,6 +25,7 @@ services:
       QDRANT_URL: http://qdrant:6333
       DEVICE: cpu
       SHAMELA: ${SHAMELA:-0}   # 1 = build Shamela here (heavy); default: seed from Dokploy file mounts
+      HADITH: ${HADITH:-1}     # HadeethEnc hadith: fetched once (~1 h on the first deploy), then cached
     volumes:
       - mueen_kb:/var/lib/mueen
       - ../../files/shamela:/seed:ro   # Dokploy file mounts (shpart_00…): see ingest/kb_entry.sh

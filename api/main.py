@@ -4,6 +4,7 @@ Endpoints (all JSON; all but /health need the X-API-Key header when MUEEN_API_KE
   GET  /health                service + knowledge-layer status (no key needed)
   POST /suggest               draft a reply for the latest seeker message
   POST /suggest/regenerate    same, with style = simpler | deeper | shorter
+  POST /mueen/draft           the Sheykak app's format: paragraphs with their sources (api/mueen.py)
   POST /feedback              what the da'i did with a draft (sent as is / edited / rejected)
   GET  /stats                 acceptance rate and level/status counts from the run log
 
@@ -29,6 +30,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from agent import settings
 from agent.graph import suggest as run_agent
 from agent.llm import LLMNotConfigured
+from api import mueen
 from api.schemas import FeedbackRequest, RegenerateRequest, SuggestRequest, SuggestResponse
 from retrieval import config as kb
 
@@ -148,6 +150,33 @@ def regenerate(req: RegenerateRequest) -> SuggestResponse:
     return _run(req, req.style)
 
 
+@app.post("/mueen/draft", response_model=mueen.MueenDraft, response_model_by_alias=True, response_model_exclude_none=True,
+          dependencies=[Depends(require_access)])
+def mueen_draft(req: mueen.MueenDraftRequest) -> mueen.MueenDraft:
+    """A draft for a scholar in the Sheykak app (MueenService.generateDraft)."""
+    try:
+        messages, text_count = mueen.to_conversation(req)
+    except mueen.NoAskerText as exc:
+        raise HTTPException(422, detail=str(exc)) from exc
+    try:
+        out = run_agent(messages, audience="scholar", language_decision=mueen.reply_language(req))
+    except LLMNotConfigured as exc:
+        raise HTTPException(503, detail=str(exc)) from exc
+    except Exception as exc:
+        log.exception("agent failed for question %s", req.question_id)
+        raise HTTPException(502, detail="The assistant could not produce a draft. Please try again.") from exc
+    draft = mueen.to_app_draft(req, out, text_count)
+    _append_log({
+        "event": "mueen_draft", "question_id": req.question_id, "draft_id": draft.id, "scope": req.scope.kind,
+        "status": out["status"], "level": out["level"], "language": out["analysis"].get("language"),
+        "language_source": out["analysis"].get("language_source"),
+        "cited": [s.id for p in draft.paragraphs for s in p.sources], "paragraphs": len(draft.paragraphs),
+        "issues": len(out["issues"]), "attempts": out["attempts"], "best_score": out["best_score"],
+        "latency_ms": out["latency_ms"], "timings_ms": out["timings_ms"], "trace": out["trace"],
+    })
+    return draft
+
+
 @app.post("/feedback", dependencies=[Depends(require_access)])
 def feedback(req: FeedbackRequest) -> dict:
     _append_log({"event": "feedback", **req.model_dump()})
@@ -165,7 +194,7 @@ def stats() -> dict:
                 r = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if r.get("event") == "suggest":
+            if r.get("event") in ("suggest", "mueen_draft"):
                 counts["suggest"] += 1
                 counts["status"][r["status"]] = counts["status"].get(r["status"], 0) + 1
                 lvl = r.get("level") or "-"

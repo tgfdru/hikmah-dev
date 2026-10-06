@@ -1,0 +1,217 @@
+"""POST /mueen/draft: the Sheykak app's format (paragraphs with their sources)."""
+from __future__ import annotations
+
+import pytest
+from fastapi.testclient import TestClient
+
+from agent import llm, settings
+from api import mueen
+from api.main import app
+from retrieval import config as kb
+from tests.agent_fakes import FakeLLM, analysis, draft, routing
+
+KEY = {"X-API-Key": "k-test"}
+
+
+def body(scope=None, messages=None):
+    return {
+        "questionId": "q_1",
+        "question": {"title": "Why do Muslims worship the Kaaba?", "description": None},
+        "messages": messages if messages is not None else [
+            {"id": "m1", "text": "Why do Muslims worship the Kaaba?", "fromAsker": True},
+            {"id": "m2", "text": "Welcome, let me explain.", "fromAsker": False},
+            {"id": "m3", "text": "Isn't that idol worship?", "fromAsker": True},
+        ],
+        "scope": scope or {"kind": "all"},
+    }
+
+
+@pytest.fixture
+def client(monkeypatch, tmp_path):
+    monkeypatch.setattr(kb, "RETRIEVER", "mock")
+    monkeypatch.setattr(settings, "RUN_LOG", tmp_path / "runs.jsonl")
+    monkeypatch.setattr(settings, "API_KEYS", {"k-test"})
+    monkeypatch.setattr(settings, "SERVICE_UNTIL", None)
+    monkeypatch.setattr(settings, "VERIFY_LLM_JUDGE", False)
+    with TestClient(app) as c:
+        yield c
+    llm.set_llm_factory(None)
+
+
+def _script(level="A", reply=None, **kw):
+    d = draft() if reply is None else draft(reply=reply, reply_ar=reply)
+    return FakeLLM({"analyze": analysis(**kw), "route": routing(level), "generate": d})
+
+
+def test_needs_the_api_key(client):
+    assert client.post("/mueen/draft", json=body()).status_code == 401
+
+
+def test_draft_in_the_app_shape(client):
+    llm.set_llm_factory(_script())
+    r = client.post("/mueen/draft", json=body(), headers=KEY)
+    assert r.status_code == 200
+    j = r.json()
+    for key in ("id", "questionId", "scope", "paragraphs", "textMessageCount", "status", "notice"):
+        assert key in j
+    assert j["questionId"] == "q_1" and j["textMessageCount"] == 2 and j["status"] == "ok"
+    p = j["paragraphs"][0]
+    assert p["id"] == "p1" and "[[" not in p["text"]
+    quran = [s for s in p["sources"] if s["kind"] == "quran"]
+    assert quran and quran[0]["quote"].startswith("﴿") and quran[0]["quote"].endswith("﴾")
+    # the exact text comes from the store, never from the model
+    from agent.nodes import _verbatim
+    assert quran[0]["quote"] == f"﴿{_verbatim('Q:2:144', 'en').text_ar}﴾"
+    assert quran[0]["collection"] == "سورة البقرة" and quran[0]["reference"] == "البقرة 144"
+    assert quran[0]["attribution"] == "سورة البقرة · الآية 144 · نص القرآن: مجمع الملك فهد"
+    assert any(s["id"] == "QA:bayyinat:9" and s["kind"] == "dawah" for s in p["sources"])
+
+
+def test_sources_follow_their_paragraph(client):
+    reply = "Muslims worship Allah alone.\n\nThey face the Kaaba in prayer because Allah commanded it: [[Q:2:144]]"
+    llm.set_llm_factory(_script(reply=reply))
+    j = client.post("/mueen/draft", json=body(), headers=KEY).json()
+    assert len(j["paragraphs"]) == 2
+    assert not any(s["kind"] == "quran" for s in j["paragraphs"][0]["sources"])
+    assert any(s["id"] == "Q:2:144" for s in j["paragraphs"][1]["sources"])
+
+
+def test_personal_case_is_drafted_for_a_scholar_with_a_note(client):
+    fake = _script(level="D", personal_case=True)
+    llm.set_llm_factory(fake)
+    j = client.post("/mueen/draft", json=body(), headers=KEY).json()
+    assert j["status"] == "ok" and j["level"] == "D"
+    assert "generate" in fake.stages() and "مستوى D" in j["notice"]
+    assert j["paragraphs"]
+
+
+def test_personal_case_still_refers_on_the_seeker_endpoint(client):
+    fake = _script(level="D", personal_case=True)
+    llm.set_llm_factory(fake)
+    r = client.post("/suggest", json={"conversation_id": "c", "messages": [{"role": "seeker", "text": "x"}]},
+                    headers=KEY)
+    assert r.json()["status"] == "refer" and "generate" not in fake.stages()
+
+
+def test_no_draft_gives_empty_paragraphs_and_a_notice(client, monkeypatch):
+    monkeypatch.setattr(settings, "ABSTAIN_THRESHOLD", 1.01)  # nothing passes: abstain
+    llm.set_llm_factory(_script())
+    j = client.post("/mueen/draft", json=body(), headers=KEY).json()
+    assert j["status"] == "no_sources" and j["outcome"] == "abstain" and j["paragraphs"] == []
+    assert j["notice"].startswith("لم يُعدّ معين")
+
+
+def test_selected_scope_answers_the_picked_messages():
+    req = mueen.MueenDraftRequest.model_validate(body(scope={"kind": "selected", "messageIds": ["m1"]}))
+    msgs, count = mueen.to_conversation(req)
+    assert count == 1
+    assert msgs[-1] == {"role": "seeker", "text": "Why do Muslims worship the Kaaba?"}
+    assert {"role": "dai", "text": "Welcome, let me explain."} in msgs
+
+
+def test_whole_conversation_answers_what_came_after_the_scholars_reply():
+    req = mueen.MueenDraftRequest.model_validate(body())
+    msgs, count = mueen.to_conversation(req)
+    assert count == 2 and msgs[-1] == {"role": "seeker", "text": "Isn't that idol worship?"}
+    assert msgs[0]["text"].startswith("Why do Muslims")  # the question card comes first
+
+
+def test_before_any_reply_the_card_and_follow_ups_are_answered_together():
+    req = mueen.MueenDraftRequest.model_validate(body(messages=[
+        {"id": "m1", "text": "And was he crucified?", "fromAsker": True}]))
+    msgs, _ = mueen.to_conversation(req)
+    assert len(msgs) == 1 and msgs[0]["role"] == "seeker"
+    assert msgs[0]["text"].startswith("Why do Muslims worship the Kaaba?") and "crucified" in msgs[0]["text"]
+
+
+def test_no_asker_text_is_rejected(client):
+    llm.set_llm_factory(_script())
+    b = body(messages=[{"id": "m2", "text": "Hello", "fromAsker": False}])
+    b["question"] = None
+    assert client.post("/mueen/draft", json=b, headers=KEY).status_code == 422
+
+
+def test_run_log_keeps_no_text(client):
+    llm.set_llm_factory(_script())
+    client.post("/mueen/draft", json=body(), headers=KEY)
+    logged = settings.RUN_LOG.read_text(encoding="utf-8")
+    assert "Kaaba" not in logged and "idol" not in logged and "mueen_draft" in logged
+
+
+@pytest.mark.parametrize("text,grade", [("صحيح", "sahih"), ("متفق عليه — صحيح", "sahih"), ("حسن", "hasan"), ("صححه الحافظ ابن حجر", "sahih"), ("إسناده حسن", "hasan"),
+                                        ("ضعيف", "daif"), ("Authentic", "sahih"), (None, None)])
+def test_grade_mapping(text, grade):
+    assert mueen._grade(text) == grade
+
+
+def test_question_card_sent_as_a_message_is_used_once():
+    """The app sends the card as `question` and as the first message (id "__question__")."""
+    card = {"id": "__question__", "text": "Why do Muslims worship the Kaaba?", "fromAsker": True}
+    req = mueen.MueenDraftRequest.model_validate(body(messages=[
+        card, {"id": "m1", "text": "And was he crucified?", "fromAsker": True}]))
+    msgs, count = mueen.to_conversation(req)
+    assert len(msgs) == 1 and msgs[0]["text"].count("Kaaba") == 1 and "crucified" in msgs[0]["text"]
+    assert count == 2  # like the app's mock: asker text messages, card included
+
+
+def test_question_card_can_be_selected():
+    card = {"id": "__question__", "text": "Why do Muslims worship the Kaaba?", "fromAsker": True}
+    req = mueen.MueenDraftRequest.model_validate(body(
+        scope={"kind": "selected", "messageIds": ["__question__"]},
+        messages=[card, {"id": "m2", "text": "Welcome.", "fromAsker": False},
+                  {"id": "m3", "text": "Unrelated follow-up", "fromAsker": True}]))
+    msgs, count = mueen.to_conversation(req)
+    assert msgs[-1] == {"role": "seeker", "text": "Why do Muslims worship the Kaaba?"} and count == 1
+
+
+def test_source_cards_use_the_apps_v2_kinds():
+    from retrieval.contract import Evidence
+
+    def ev(**kw):
+        base = dict(text_ar="نص اختباري", translation=None, source="مصدر", ref="مرجع", grade=None,
+                    source_url="https://example.org", score=1.0)
+        return Evidence(**{**base, **kw})
+
+    hadith = mueen.evidence_source(ev(id="H:hadeethenc:7", type="hadith", ref="متفق عليه", grade="صحيح"), "ar")
+    assert (hadith.kind, hadith.grade, hadith.attribution) == ("hadith", "sahih", "متفق عليه")
+    book = mueen.evidence_source(ev(id="SH:5705:12", type="dawah", source="كتاب — مؤلف (المكتبة الشاملة)"), "ar")
+    assert (book.kind, book.collection, book.quote) == ("book", "المكتبة الشاملة", "كتاب — مؤلف")
+    qa = mueen.evidence_source(ev(id="QA:bayyinat:9", type="qa", text_ar="السؤال: عنوان\nنص"), "ar")
+    assert (qa.kind, qa.quote) == ("dawah", "عنوان")
+    rng = mueen.evidence_source(ev(id="Q:4:157-158", type="quran", ref="النساء: 157-158"), "ar")
+    assert rng.reference == "النساء 157–158" and "الآيتان 157–158" in rng.attribution
+
+
+# ---- reply language in the app path (the reported bug) ----------------------------------
+AR_CARD = {"title": "عندي أسئلة عن النبي محمد وزوجاته", "description": "أنا أقرأ عن الإسلام منذ فترة"}
+MIXED_APP = [
+    {"id": "m1", "text": "السلام عليكم، أنا أقرأ عن الإسلام منذ فترة وعندي بعض الأسئلة", "fromAsker": True},
+    {"id": "m2", "text": "وعليكم السلام، تفضل.", "fromAsker": False},
+    {"id": "m3", "text": "what about the marriage of muhammed of aisha?", "fromAsker": True},
+    {"id": "m4", "text": "وعندي سؤال ثاني عن الصيام بعدين", "fromAsker": True},
+]
+
+
+@pytest.mark.skipif(not (kb.MODELS_DIR / "lid.176.ftz").exists(), reason="language-id model not downloaded")
+def test_selected_english_message_in_arabic_chat_is_answered_in_english():
+    req = mueen.MueenDraftRequest.model_validate(
+        {**body({"kind": "selected", "messageIds": ["m3"]}, MIXED_APP), "question": AR_CARD})
+    d = mueen.reply_language(req)
+    assert (d.language, d.source) == ("en", "target_message")
+
+
+@pytest.mark.skipif(not (kb.MODELS_DIR / "lid.176.ftz").exists(), reason="language-id model not downloaded")
+def test_all_scope_follows_the_latest_meaningful_asker_message():
+    msgs = MIXED_APP[:3]                       # Arabic card + Arabic, then the English question last
+    req = mueen.MueenDraftRequest.model_validate({**body({"kind": "all"}, msgs), "question": AR_CARD})
+    assert mueen.reply_language(req).language == "en"
+    msgs = MIXED_APP                           # the Arabic follow-up is now the latest
+    req = mueen.MueenDraftRequest.model_validate({**body({"kind": "all"}, msgs), "question": AR_CARD})
+    assert mueen.reply_language(req).language == "ar"
+
+
+def test_endpoint_uses_the_app_side_language_decision(client):
+    llm.set_llm_factory(_script(language="ar"))      # the analyzer's guess must not win
+    b = {**body({"kind": "selected", "messageIds": ["m3"]}, MIXED_APP), "question": AR_CARD}
+    r = client.post("/mueen/draft", json=b, headers=KEY)
+    assert r.status_code == 200 and r.json()["language"] == "en"

@@ -5,12 +5,14 @@ approved translation for that language. Ranges ("Q:112:1-4") are merged with
 ayah-number markers. Unknown or malformed ids return None, which is how the
 agent's verifier detects a hallucinated reference.
 
-Hadith is not stored here. When the optional Dorar tool is enabled, hadith
-returned by it are cached (retrieval/dorar.py) and resolved through the same
-`get_verbatim` call, so the verifier treats both the same way.
+Hadith: `H:hadeethenc:<id>` comes from the HadeethEnc store (store/hadith.sqlite, built
+by ingest/hadeethenc.py): exact Arabic text, grade, attribution and approved translations.
+Other `H:` ids are hadith cached from the optional Dorar tool (retrieval/dorar.py). Both go
+through the same `get_verbatim` call, so the verifier treats them like the Quran.
 """
 from __future__ import annotations
 
+import json
 import re
 import sqlite3
 import threading
@@ -121,6 +123,8 @@ class VerbatimStore:
         ref_id = (ref_id or "").strip()
         if ref_id.startswith("Q:"):
             return self.get_quran(ref_id, lang)
+        if ref_id.startswith("H:hadeethenc:"):
+            return get_hadith(ref_id, lang)
         if ref_id.startswith("H:"):
             from retrieval import dorar  # cached hadith from the optional Dorar tool
 
@@ -160,11 +164,45 @@ def _surah_numbers(store: "VerbatimStore") -> dict[str, int]:
     return {store.surah_name(s, "ar"): s for s in range(1, 115)}
 
 
+HADITH_SOURCE_AR = "موسوعة الأحاديث النبوية المترجمة (HadeethEnc)"
+_hadith_local = threading.local()
+
+
+def _hadith_db() -> sqlite3.Connection | None:
+    conn = getattr(_hadith_local, "conn", None)
+    if conn is None:
+        if not config.HADITH_DB.exists():
+            return None
+        conn = sqlite3.connect(f"file:{config.HADITH_DB}?mode=ro", uri=True, check_same_thread=False)
+        _hadith_local.conn = conn
+    return conn
+
+
+def get_hadith(ref_id: str, lang: str) -> Evidence | None:
+    """A HadeethEnc hadith: exact Arabic text, its grade and attribution, and the approved
+    translation for `lang` (None for Arabic or when HadeethEnc has none in that language)."""
+    m = re.fullmatch(r"H:hadeethenc:(\d+)", (ref_id or "").strip())
+    db = _hadith_db()
+    if not m or db is None:
+        return None
+    row = db.execute("SELECT text_ar, attribution_ar, grade_ar, translations, url FROM hadith WHERE id = ?",
+                     (m.group(1),)).fetchone()
+    if not row:
+        return None
+    text_ar, attribution, grade, translations, url = row
+    tr = json.loads(translations).get(lang) if lang != "ar" else None
+    return Evidence(
+        id=f"H:hadeethenc:{m.group(1)}", type="hadith", text_ar=text_ar,
+        translation=(tr or {}).get("hadeeth"), source=HADITH_SOURCE_AR, ref=attribution or "",
+        grade=grade, source_url=url.replace("/ar/", f"/{lang}/") if tr else url, score=1.0,
+    )
+
+
 @lru_cache(maxsize=1)
 def get_store() -> VerbatimStore:
     return VerbatimStore()
 
 
 def get_verbatim(ref_id: str, lang: str) -> Evidence | None:
-    """Exact text for a Quran reference (or a cached Dorar hadith); None if unknown."""
+    """Exact text for a Quran reference or a hadith (HadeethEnc / cached Dorar); None if unknown."""
     return get_store().get(ref_id, lang)
